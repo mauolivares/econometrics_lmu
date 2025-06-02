@@ -1541,7 +1541,9 @@ estimated slope coefficient across sample sizes.</p>
 <h2><span class="header-section-number">1.4</span> Central Limit Theorem
 (CLT)</h2>
 <p>The CLT predicts that <span class="math inline">\(\sqrt{n}(\hat{\beta}-\beta)\)</span> converge in
-distribution to a normal. We illustrate this below.</p>
+distribution to a normal.</p>
+<p>Now let’s see if we can compile correctly. We illustrate this
+below.</p>
 <pre class="r"><code>simulate_ols_stand &lt;- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)
 for(t in seq_along(sample_sizes)) {
   simulate_ols_stand[t, ] &lt;- (simulate_ols[t, ] - 2) * sqrt(sample_sizes[t])
