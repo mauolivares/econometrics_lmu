@@ -8,6 +8,7 @@ output:
     toc_float: true
     number_sections: true
     theme: united
+    mathjax: default
 ---
 
 # Preliminaries
@@ -66,7 +67,7 @@ plot_asympt(sample_sizes, simulate_ols)
 
 ## Central Limit Theorem (CLT)
 
-The CLT predicts that scaled and centered estimators converge in distribution to a normal. We illustrate this below.
+The CLT predicts that $\sqrt{n}(\hat{\beta}-\beta)$ converge in distribution to a normal. We illustrate this below.
 
 ```{r }
 simulate_ols_stand <- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)

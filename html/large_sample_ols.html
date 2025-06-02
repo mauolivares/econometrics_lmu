@@ -1540,7 +1540,7 @@ estimated slope coefficient across sample sizes.</p>
 <div id="central-limit-theorem-clt" class="section level2" number="1.4">
 <h2><span class="header-section-number">1.4</span> Central Limit Theorem
 (CLT)</h2>
-<p>The CLT predicts that scaled and centered estimators converge in
+<p>The CLT predicts that <span class="math inline">\(\sqrt{n}(\hat{\beta}-\beta)\)</span> converge in
 distribution to a normal. We illustrate this below.</p>
 <pre class="r"><code>simulate_ols_stand &lt;- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)
 for(t in seq_along(sample_sizes)) {
