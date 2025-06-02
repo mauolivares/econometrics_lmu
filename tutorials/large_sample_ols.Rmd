@@ -1,0 +1,78 @@
+---
+title: "Large Sample Behavior in the Linear Regression Model"
+author: "Mauricio Olivares"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: true
+    theme: united
+---
+
+# Preliminaries
+
+Set seed for reproducibility
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+set.seed(5, kind = "L'Ecuyer-CMRG")
+```
+
+Load packages
+```{r load-packages, message=FALSE, warning=FALSE}
+library(here)
+library(Matrix)
+library(ggplot2)
+library(dplyr)
+```
+
+Source internal helper functions
+```{r load-data, message=FALSE, warning=FALSE}
+
+source(here("scripts/gen_data.R"))
+source(here("scripts/plots_estimates.R"))
+```
+
+## Introduction
+
+This tutorial illustrates the Law of Large Numbers (LLN) and the Central Limit Theorem (CLT) using Monte Carlo simulations in a linear regression model with heteroskedastic errors.
+
+## Monte Carlo Design
+We simulate OLS estimates under different sample sizes:
+
+```{r monte-carlo-design}
+sample_sizes <- c(50, 100, 1000)
+num_simulations <- 5000
+simulate_ols <- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)
+
+for (t in seq_along(sample_sizes)) {
+  for (s in 1:num_simulations) {
+    data <- gen_data(n = sample_sizes[t], dgp = "model 2")
+    Y <- data$Y
+    X <- data$X
+    betaHat <- solve(t(X) %*% X) %*% t(X) %*% Y
+    simulate_ols[t, s] <- betaHat[2]
+  }
+}
+```
+## Law of Large Numbers (LLN)
+
+We expect that as the sample size increases, the OLS estimates converge to the true parameter value. Below is a visualization of the estimated slope coefficient across sample sizes.
+
+```{r lln-plot, fig.width=10, fig.height=6}
+my_plots(sample_sizes, simulate_ols)
+plot_asympt(sample_sizes, simulate_ols)
+```
+
+## Central Limit Theorem (CLT)
+
+The CLT predicts that scaled and centered estimators converge in distribution to a normal. We illustrate this below.
+
+```{r }
+simulate_ols_stand <- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)
+for(t in seq_along(sample_sizes)) {
+  simulate_ols_stand[t, ] <- (simulate_ols[t, ] - 2) * sqrt(sample_sizes[t])
+}
+
+plot_asympt(sample_sizes, simulate_ols_stand)
+```
