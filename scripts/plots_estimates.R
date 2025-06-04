@@ -57,14 +57,20 @@ plot_asympt <- function(sample_sizes, estimates) {
          y = "Density",
          fill = "Sample Size") +
     theme_minimal() +
-    theme(panel.background = element_rect(fill = "black"),
-          plot.background = element_rect(fill = "black"),
-          text = element_text(color = "white"),
-          axis.text = element_text(color = "white"),
-          legend.background = element_rect(fill = "black"),
-          legend.text = element_text(color = "white"),
-          legend.title = element_text(color = "white"),
-          legend.key = element_rect(fill = NA)) 
+    theme(
+  panel.background = element_rect(fill = "white", color = NA),
+  plot.background = element_rect(fill = "white", color = NA),
+  panel.grid.major = element_line(color = "grey90"),
+  panel.grid.minor = element_line(color = "grey95"),
+  axis.text = element_text(color = "black"),
+  axis.title = element_text(color = "black"),
+  plot.title = element_text(color = "black", face = "bold"),
+  plot.subtitle = element_text(color = "black"),
+  legend.background = element_rect(fill = "white", color = NA),
+  legend.key = element_rect(fill = "white", color = NA),
+  legend.text = element_text(color = "black"),
+  legend.title = element_text(color = "black")
+) 
 
   # Return the density plot
   return(density_plot)

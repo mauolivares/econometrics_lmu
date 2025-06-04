@@ -84,5 +84,5 @@ for(t in seq_along(sample_sizes)){
 # Histograms of the estimated slopes to showcase the CLT
 plot_asympt(sample_sizes, simulate_ols_stand)
 
-rmarkdown::render("tutorials/large_sample_ols.Rmd", output_dir = "html")
+rmarkdown::render("tutorials/HAC_inference.Rmd", output_dir = "html")
 

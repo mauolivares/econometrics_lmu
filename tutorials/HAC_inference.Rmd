@@ -1,0 +1,127 @@
+---
+title: "Heteroskedasticity-Robust Inference in the Linear Regression Model"
+author:
+  - name: "Mauricio Olivares"
+    affiliation: "LMU Munich"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: true
+    theme: united
+    mathjax: default
+---
+
+# Preliminaries
+
+Set seed for reproducibility
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+set.seed(5, kind = "L'Ecuyer-CMRG")
+```
+
+Load packages we will need in this tutorial. Make sure you have them installed. If not, you can install them using `install.packages("package_name")`.
+```{r load-packages, message=FALSE, warning=FALSE}
+library(here)
+library(sandwich)
+library(lmtest)
+```
+
+To avoid clutter, I have coded a couple of functions elsewhwere that we can outsource and use here right away. These functions will help us generate data for the Monte Carlo simulations, and plot the results of our simulations.
+```{r load-data, message=FALSE, warning=FALSE}
+
+source(here("scripts/gen_data.R"))
+source(here("scripts/plots_estimates.R"))
+```
+
+## Introduction
+
+The goal of this tutorial is to illustrate how to perform heteroskedasticity-robust inference in the context of the linear regression model. I will pay special attention to the different approaches to compute heteroskedasticity-robust standard errors as seen in class, and how they affect the inference on the OLS estimates.
+
+## Generate the Data and Estimate the model
+
+Let us generate data according to model 2 (see the `gen_data` function for details). We will then estimate the OLS model using the generated data.
+
+```{r generate-data}
+data <- gen_data(n = 1000, dgp = "model 2")
+Y <- data$Y
+X <- data$X
+```
+
+Base R includes an intercept by default. We need to remove it from our model because `gen_data.R` returns a matrix with an intercept.
+
+```{r fit-model}
+fitModel <- lm(Y ~ X - 1)
+summary(fitModel)
+```
+Alternatively, we could have specified the model using the matrix `X` directly, which is useful when we want to include only specific columns of `X` in our model.
+```{r fit-model-b}
+fitModel_b <- lm(data$Y ~ data$X[,2:3])
+summary(fitModel_b)
+```
+
+## Heteroskedasticity-Consistent (HC) covariance matrix estimators
+
+To adjust for heteroskedasticity, you can use the `sandwich` package to obtain robust standard errors.
+
+```{r load-sandwich, message=FALSE, warning=FALSE}
+hc0_se <- sqrt(diag(vcovHC(fitModel, type = "HC0")))
+hc1_se <- sqrt(diag(vcovHC(fitModel, type = "HC1")))
+hc2_se <- sqrt(diag(vcovHC(fitModel, type = "HC2")))
+hc3_se <- sqrt(diag(vcovHC(fitModel, type = "HC3")))
+```
+
+Display the robust standard errors
+```{r display-robust-se}
+robust_se <- data.frame(HC0 = hc0_se, HC1 = hc1_se, HC2 = hc2_se, HC3 = hc3_se)
+print(robust_se)
+```
+
+The previous formulas provide the estimates using the  estimators HC0, HC1, HC2, and HC3, we covered in class. For example, if want to derive the HC0 estimator by hand:
+
+1.  Calculate the OLS residuals
+```{r calculate-residuals}
+residuals <- Y - X %*% betaHat
+residuals <- as.vector(residuals)
+```
+2.  Calculate the variance of the OLS estimator using the residuals
+```{r calculate-variance}
+vHat0 <- solve(t(X) %*% X) %*% t(X) %*% diag(residuals^2) %*% X %*% solve(t(X) %*% X)
+```
+3.  Calculate the standard errors from the variance-covariance matrix
+```{r calculate-robust-se}
+robust_se$HC0hand <- sqrt(diag(vHat0))
+```
+Display the robust standard errors
+
+```{r display-robust-se-hand}
+print(robust_se)
+```
+
+To incorporate heteroskedasticity-consistent (HC) estimators when reporting standard errors in the `summary()` output, you can use the `coeftest()` function from the lmtest package along with the `vcovHC()` function from the `sandwich` package. This approach  will allow you to display the model coefficients with robust standard errors.
+
+### Summary of the model with standard errors adjusted for heteroskedasticity
+
+HC0 type
+```{r summary-hc0}
+coeftest(fitModel, vcov = vcovHC(fitModel, type = "HC0"))
+```
+HC1 type
+```{r summary-hc1}
+coeftest(fitModel, vcov = vcovHC(fitModel, type = "HC1"))
+```
+HC2 type
+```{r summary-hc2}
+coeftest(fitModel, vcov = vcovHC(fitModel, type = "HC2"))
+```
+HC3 type
+```{r summary-hc3}
+coeftest(fitModel, vcov = vcovHC(fitModel, type = "HC3"))
+``` 
+
+Summarize the model with different HC estimators using the `summarize_with_robust_se()` function we created in the `scripts/plots_estimates.R` file. This function will display the coefficients, standard errors, t-values, and p-values for each HC type.
+```{r summarize-robust-se}
+summarize_with_robust_se(fitModel)
+```
+

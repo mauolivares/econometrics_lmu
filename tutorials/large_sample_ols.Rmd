@@ -1,6 +1,8 @@
 ---
 title: "Large Sample Behavior in the Linear Regression Model"
-author: "Mauricio Olivares"
+author:
+  - name: "Mauricio Olivares"
+    affiliation: "LMU Munich"
 output: 
   html_document:
     toc: true
@@ -19,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 set.seed(5, kind = "L'Ecuyer-CMRG")
 ```
 
-Load packages
+Load packages we will need in this tutorial. Make sure you have them installed. If not, you can install them using `install.packages("package_name")`.
 ```{r load-packages, message=FALSE, warning=FALSE}
 library(here)
 library(Matrix)
@@ -27,7 +29,7 @@ library(ggplot2)
 library(dplyr)
 ```
 
-Source internal helper functions
+To avoid clutter, I have coded a couple of functions elsewhwere that we can outsource and use here right away. These functions will help us generate data for the Monte Carlo simulations, and plot the results of our simulations.
 ```{r load-data, message=FALSE, warning=FALSE}
 
 source(here("scripts/gen_data.R"))
@@ -36,29 +38,32 @@ source(here("scripts/plots_estimates.R"))
 
 ## Introduction
 
-This tutorial illustrates the Law of Large Numbers (LLN) and the Central Limit Theorem (CLT) using Monte Carlo simulations in a linear regression model with heteroskedastic errors.
+The goal of this tutorial is to illustrate the Law of Large Numbers (LLN) and the Central Limit Theorem (CLT) in the context of the linear regression model with heteroskedastic errors. To this end, I will simulate data from a linear regression model and show how the OLS estimates behave as the sample size increases.
 
 ## Monte Carlo Design
-We simulate OLS estimates under different sample sizes:
+
+Let us set the parameters of the data generating process (DGP) we will use for our simulations. In particular, we will generate data according to model 2 (see the `gen_data` function for details).
 
 ```{r monte-carlo-design}
-sample_sizes <- c(50, 100, 1000)
-num_simulations <- 5000
-simulate_ols <- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)
+sample_sizes <- c(50, 100, 1000) # Sample sizes for the simulations
+num_simulations <- 5000 # Number of simulations to run
+simulate_ols <- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations) # Initialize a matrix to store OLS estimates
 
 for (t in seq_along(sample_sizes)) {
   for (s in 1:num_simulations) {
     data <- gen_data(n = sample_sizes[t], dgp = "model 2")
     Y <- data$Y
     X <- data$X
-    betaHat <- solve(t(X) %*% X) %*% t(X) %*% Y
+    betaHat <- solve(t(X) %*% X) %*% t(X) %*% Y # Compute OLS estimates using matrix algebra
     simulate_ols[t, s] <- betaHat[2]
   }
 }
 ```
+For each simulation draw, `betaHat` is a 3-dimensional vector containing the $\hat{\beta}$ estimates associated to a constant and two covariates.  The `simulate_ols` matrix stores the estimated slope coefficient of covariate $X_2$ across simulations.
+
 ## Law of Large Numbers (LLN)
 
-We expect that as the sample size increases, the OLS estimates converge to the true parameter value. Below is a visualization of the estimated slope coefficient across sample sizes.
+Under mild assumptions we have seen in class, we expect that as the sample size increases, $\hat{\beta}$ concentrates around the true parameter $\beta$. Below is a visualization of the estimated slope coefficient across sample sizes.
 
 ```{r lln-plot, fig.width=10, fig.height=6}
 my_plots(sample_sizes, simulate_ols)
@@ -67,9 +72,8 @@ plot_asympt(sample_sizes, simulate_ols)
 
 ## Central Limit Theorem (CLT)
 
-The CLT predicts that $\sqrt{n}(\hat{\beta}-\beta)$ converge in distribution to a normal. 
+We have also seen that under a finite second moment assumption (plus some regularity conditions), $\sqrt{n}(\hat{\beta}-\beta)$ converges in distribution to a normal random vector with mean 0 and variance $\Omega$. 
 
-Now let's see if we can compile correctly. We illustrate this below.
 
 ```{r }
 simulate_ols_stand <- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)
@@ -79,3 +83,4 @@ for(t in seq_along(sample_sizes)) {
 
 plot_asympt(sample_sizes, simulate_ols_stand)
 ```
+
