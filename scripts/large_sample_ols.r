@@ -32,7 +32,7 @@ lapply(pkg, require, character.only = TRUE)
 # These functions live inside the
 # working directory defined earlier.
 
-functions <- list("gen_data.R", "my_plots.R")
+functions <- list("scripts/gen_data.R", "scripts/plots_estimates.R")
 lapply(functions, source)
 rm(functions)
 
@@ -78,11 +78,11 @@ plot_asympt(sample_sizes, simulate_ols)
 
 simulate_ols_stand <- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)  # Matrix to store the centered OLS estimators
 for(t in seq_along(sample_sizes)){
-  simulate_ols_stand[t, ] <- (simulate_ols[t, ] - 2) * sqrt(sample_sizes[t])
+  simulate_ols_stand[t, ] <-  sqrt(sample_sizes[t]) * (simulate_ols[t, ] - 2)
 }
 
 # Histograms of the estimated slopes to showcase the CLT
 plot_asympt(sample_sizes, simulate_ols_stand)
 
-rmarkdown::render("tutorials/HAC_inference.Rmd", output_dir = "html")
+# rmarkdown::render("tutorials/HAC_inference.Rmd", output_dir = "html")
 

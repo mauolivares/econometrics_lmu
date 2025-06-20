@@ -75,3 +75,13 @@ plot_asympt <- function(sample_sizes, estimates) {
   # Return the density plot
   return(density_plot)
 }
+
+# Function to display summary with different HC estimators
+summarize_with_robust_se <- function(model) {
+  hc_types <- c("HC0", "HC1", "HC2", "HC3")
+  
+  for (hc_type in hc_types) {
+    cat("\n", hc_type, " robust standard errors:\n", sep = "")
+    print(coeftest(model, vcov = vcovHC(model, type = hc_type)))
+  }
+}

@@ -1,0 +1,137 @@
+---
+title: "Asymptotic Inference in the Linear Regression Model"
+author:
+  - name: "Mauricio Olivares"
+    affiliation: "LMU Munich"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: true
+    theme: united
+    mathjax: default
+---
+
+# Preliminaries
+
+Set seed for reproducibility
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+set.seed(5, kind = "L'Ecuyer-CMRG")
+```
+
+Load packages we will need in this tutorial. Make sure you have them installed. If not, you can install them using `install.packages("package_name")`.
+```{r load-packages, message=FALSE, warning=FALSE}
+library(here)
+library(sandwich)
+library(lmtest)
+library(car)
+```
+
+To avoid clutter, I have coded a couple of functions elsewhwere that we can outsource and use here right away. These functions will help us generate data for the Monte Carlo simulations, and plot the results of our simulations.
+```{r load-data, message=FALSE, warning=FALSE}
+
+source(here("scripts/gen_data.R"))
+source(here("scripts/plots_estimates.R"))
+```
+
+## Introduction
+
+The goal of this tutorial is to illustrate how to perform heteroskedasticity-robust inference in the context of the linear regression model. We will consider single and multiple hypotheses, both linear and non-linear.
+
+## Generate the Data and Estimate the model
+
+Let us generate data according to model 2 (see the `gen_data` function for details). We will then estimate the OLS model using the generated data.
+
+```{r generate-data}
+data <- gen_data(n = 1000, dgp = "model 2")
+Y <- data$Y
+X <- data$X
+```
+
+Base R includes an intercept by default. We need to remove it from our model because `gen_data.R` returns a matrix with an intercept.
+
+```{r fit-model}
+fitModel <- lm(Y ~ X - 1)
+summary(fitModel)
+```
+and the estimate of the covariance matrix
+```{r vcov-estimate}
+Vhat <- vcovHC(fitModel, type = "HC0")
+```
+
+## Testing Linear Hypotheses
+
+Before we proceed with the inference, recall that for this example, we generated data according to model 2, which means that the true parameter values are $\beta=(0.5,2,-1)$.
+We can use the `linearHypothesis` function from the `car` package to test linear hypotheses. For example, we can test if the second coefficient is equal to 2. Notice that this is a true hypothesis, so the test should not reject $H_0$. Indeed, this is the case:
+```{r test-linear-hypothesis}
+test_result <- linearHypothesis(fitModel, "XX1 = 2", vcov = vcovHC(fitModel, type = "HC0"), test = "Chisq")
+summary(test_result)
+```
+We now test the join hypothesis $H_0: \beta_1=1,\:\beta_2=2$. In thi case, the null hypothesis is false, so we expect the test to reject $H_0$:
+```{r test-join-hypothesis}
+joint_test_result <- linearHypothesis(fitModel, c("XX1 = 1", "XX2 = 0"), vcov = vcovHC(fitModel, type = "HC0"), test = "Chisq")
+summary(joint_test_result)
+```
+## Testing Non-Linear Hypotheses
+
+Let us consider two types of non-linear hypotheses. First, we want to test whether $H_0: \beta_0\beta_1+\beta=0$. Then, we will test the joint hypothesis $H_0: \beta_0\beta_1+\beta_2=0,\:\beta_1^2=3$. Observe that the first non-linear hypothesis is true, while the second one is false. We expect the first test to not reject $H_0$, while the second one should reject it.
+
+Before we proceed, let's define a couple of functions that compute $\hat{\theta}$ and matrix $\hat{A}$ for the non-linear hypotheses (the Jacobian matrix); see Assumption A5 in the lecture notes for details.
+```{r define-non-linear-functions}
+theta <- function(a, type = c("single", "multiple")) {
+  type <- match.arg(type)
+  if (type == "single") {
+    return(c(a[1] * a[2] + a[3]))
+  }
+  if (type == "multiple") {
+    return(c(a[1]*a[2] + a[3], a[2]^2 - 3))
+  }
+  stop("Unrecognized type. Use 'single' or 'multiple'.")
+}
+
+A_jacobian <- function(a, type = c("single", "multiple")) {
+type <- match.arg(type)
+  if (type == "single") {
+    return(c(a[2], a[1], 1))
+}
+  if (type == "multiple") {
+    A <- c(a[2], a[1], 1, 0, 2 * a[2], 0 )
+    return(matrix(A, nrow = 3, ncol = 2, byrow = FALSE))
+  }
+  stop("Unrecognized type. Use 'single' or 'multiple'.")
+}
+```
+
+# Test Non-Linear Hypothesis 1
+
+Let's calculate the Wald statistic for the first non-linear hypothesis $H_0: \beta_0\beta_1+\beta=0$.
+```{r test-non-linear-hypothesis-1}
+theta_hat_1 <- theta(coef(fitModel), type = "single")
+Ahat_1 <- A_jacobian(coef(fitModel), type = "single")
+Wald_1 <- t(theta_hat_1) %*% solve(t(Ahat_1) %*% Vhat %*% Ahat_1) %*% theta_hat_1
+Wald_1
+```
+To compute the p-value, we need to know the degrees of freedom. In this case, we have one restriction, so the degrees of freedom is 1.
+```{r p-value-non-linear-hypothesis-1}
+p_value_1 <- pchisq(Wald_1, df = 1, lower.tail = FALSE)
+p_value_1
+```
+Suppose we wanted to test the second non-linear hypothesis at a significance level of $\alpha = 0.05$. We can compare the p-value with $\alpha$ to decide whether to reject or not the null hypothesis. In this case, we have that the p-value is not smaller than $\alpha$, so we cannot reject the null hypothesis.
+
+
+# Test Non-Linear Hypothesis 2
+Now, let's calculate the Wald statistic for the second non-linear hypothesis $H_0: \beta_0\beta_1+\beta_2=0,\:\beta_1^2=3$.
+```{r test-non-linear-hypothesis-2}
+theta_hat_2 <- theta(coef(fitModel), type = "multiple")
+Ahat_2 <- A_jacobian(coef(fitModel), type = "multiple")
+Wald_2 <- t(theta_hat_2) %*% solve(t(Ahat_2) %*% Vhat %*% Ahat_2) %*% theta_hat_2
+Wald_2
+```
+To compute the p-value, we need to know the degrees of freedom. In this case, we have two restrictions, so the degrees of freedom is 2.
+```{r p-value-non-linear-hypothesis-2}
+p_value_2 <- pchisq(Wald_2, df = 2, lower.tail = FALSE)
+p_value_2
+```
+Suppose we wanted to test the second non-linear hypothesis at a significance level of $\alpha = 0.05$. We can compare the p-value with $\alpha$ to decide whether to reject or not the null hypothesis. In this case, we have that the p-value is smaller, so we reject the null hypothesis.
