@@ -69,7 +69,7 @@ We can use the `linearHypothesis` function from the `car` package to test linear
 test_result <- linearHypothesis(fitModel, "XX1 = 2", vcov = vcovHC(fitModel, type = "HC0"), test = "Chisq")
 summary(test_result)
 ```
-We now test the join hypothesis $H_0: \beta_1=1,\:\beta_2=2$. In thi case, the null hypothesis is false, so we expect the test to reject $H_0$:
+We now test the join hypothesis $H_0: \beta_1=1,\:\beta_2=0$. In thi case, the null hypothesis is false, so we expect the test to reject $H_0$:
 ```{r test-join-hypothesis}
 joint_test_result <- linearHypothesis(fitModel, c("XX1 = 1", "XX2 = 0"), vcov = vcovHC(fitModel, type = "HC0"), test = "Chisq")
 summary(joint_test_result)

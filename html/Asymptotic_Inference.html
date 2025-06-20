@@ -1572,7 +1572,7 @@ summary(test_result)</code></pre>
 ##  Max.   :998.0   Max.   :1   Max.   :0.5668   Max.   :0.4515  
 ##                  NA&#39;s   :1   NA&#39;s   :1        NA&#39;s   :1</code></pre>
 <p>We now test the join hypothesis <span class="math inline">\(H_0:
-\beta_1=1,\:\beta_2=2\)</span>. In thi case, the null hypothesis is
+\beta_1=1,\:\beta_2=0\)</span>. In thi case, the null hypothesis is
 false, so we expect the test to reject <span class="math inline">\(H_0\)</span>:</p>
 <pre class="r"><code>joint_test_result &lt;- linearHypothesis(fitModel, c(&quot;XX1 = 1&quot;, &quot;XX2 = 0&quot;), vcov = vcovHC(fitModel, type = &quot;HC0&quot;), test = &quot;Chisq&quot;)
 summary(joint_test_result)</code></pre>
