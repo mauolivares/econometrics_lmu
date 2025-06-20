@@ -130,7 +130,8 @@ Ahat_1 <- A_jacobian(coef(fitModel), type = "single")
 Wn_1 <- t(theta_hat_1) %*% solve(t(Ahat_1) %*% Vhat %*% Ahat_1) %*% theta_hat_1
 
 # Rejection Rule: reject H0 if p-value<0.05
-pval <- pchisq(Wn, df = 1, lower.tail = FALSE)
+pval <- pchisq(Wn_1, df = 1, lower.tail = FALSE)
+
 pval
 
 
