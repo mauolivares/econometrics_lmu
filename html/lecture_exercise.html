@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="lecture_exercise_files/libs/clipboard/clipboard.min.js"></script>
+<script src="lecture_exercise_files/libs/quarto-html/tabby.min.js"></script>
+<script src="lecture_exercise_files/libs/quarto-html/popper.min.js"></script>
+<script src="lecture_exercise_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="lecture_exercise_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="lecture_exercise_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="lecture_exercise_files/libs/quarto-html/quarto-syntax-highlighting-dark-23bbe8b5e4efc1e257f6d59dce478b08.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.9.37">
+
+  <meta name="author" content="Mauricio Olivares">
+  <meta name="dcterms.date" content="2026-04-20">
+  <title>Potential Outcomes: From Theory to Code</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="lecture_exercise_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="lecture_exercise_files/libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+      }
+    pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+    div.sourceCode
+      { color: #e1e4e8; background-color: #24292e; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #e1e4e8; } /* Normal */
+    code span.al { color: #ff5555; font-weight: bold; } /* Alert */
+    code span.an { color: #6a737d; } /* Annotation */
+    code span.at { color: #f97583; } /* Attribute */
+    code span.bn { color: #79b8ff; } /* BaseN */
+    code span.bu { color: #f97583; } /* BuiltIn */
+    code span.cf { color: #f97583; } /* ControlFlow */
+    code span.ch { color: #9ecbff; } /* Char */
+    code span.cn { color: #79b8ff; } /* Constant */
+    code span.co { color: #6a737d; } /* Comment */
+    code span.cv { color: #6a737d; } /* CommentVar */
+    code span.do { color: #6a737d; } /* Documentation */
+    code span.dt { color: #f97583; } /* DataType */
+    code span.dv { color: #79b8ff; } /* DecVal */
+    code span.er { color: #ff5555; text-decoration: underline; } /* Error */
+    code span.ex { color: #f97583; font-weight: bold; } /* Extension */
+    code span.fl { color: #79b8ff; } /* Float */
+    code span.fu { color: #b392f0; } /* Function */
+    code span.im { color: #9ecbff; } /* Import */
+    code span.in { color: #6a737d; } /* Information */
+    code span.kw { color: #f97583; } /* Keyword */
+    code span.op { color: #e1e4e8; } /* Operator */
+    code span.ot { color: #b392f0; } /* Other */
+    code span.pp { color: #f97583; } /* Preprocessor */
+    code span.re { color: #6a737d; } /* RegionMarker */
+    code span.sc { color: #79b8ff; } /* SpecialChar */
+    code span.ss { color: #9ecbff; } /* SpecialString */
+    code span.st { color: #9ecbff; } /* String */
+    code span.va { color: #ffab70; } /* Variable */
+    code span.vs { color: #9ecbff; } /* VerbatimString */
+    code span.wa { color: #ff5555; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="lecture_exercise_files/libs/revealjs/dist/theme/quarto-a744a2b370710ab7168324db5d172d71.css">
+  <link href="lecture_exercise_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="lecture_exercise_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="lecture_exercise_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="lecture_exercise_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="lecture_exercise_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="lecture_exercise_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-dark">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Potential Outcomes: From Theory to Code</h1>
+  <p class="subtitle">Applied Causal Analysis — Coding Exercise</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Mauricio Olivares 
+</div>
+        <p class="quarto-title-affiliation">
+            LMU Munich · Chair of Statistics and Econometrics
+          </p>
+    </div>
+</div>
+
+  <p class="date">2026-04-20</p>
+</section>
+<section>
+<section id="part-i-the-fundamental-problem" class="title-slide slide level1 center" data-background-color="#1a1a2e">
+<h1>Part I: The Fundamental Problem</h1>
+
+</section>
+<section id="what-a-researcher-wishes-they-could-see" class="slide level2">
+<h2>What a researcher <em>wishes</em> they could see</h2>
+<p>Recall from the lecture: for each unit <span class="math inline">\(i\)</span>, we have two potential outcomes</p>
+<p><span class="math display">\[Y_i = D_i \cdot Y_i(1) + (1 - D_i) \cdot Y_i(0)\]</span></p>
+<p>but we only ever observe <strong>one</strong> of <span class="math inline">\(Y_i(0)\)</span> or <span class="math inline">\(Y_i(1)\)</span>.</p>
+<p>Let us make this concrete with a small example.</p>
+</section>
+<section id="generating-the-full-schedule-of-potential-outcomes" class="slide level2">
+<h2>Generating the Full Schedule of Potential Outcomes</h2>
+<p>Think of the health care example. We observe <span class="math inline">\(n = 10\)</span> patients.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a>n_small <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb1-2"><a href=""></a></span>
+<span id="cb1-3"><a href=""></a><span class="co"># Individual treatment effects: β_i ~ N(-0.5, 1)</span></span>
+<span id="cb1-4"><a href=""></a><span class="co"># Negative on average: hospitalization helps (lower score = better health)</span></span>
+<span id="cb1-5"><a href=""></a>beta <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n_small, <span class="at">mean =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb1-6"><a href=""></a></span>
+<span id="cb1-7"><a href=""></a><span class="co"># Y(0): health score if NOT hospitalised (higher = worse health)</span></span>
+<span id="cb1-8"><a href=""></a>Y0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n_small, <span class="at">mean =</span> <span class="dv">3</span>, <span class="at">sd =</span> <span class="fl">0.5</span>)</span>
+<span id="cb1-9"><a href=""></a></span>
+<span id="cb1-10"><a href=""></a><span class="co"># Y(1): health score if hospitalised</span></span>
+<span id="cb1-11"><a href=""></a>Y1 <span class="ot">&lt;-</span> Y0 <span class="sc">+</span> beta</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p><span class="math inline">\(\beta_i = Y_i(1) - Y_i(0)\)</span> is the <strong>individual treatment effect</strong> — the quantity we can never directly observe.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="the-full-potential-outcomes-table" class="slide level2">
+<h2>The Full Potential Outcomes Table</h2>
+<p>This is what a <em>god-like</em> researcher would see — both columns at once:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"><span class="math inline">\(i\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(Y_i(0)\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(Y_i(1)\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\beta_i\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2.05</td>
+<td style="text-align: center;">0.61</td>
+<td style="text-align: center;">-1.44</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3.46</td>
+<td style="text-align: center;">2.92</td>
+<td style="text-align: center;">-0.54</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2.78</td>
+<td style="text-align: center;">3.11</td>
+<td style="text-align: center;">0.33</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">3.07</td>
+<td style="text-align: center;">2.14</td>
+<td style="text-align: center;">-0.94</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">2.29</td>
+<td style="text-align: center;">1.47</td>
+<td style="text-align: center;">-0.81</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">2.45</td>
+<td style="text-align: center;">-0.18</td>
+<td style="text-align: center;">-2.63</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">3.64</td>
+<td style="text-align: center;">5.65</td>
+<td style="text-align: center;">2.01</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">3.64</td>
+<td style="text-align: center;">2.02</td>
+<td style="text-align: center;">-1.63</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">2.35</td>
+<td style="text-align: center;">2.02</td>
+<td style="text-align: center;">-0.33</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">2.89</td>
+<td style="text-align: center;">2.96</td>
+<td style="text-align: center;">0.08</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="now-assign-treatment-and-watch-data-disappear" class="slide level2">
+<h2>Now Assign Treatment — and Watch Data Disappear</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href=""></a><span class="co"># Random assignment: flip a fair coin</span></span>
+<span id="cb2-2"><a href=""></a>D <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n_small, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb2-3"><a href=""></a></span>
+<span id="cb2-4"><a href=""></a><span class="co"># Observed outcome: only ONE potential outcome is revealed</span></span>
+<span id="cb2-5"><a href=""></a>Y_obs <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(D <span class="sc">==</span> <span class="dv">1</span>, Y1, Y0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: center;"><span class="math inline">\(i\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(D_i\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(Y_i(0)\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(Y_i(1)\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(Y_i^{obs}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.05</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">2.05</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">2.92</td>
+<td style="text-align: center;">2.92</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.78</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">2.78</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">2.14</td>
+<td style="text-align: center;">2.14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.29</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">2.29</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">2.45</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">2.45</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3.64</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">3.64</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">3.64</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">3.64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">2.02</td>
+<td style="text-align: center;">2.02</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">2.96</td>
+<td style="text-align: center;">2.96</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="fragment">
+<p>Every <code>?</code> is a <strong>missing counterfactual</strong> — this is what makes causal inference a missing data problem.</p>
+</div>
+</section>
+<section id="the-true-ate-and-why-we-cant-compute-it" class="slide level2">
+<h2>The True ATE — and Why We Can’t Compute It</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="co"># True ATE: we know this only because we simulated the data</span></span>
+<span id="cb3-2"><a href=""></a>ATE_true <span class="ot">&lt;-</span> <span class="fu">mean</span>(beta)</span>
+<span id="cb3-3"><a href=""></a><span class="fu">round</span>(ATE_true, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.591</code></pre>
+</div>
+</div>
+<div class="fragment">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href=""></a><span class="co"># What a researcher actually computes from observed data</span></span>
+<span id="cb5-2"><a href=""></a>APE <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y_obs[D <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(Y_obs[D <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb5-3"><a href=""></a><span class="fu">round</span>(APE, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.3</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="callout callout-warning callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Warning</strong></p>
+</div>
+<div class="callout-content">
+<p>With only <span class="math inline">\(n = 10\)</span> units and random assignment, these two numbers may already differ noticeably. Why? Small samples, not bias. Let us scale up.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-ii-selection-bias" class="title-slide slide level1 center" data-background-color="#1a1a2e">
+<h1>Part II: Selection Bias</h1>
+
+</section>
+<section id="scaling-up-and-introducing-selection" class="slide level2">
+<h2>Scaling Up — and Introducing Selection</h2>
+<p>We now use <span class="math inline">\(n = 1{,}000\)</span> units and introduce <strong>selection on levels</strong>: sicker patients (higher <span class="math inline">\(Y_i(0)\)</span>) are more likely to seek hospitalisation.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href=""></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb7-2"><a href=""></a></span>
+<span id="cb7-3"><a href=""></a><span class="co"># Individual treatment effects</span></span>
+<span id="cb7-4"><a href=""></a>beta  <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb7-5"><a href=""></a></span>
+<span id="cb7-6"><a href=""></a><span class="co"># Y(0): baseline health (higher = worse)</span></span>
+<span id="cb7-7"><a href=""></a>Y0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">3</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb7-8"><a href=""></a></span>
+<span id="cb7-9"><a href=""></a><span class="co"># Y(1): health if hospitalised</span></span>
+<span id="cb7-10"><a href=""></a>Y1 <span class="ot">&lt;-</span> Y0 <span class="sc">+</span> beta</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="a-biased-assignment-mechanism" class="slide level2">
+<h2>A Biased Assignment Mechanism</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href=""></a><span class="co"># Selection on levels: probability of treatment increases with Y(0)</span></span>
+<span id="cb8-2"><a href=""></a><span class="co"># i.e., sicker people are more likely to go to hospital</span></span>
+<span id="cb8-3"><a href=""></a>p_treat <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">+</span> <span class="fl">1.5</span> <span class="sc">*</span> Y0)   <span class="co"># logistic link</span></span>
+<span id="cb8-4"><a href=""></a>D_sel   <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, p_treat)</span>
+<span id="cb8-5"><a href=""></a></span>
+<span id="cb8-6"><a href=""></a><span class="co"># Observed outcomes</span></span>
+<span id="cb8-7"><a href=""></a>Y_sel <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(D_sel <span class="sc">==</span> <span class="dv">1</span>, Y1, Y0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Fraction treated: 0.85 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean Y(0) among treated:   3.148 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean Y(0) among untreated: 1.966 </code></pre>
+</div>
+</div>
+<div class="fragment">
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Important</strong></p>
+</div>
+<div class="callout-content">
+<p>The treated have a <strong>higher</strong> baseline <span class="math inline">\(Y_i(0)\)</span> — they are sicker to begin with. This is exactly <strong>selection on levels</strong>.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="the-bias-decomposition-in-code" class="slide level2">
+<h2>The Bias Decomposition — in Code</h2>
+<p>Recall from the lecture:</p>
+<p><span class="math display">\[\underbrace{\mathbb{E}[Y_i|D_i=1] - \mathbb{E}[Y_i|D_i=0]}_{\text{APE (observed)}} = \underbrace{\mathbb{E}[Y_i(1)-Y_i(0)|D_i=1]}_{\text{ATT}} + \underbrace{\mathbb{E}[Y_i(0)|D_i=1] - \mathbb{E}[Y_i(0)|D_i=0]}_{\text{selection bias}}\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href=""></a>APE_sel <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y_sel[D_sel <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(Y_sel[D_sel <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb12-2"><a href=""></a>ATT_sel <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y1[D_sel <span class="sc">==</span> <span class="dv">1</span>])    <span class="sc">-</span> <span class="fu">mean</span>(Y0[D_sel <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb12-3"><a href=""></a>SB_sel  <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y0[D_sel <span class="sc">==</span> <span class="dv">1</span>])    <span class="sc">-</span> <span class="fu">mean</span>(Y0[D_sel <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb12-4"><a href=""></a>ATE_true <span class="ot">&lt;-</span> <span class="fu">mean</span>(beta)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="the-numbers" class="slide level2">
+<h2>The Numbers</h2>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Quantity</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">APE (observed)</td>
+<td style="text-align: center;">0.678</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATT</td>
+<td style="text-align: center;">-0.504</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Selection Bias</td>
+<td style="text-align: center;">1.182</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATT + Selection Bias</td>
+<td style="text-align: center;">0.678</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">True ATE</td>
+<td style="text-align: center;">-0.501</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="fragment">
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p><strong>ATT + Selection Bias = APE</strong> ✓ — the decomposition holds exactly.</p>
+<p>The selection bias is <strong>positive</strong>: hospitalized patients are sicker to begin with, inflating the observed health gap and masking the true (negative) treatment effect.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="visualising-the-selection-problem" class="slide level2">
+<h2>Visualising the Selection Problem</h2>
+
+<img data-src="lecture_exercise_files/figure-revealjs/plot-selection-1.png" width="960" class="r-stretch"><p>The two distributions of <span class="math inline">\(Y_i(0)\)</span> are <strong>shifted</strong> — the treated were sicker before treatment.</p>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-iii-random-assignment-as-the-fix" class="title-slide slide level1 center" data-background-color="#1a1a2e">
+<h1>Part III: Random Assignment as the Fix</h1>
+
+</section>
+<section id="randomly-assigning-treatment" class="slide level2">
+<h2>Randomly Assigning Treatment</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href=""></a><span class="co"># Fair coin flip — independent of Y(0) and Y(1)</span></span>
+<span id="cb13-2"><a href=""></a>D_rand <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb13-3"><a href=""></a></span>
+<span id="cb13-4"><a href=""></a><span class="co"># Observed outcomes</span></span>
+<span id="cb13-5"><a href=""></a>Y_rand <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(D_rand <span class="sc">==</span> <span class="dv">1</span>, Y1, Y0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean Y(0) among treated:   2.969 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean Y(0) among untreated: 2.97 </code></pre>
+</div>
+</div>
+<div class="fragment">
+<div class="callout callout-tip callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Tip</strong></p>
+</div>
+<div class="callout-content">
+<p>Under random assignment, the two groups have <strong>similar</strong> baseline <span class="math inline">\(Y_i(0)\)</span>. Selection bias vanishes.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="the-decomposition-under-random-assignment" class="slide level2">
+<h2>The Decomposition Under Random Assignment</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href=""></a>APE_rand <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y_rand[D_rand <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(Y_rand[D_rand <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb16-2"><a href=""></a>ATT_rand <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y1[D_rand <span class="sc">==</span> <span class="dv">1</span>])     <span class="sc">-</span> <span class="fu">mean</span>(Y0[D_rand <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb16-3"><a href=""></a>SB_rand  <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y0[D_rand <span class="sc">==</span> <span class="dv">1</span>])     <span class="sc">-</span> <span class="fu">mean</span>(Y0[D_rand <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb16-4"><a href=""></a>ATU_rand <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y1[D_rand <span class="sc">==</span> <span class="dv">0</span>])     <span class="sc">-</span> <span class="fu">mean</span>(Y0[D_rand <span class="sc">==</span> <span class="dv">0</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Quantity</th>
+<th style="text-align: center;">Selection on Levels</th>
+<th style="text-align: center;">Random Assignment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">APE (observed)</td>
+<td style="text-align: center;">0.678</td>
+<td style="text-align: center;">-0.482</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATT</td>
+<td style="text-align: center;">-0.504</td>
+<td style="text-align: center;">-0.481</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ATU</td>
+<td style="text-align: center;">NA</td>
+<td style="text-align: center;">-0.520</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">True ATE</td>
+<td style="text-align: center;">-0.501</td>
+<td style="text-align: center;">-0.501</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Selection Bias</td>
+<td style="text-align: center;">1.182</td>
+<td style="text-align: center;">-0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATT + Selection Bias</td>
+<td style="text-align: center;">0.678</td>
+<td style="text-align: center;">-0.482</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="side-by-side-what-randomisation-fixes" class="slide level2">
+<h2>Side-by-Side: What Randomisation Fixes</h2>
+
+<img data-src="lecture_exercise_files/figure-revealjs/plot-random-1.png" width="960" class="r-stretch"><p>The distributions of <span class="math inline">\(Y_i(0)\)</span> now <strong>overlap almost perfectly</strong>. Selection bias <span class="math inline">\(\approx 0\)</span>.</p>
+</section>
+<section id="randomisation-works-in-expectation" class="slide level2">
+<h2>Randomisation Works <em>In Expectation</em></h2>
+<p>Does it always work in a single draw? Let us check across many replications:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href=""></a>R       <span class="ot">&lt;-</span> <span class="dv">2000</span>   <span class="co"># replications</span></span>
+<span id="cb17-2"><a href=""></a>APE_sim <span class="ot">&lt;-</span> <span class="fu">numeric</span>(R)</span>
+<span id="cb17-3"><a href=""></a></span>
+<span id="cb17-4"><a href=""></a><span class="cf">for</span> (r <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>R) {</span>
+<span id="cb17-5"><a href=""></a>  D_r       <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb17-6"><a href=""></a>  Y_r       <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(D_r <span class="sc">==</span> <span class="dv">1</span>, Y1, Y0)</span>
+<span id="cb17-7"><a href=""></a>  APE_sim[r] <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y_r[D_r <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(Y_r[D_r <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb17-8"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean of APE across 2000 replications: -0.5007 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>True ATE:                               -0.5012 </code></pre>
+</div>
+</div>
+</section>
+<section id="sampling-distribution-of-the-ape" class="slide level2">
+<h2>Sampling Distribution of the APE</h2>
+
+<img data-src="lecture_exercise_files/figure-revealjs/plot-sim-1.png" width="960" class="r-stretch"><p>The APE is <strong>centred on the true ATE</strong>. In any single study there is sampling variability — but the estimator is unbiased.</p>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-iv-selection-on-gains" class="title-slide slide level1 center" data-background-color="#1a1a2e">
+<h1>Part IV: Selection on Gains</h1>
+
+</section>
+<section id="a-different-kind-of-selection" class="slide level2">
+<h2>A Different Kind of Selection</h2>
+<div title="In-class exercise (Lecture 3, Slide 19)">
+<div class="callout callout-note callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>In-class exercise (Lecture 3, Slide 19)</strong></p>
+</div>
+<div class="callout-content">
+<p>Show that in general <span class="math inline">\(\text{ATE} \neq \text{ATT}\)</span> due to <strong>selection on gains</strong>, but that <span class="math inline">\(\text{ATE} = \text{ATT}\)</span> under random assignment.</p>
+</div>
+</div>
+</div>
+</div>
+<p>Selection on gains means individuals sort into treatment based on <em>how much they benefit</em>:</p>
+<p><span class="math display">\[\mathbb{E}[Y_i(1) - Y_i(0) \mid D_i = 1] \neq \mathbb{E}[Y_i(1) - Y_i(0) \mid D_i = 0]\]</span></p>
+</section>
+<section id="generating-selection-on-gains" class="slide level2">
+<h2>Generating Selection on Gains</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href=""></a><span class="co"># Those who benefit MORE (more negative beta) are more likely to seek treatment</span></span>
+<span id="cb20-2"><a href=""></a>p_gains <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="dv">2</span> <span class="sc">-</span> <span class="dv">3</span> <span class="sc">*</span> beta)    <span class="co"># treatment prob increases as β_i decreases</span></span>
+<span id="cb20-3"><a href=""></a>D_gains <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, p_gains)</span>
+<span id="cb20-4"><a href=""></a>Y_gains <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(D_gains <span class="sc">==</span> <span class="dv">1</span>, Y1, Y0)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean β_i among treated:   -0.761 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean β_i among untreated: 0.722 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>True ATE:                 -0.501 </code></pre>
+</div>
+</div>
+<div class="fragment">
+<p>The treated have more negative <span class="math inline">\(\beta_i\)</span> on average — they are <strong>self-selecting because they gain more</strong> from treatment.</p>
+</div>
+</section>
+<section id="ate-vs-att-vs-atu-under-selection-on-gains" class="slide level2">
+<h2>ATE vs ATT vs ATU Under Selection on Gains</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href=""></a>ATE_gains <span class="ot">&lt;-</span> <span class="fu">mean</span>(beta)</span>
+<span id="cb24-2"><a href=""></a>ATT_gains <span class="ot">&lt;-</span> <span class="fu">mean</span>(beta[D_gains <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb24-3"><a href=""></a>ATU_gains <span class="ot">&lt;-</span> <span class="fu">mean</span>(beta[D_gains <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb24-4"><a href=""></a>APE_gains <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y_gains[D_gains <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(Y_gains[D_gains <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb24-5"><a href=""></a>SB_gains  <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y0[D_gains <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(Y0[D_gains <span class="sc">==</span> <span class="dv">0</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Quantity</th>
+<th style="text-align: center;">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">True ATE</td>
+<td style="text-align: center;">-0.501</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATT</td>
+<td style="text-align: center;">-0.761</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ATU</td>
+<td style="text-align: center;">0.722</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">APE (observed)</td>
+<td style="text-align: center;">-0.710</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Selection Bias (levels)</td>
+<td style="text-align: center;">0.051</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="fragment">
+<p><span class="math inline">\(\text{ATE} \neq \text{ATT} \neq \text{ATU}\)</span> — each answers a <em>different</em> causal question.</p>
+</div>
+</section>
+<section id="random-assignment-restores-ate-att" class="slide level2">
+<h2>Random Assignment Restores ATE = ATT</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href=""></a>ATT_r <span class="ot">&lt;-</span> <span class="fu">mean</span>(beta[D_rand <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb25-2"><a href=""></a>ATU_r <span class="ot">&lt;-</span> <span class="fu">mean</span>(beta[D_rand <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb25-3"><a href=""></a>ATE_r <span class="ot">&lt;-</span> <span class="fu">mean</span>(beta)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Quantity</th>
+<th style="text-align: center;">Selection on Gains</th>
+<th style="text-align: center;">Random Assignment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ATE</td>
+<td style="text-align: center;">-0.501</td>
+<td style="text-align: center;">-0.501</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATT</td>
+<td style="text-align: center;">-0.761</td>
+<td style="text-align: center;">-0.481</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ATU</td>
+<td style="text-align: center;">0.722</td>
+<td style="text-align: center;">-0.520</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="fragment">
+<p>Under random assignment, <span class="math inline">\(D_i \perp (Y_i(0), Y_i(1))\)</span>, so who ends up treated is unrelated to their gains — and ATE <span class="math inline">\(\approx\)</span> ATT <span class="math inline">\(\approx\)</span> ATU. ✓</p>
+</div>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="part-v-qte-identification" class="title-slide slide level1 center" data-background-color="#1a1a2e">
+<h1>Part V: QTE Identification</h1>
+
+</section>
+<section id="beyond-means-quantile-treatment-effects" class="slide level2">
+<h2>Beyond Means — Quantile Treatment Effects</h2>
+<p>Recall from Lecture 3: under random assignment,</p>
+<p><span class="math display">\[\underbrace{F_1^{-1}(\tau) - F_0^{-1}(\tau)}_{\text{QTE}_\tau,\ \text{unobserved}} = \underbrace{F^{-1}(\tau \mid D_i=1) - F^{-1}(\tau \mid D_i=0)}_{\text{observed}}\]</span></p>
+<p>Let us verify this numerically.</p>
+</section>
+<section id="computing-qtes" class="slide level2">
+<h2>Computing QTEs</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href=""></a>quantiles <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="at">by =</span> <span class="fl">0.05</span>)</span>
+<span id="cb26-2"><a href=""></a></span>
+<span id="cb26-3"><a href=""></a><span class="co"># Unobserved QTE: quantiles of potential outcome distributions</span></span>
+<span id="cb26-4"><a href=""></a>qte_true <span class="ot">&lt;-</span> <span class="fu">quantile</span>(Y1, quantiles) <span class="sc">-</span> <span class="fu">quantile</span>(Y0, quantiles)</span>
+<span id="cb26-5"><a href=""></a></span>
+<span id="cb26-6"><a href=""></a><span class="co"># Observed under random assignment</span></span>
+<span id="cb26-7"><a href=""></a>qte_obs  <span class="ot">&lt;-</span> <span class="fu">quantile</span>(Y_rand[D_rand <span class="sc">==</span> <span class="dv">1</span>], quantiles) <span class="sc">-</span></span>
+<span id="cb26-8"><a href=""></a>            <span class="fu">quantile</span>(Y_rand[D_rand <span class="sc">==</span> <span class="dv">0</span>], quantiles)</span>
+<span id="cb26-9"><a href=""></a></span>
+<span id="cb26-10"><a href=""></a><span class="co"># Observed under selection on levels (biased)</span></span>
+<span id="cb26-11"><a href=""></a>qte_sel  <span class="ot">&lt;-</span> <span class="fu">quantile</span>(Y_sel[D_sel <span class="sc">==</span> <span class="dv">1</span>], quantiles) <span class="sc">-</span></span>
+<span id="cb26-12"><a href=""></a>            <span class="fu">quantile</span>(Y_sel[D_sel <span class="sc">==</span> <span class="dv">0</span>], quantiles)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="qte-random-assignment-identifies-the-truth" class="slide level2">
+<h2>QTE: Random Assignment Identifies the Truth</h2>
+
+<img data-src="lecture_exercise_files/figure-revealjs/plot-qte-1.png" width="960" class="r-stretch"><p>The observed QTE under <strong>random assignment</strong> (blue) tracks the true QTE closely. Under <strong>selection on levels</strong> (red) it is systematically distorted.</p>
+</section>
+<section class="slide level2">
+
+</section></section>
+<section>
+<section id="summary" class="title-slide slide level1 center" data-background-color="#1a1a2e">
+<h1>Summary</h1>
+
+</section>
+<section id="what-we-did-and-why-it-matters" class="slide level2">
+<h2>What We Did — and Why It Matters</h2>
+<ol type="1">
+<li class="fragment"><p><strong>The fundamental problem</strong> — with <span class="math inline">\(n=10\)</span> we saw the missing counterfactual table directly: every <code>?</code> is what makes causal inference hard</p></li>
+<li class="fragment"><p><strong>Selection on levels</strong> — sicker patients self-select into hospitals; the bias decomposition <span class="math inline">\(\text{APE} = \text{ATT} + \text{Selection Bias}\)</span> holds <em>exactly</em> in the data</p></li>
+<li class="fragment"><p><strong>Random assignment</strong> — the fix: <span class="math inline">\(D_i \perp (Y_i(0), Y_i(1))\)</span> kills selection bias, and the APE is unbiased for the ATE across replications</p></li>
+<li class="fragment"><p><strong>Selection on gains</strong> — a subtler problem: ATE <span class="math inline">\(\neq\)</span> ATT <span class="math inline">\(\neq\)</span> ATU; random assignment equalises all three</p></li>
+<li class="fragment"><p><strong>QTE identification</strong> — under random assignment, observed quantile differences recover the true QTE; under selection they do not</p></li>
+</ol>
+</section>
+<section id="looking-ahead" class="slide level2">
+<h2>Looking Ahead</h2>
+<p>The next step: <strong>estimation and inference</strong> — how do we attach uncertainty to these estimates?</p>
+<ul>
+<li>Standard errors for the difference-in-means</li>
+<li>Permutation tests (no asymptotic approximation needed)</li>
+<li>Bootstrap inference</li>
+<li>Covariate adjustment for efficiency gains</li>
+</ul>
+<div class="fragment">
+<p><strong>Reading for next class:</strong> Lecture 3 slides, sections on covariate balance and the CATE.</p>
+</div>
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+<p>Applied Causal Analysis · Summer Semester 2026 · LMU Munich</p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="lecture_exercise_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="lecture_exercise_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="lecture_exercise_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="lecture_exercise_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="lecture_exercise_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="lecture_exercise_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="lecture_exercise_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="lecture_exercise_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="lecture_exercise_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="lecture_exercise_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="lecture_exercise_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
