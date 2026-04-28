@@ -1,0 +1,202 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Applied Causal Analysis",
+    "section": "",
+    "text": "0.1 Welcome\nThis lecture covers two important topics in the analysis of randomized controlled trials (RCTs):",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#welcome",
+    "href": "index.html#welcome",
+    "title": "Applied Causal Analysis",
+    "section": "",
+    "text": "Covariate Adjustment — How adding pre-treatment covariates to a regression can improve precision without introducing bias, even in a randomized experiment.\nQuantile Treatment Effects (QTE) — How treatment effects can vary across the outcome distribution, and how to estimate and visualize them using quantile regression.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#datasets",
+    "href": "index.html#datasets",
+    "title": "Applied Causal Analysis",
+    "section": "0.2 Datasets",
+    "text": "0.2 Datasets\nWe use two datasets throughout this lecture:\n\n\n\n\n\n\n\nDataset\nDescription\n\n\n\n\nButler & Broockman (AJPS, 2011)\nA field experiment on political representation and race. Legislators received emails from constituents with racially distinct names.\n\n\nPenn Job Training Experiment\nAn experiment testing the effect of job training on unemployment duration.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#setup",
+    "href": "index.html#setup",
+    "title": "Applied Causal Analysis",
+    "section": "0.3 Setup",
+    "text": "0.3 Setup\nThe code chunk below loads all required packages and the shared function library used throughout the lecture. Run this first before proceeding to any other section.\n\n# Load packages\nlibrary(tidyverse)\nlibrary(foreign)\nlibrary(quantreg)\nlibrary(modelsummary)\nlibrary(kableExtra)\n\n# Load the shared function library\nsource(\"R/ACA_Function_Library.r\")\n\n# Set seed for reproducibility\nset.seed(42, kind = \"L'Ecuyer-CMRG\")",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "part1_covariate_adjustment.html",
+    "href": "part1_covariate_adjustment.html",
+    "title": "2  Covariate Adjustment in RCTs",
+    "section": "",
+    "text": "2.1 Motivation\nEven in a perfectly randomized experiment, we observe a single realization of the assignment mechanism. This means that — by chance — the treated and control groups may be slightly imbalanced on pre-treatment characteristics (covariates).\nKey insight: Including pre-treatment covariates in the regression does not change the consistency of the estimator (randomization already takes care of that), but it can substantially reduce variance, yielding tighter confidence intervals.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Covariate Adjustment in RCTs</span>"
+    ]
+  },
+  {
+    "objectID": "part1_covariate_adjustment.html#motivation",
+    "href": "part1_covariate_adjustment.html#motivation",
+    "title": "2  Covariate Adjustment in RCTs",
+    "section": "",
+    "text": "NoteWhen is covariate adjustment useful?\n\n\n\nCovariate adjustment is most valuable when the included covariates are strong predictors of the outcome. If covariates explain little variation in the outcome, there is little precision gain.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Covariate Adjustment in RCTs</span>"
+    ]
+  },
+  {
+    "objectID": "part1_covariate_adjustment.html#the-butler-broockman-2011-experiment",
+    "href": "part1_covariate_adjustment.html#the-butler-broockman-2011-experiment",
+    "title": "2  Covariate Adjustment in RCTs",
+    "section": "2.2 The Butler & Broockman (2011) Experiment",
+    "text": "2.2 The Butler & Broockman (2011) Experiment\nButler and Broockman (2011) conducted a large-scale field experiment to study racial discrimination in political representation. They sent emails to state legislators across the United States. The emails were identical in content but were signed with names that are distinctly associated with either Black or white Americans.\n\nTreatment (treat_deshawn = 1): Email signed with a Black-sounding name (e.g., DeShawn Jackson)\n\nControl (treat_deshawn = 0): Email signed with a white-sounding name (e.g., Jake Mueller)\nOutcome (reply_atall): Binary indicator — did the legislator reply at all?\n\nThe key question: Does the racial signal in the name affect the probability of receiving a reply?",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Covariate Adjustment in RCTs</span>"
+    ]
+  },
+  {
+    "objectID": "part1_covariate_adjustment.html#data-carpentry",
+    "href": "part1_covariate_adjustment.html#data-carpentry",
+    "title": "2  Covariate Adjustment in RCTs",
+    "section": "2.3 Data Carpentry",
+    "text": "2.3 Data Carpentry\nWe restrict the sample to email senders who did not signal partisan preference, i.e., fictitious constituents who did not ask for help to register in future primary elections (treat_noprimary == 1) , and select the relevant variables.\n\nraw_data &lt;- read.dta(\"data/Butler_Broockman_AJPS_2011_public.dta\",\n                     convert.factors = FALSE)\n\ndata &lt;- raw_data %&gt;%\n  filter(treat_noprimary == 1) %&gt;%\n  select(reply_atall, treat_deshawn, leg_party, leg_white) %&gt;%\n  mutate(\n    reply_atall   = as.numeric(reply_atall),\n    treat_deshawn = as.numeric(treat_deshawn),\n    leg_party     = as.factor(leg_party),\n    leg_white     = as.factor(leg_white)\n  ) %&gt;%\n  filter(!is.na(reply_atall) & !is.na(treat_deshawn)\n         & !is.na(leg_party) & !is.na(leg_white))\n\nLet’s take a quick look at the data:\n\nhead(data) %&gt;%\n  kbl(caption = \"First rows of the analysis dataset\") %&gt;%\n  kable_styling(bootstrap_options = c(\"striped\", \"hover\", \"condensed\"),\n                full_width = FALSE)\n\n\nFirst rows of the analysis dataset\n\n\n\nreply_atall\ntreat_deshawn\nleg_party\nleg_white\n\n\n\n\n3\n0\n1\nR\n1\n\n\n4\n0\n1\nR\n1\n\n\n5\n0\n0\nD\n1\n\n\n12\n1\n0\nR\n1\n\n\n16\n1\n1\nR\n1\n\n\n27\n0\n0\nD\n1\n\n\n\n\n\nA brief summary of the outcome and treatment variables:\n\ndata %&gt;%\n  group_by(treat_deshawn) %&gt;%\n  summarise(\n    n = n(),\n    mean_reply = mean(reply_atall),\n    sd_reply   = sd(reply_atall)\n  ) %&gt;%\n  mutate(treat_deshawn = ifelse(treat_deshawn == 1, \"Black name\", \"White name\")) %&gt;%\n  rename(`Treatment group` = treat_deshawn,\n         `N` = n,\n         `Mean reply rate` = mean_reply,\n         `SD reply rate`   = sd_reply) %&gt;%\n  kbl(digits = 3,\n      caption = \"Reply rates by treatment group\") %&gt;%\n  kable_styling(bootstrap_options = c(\"striped\", \"hover\"),\n                full_width = FALSE)\n\n\nReply rates by treatment group\n\n\nTreatment group\nN\nMean reply rate\nSD reply rate\n\n\n\n\nWhite name\n812\n0.605\n0.489\n\n\nBlack name\n806\n0.553\n0.497",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Covariate Adjustment in RCTs</span>"
+    ]
+  },
+  {
+    "objectID": "part1_covariate_adjustment.html#estimation",
+    "href": "part1_covariate_adjustment.html#estimation",
+    "title": "2  Covariate Adjustment in RCTs",
+    "section": "2.4 Estimation",
+    "text": "2.4 Estimation\n\n2.4.1 Without Covariate Adjustment\nThe simplest approach is to regress the outcome on the treatment indicator alone:\n\\[\n\\texttt{reply\\_atall}_i = \\alpha + \\beta \\cdot \\texttt{treat\\_deshawn}_i + \\varepsilon_i\n\\]\nThe OLS estimate of \\(\\beta\\) gives us the Average Partial Effect (APE), which in a randomized experiment equals the Average Treatment Effect (ATE).\n\nreg_no_covariates &lt;- lm(reply_atall ~ treat_deshawn, data = data)\n\n\n\n\n\n\n\nTipConnection to the simple difference-in-means\n\n\n\nIn a randomized experiment, the OLS estimate \\(\\hat{\\beta}\\) is numerically identical to the difference in sample means between the treated and control groups:\n\\[\\hat{\\beta}_{\\text{OLS}} = \\bar{Y}_1 - \\bar{Y}_0\\]\nLet’s verify this:\n\n\n\nape &lt;- mean(data$reply_atall[data$treat_deshawn == 1]) -\n       mean(data$reply_atall[data$treat_deshawn == 0])\n\ncat(\"Simple difference in means:\", round(ape, 6), \"\\n\")\n\nSimple difference in means: -0.05133 \n\ncat(\"OLS coefficient:           \", round(coef(reg_no_covariates)[2], 6), \"\\n\")\n\nOLS coefficient:            -0.05133 \n\n\nThey are identical — as expected.\n\n\n2.4.2 With Covariate Adjustment\nNow we add two pre-treatment covariates:\n\nleg_party: the legislator’s party affiliation\nleg_white: whether the legislator is white\n\n\\[\n\\texttt{reply\\_atall}_i = \\alpha + \\beta \\cdot \\texttt{treat\\_deshawn}_i + \\gamma_1 \\cdot \\texttt{leg\\_party}_i + \\gamma_2 \\cdot \\texttt{leg\\_white}_i + \\varepsilon_i\n\\]\n\nreg_covariates &lt;- lm(reply_atall ~ treat_deshawn + leg_party + leg_white,\n                     data = data)",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Covariate Adjustment in RCTs</span>"
+    ]
+  },
+  {
+    "objectID": "part1_covariate_adjustment.html#results",
+    "href": "part1_covariate_adjustment.html#results",
+    "title": "2  Covariate Adjustment in RCTs",
+    "section": "2.5 Results",
+    "text": "2.5 Results\nThe table below puts both specifications side by side for comparison.\n\nmodelsummary(\n  list(\n    \"No Adjustment\"       = reg_no_covariates,\n    \"With Covariates\"     = reg_covariates\n  ),\n  coef_rename = c(\n    treat_deshawn = \"Black name (treatment)\",\n    leg_party2    = \"Republican\",\n    leg_white1    = \"White legislator\"\n  ),\n  stars    = c(\"*\" = .1, \"**\" = .05, \"***\" = .01),\n  gof_map  = c(\"nobs\", \"r.squared\", \"adj.r.squared\"),\n  title    = \"Effect of Sender's Race on Legislator Reply Rate\",\n  notes    = \"Outcome: binary indicator for whether the legislator replied at all.\"\n)\n\n\n\n    \n\n    \n\n    \n    \n    \n      \n        Effect of Sender's Race on Legislator Reply Rate\n        \n              \n                 \n                No Adjustment\n                With Covariates\n              \n        \n        * p &lt; 0.1, ** p &lt; 0.05, *** p &lt; 0.01\nOutcome: binary indicator for whether the legislator replied at all.\n        \n                \n                  (Intercept)\n                  0.605***\n                  0.421***\n                \n                \n                  \n                  (0.017)\n                  (0.037)\n                \n                \n                  Black name (treatment)\n                  -0.051**\n                  -0.048**\n                \n                \n                  \n                  (0.025)\n                  (0.024)\n                \n                \n                  leg_partyR\n                  \n                  0.060**\n                \n                \n                  \n                  \n                  (0.025)\n                \n                \n                  White legislator\n                  \n                  0.178***\n                \n                \n                  \n                  \n                  (0.038)\n                \n                \n                  Num.Obs.\n                  1618\n                  1618\n                \n                \n                  R2\n                  0.003\n                  0.024\n                \n                \n                  R2 Adj.\n                  0.002\n                  0.022",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Covariate Adjustment in RCTs</span>"
+    ]
+  },
+  {
+    "objectID": "part1_covariate_adjustment.html#interpreting-the-results",
+    "href": "part1_covariate_adjustment.html#interpreting-the-results",
+    "title": "2  Covariate Adjustment in RCTs",
+    "section": "2.6 Interpreting the Results",
+    "text": "2.6 Interpreting the Results\n\n\n\n\n\n\nImportantKey takeaways\n\n\n\n\nThe point estimate barely changes when we add covariates — this is expected in a well-randomized experiment. The treatment effect estimate is robust.\nPrecision improves (smaller standard errors) when we add covariates that explain variation in the outcome. Legislator characteristics (leg_party, leg_white) predict reply behavior, so they help.\nThe treatment effect is negative — legislators are less likely to reply to emails with a Black-sounding name. This is evidence of racial discrimination in political representation.\n\n\n\n\n\n\n\n\n\nNoteA note on Lin (2013)\n\n\n\nLin (2013) shows that in finite samples, the optimal covariate adjustment strategy is to include covariates interacted with a centered treatment indicator. This approach is asymptotically at least as efficient as simple covariate adjustment. In practice, for large samples the difference is small, but it is worth knowing about.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Covariate Adjustment in RCTs</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html",
+    "href": "part2_quantile_regression.html",
+    "title": "3  Quantile Treatment Effects",
+    "section": "",
+    "text": "3.1 Beyond the Average Treatment Effect\nIn the first part of this lecture, we focused on the Average Treatment Effect (ATE):\n\\[\\text{ATE} = \\mathbb{E}[Y_i(1) - Y_i(0)]\\]\nThe ATE plays a central role in causal inference — but it summarizes the treatment effect by collapsing the entire distribution of individual treatment effects into a single number: the mean. This can mask substantial heterogeneity in how the treatment affects different individuals.\nQuantile Treatment Effects (QTEs) offer an alternative: instead of focusing on one aspect of the distribution (the mean), they let us study how a treatment shifts the entire outcome distribution.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html#beyond-the-average-treatment-effect",
+    "href": "part2_quantile_regression.html#beyond-the-average-treatment-effect",
+    "title": "3  Quantile Treatment Effects",
+    "section": "",
+    "text": "NoteQTE vs ATE\n\n\n\n\nThe ATE answers: “What is the average effect of treatment?”\nThe QTE at quantile \\(\\tau\\) answers: “By how much does treatment shift the \\(\\tau\\)-th quantile of the outcome distribution?”\n\nThese can differ substantially when treatment effects are heterogeneous — which is often the case in practice.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html#quantiles-a-brief-refresher",
+    "href": "part2_quantile_regression.html#quantiles-a-brief-refresher",
+    "title": "3  Quantile Treatment Effects",
+    "section": "3.2 Quantiles: A Brief Refresher",
+    "text": "3.2 Quantiles: A Brief Refresher\nSuppose \\(Y \\sim F\\). The \\(\\tau\\)-quantile of \\(Y\\) is defined as the inverse CDF:\n\\[F^{-1}(\\tau) = \\inf\\{ y : F(y) \\geq \\tau \\}, \\quad \\tau \\in (0,1)\\]\nA few properties worth recalling:\n\nFor \\(\\tau = 1/2\\), \\(F^{-1}(1/2)\\) is the median.\nQuantiles are robust to long-tailed distributions and outliers.\nQuantiles are often more informative than mean-based summaries when distributions are skewed or heavy-tailed.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html#definition-and-identification-of-qte",
+    "href": "part2_quantile_regression.html#definition-and-identification-of-qte",
+    "title": "3  Quantile Treatment Effects",
+    "section": "3.3 Definition and Identification of QTE",
+    "text": "3.3 Definition and Identification of QTE\nSetup. Let \\(F_0(y)\\) denote the CDF of \\(Y_i(0)\\) (the control potential outcome) and \\(F_1(y)\\) the CDF of \\(Y_i(1)\\) (the treated potential outcome). Then:\n\\[\\text{QTE}_\\tau = F_1^{-1}(\\tau) - F_0^{-1}(\\tau)\\]\nThis is the horizontal distance between the two CDFs at a given probability level \\(\\tau\\).\nIdentification under random assignment. QTEs are defined in terms of potential outcomes, which we never fully observe. Under random assignment,\n\\[(Y_i(0), Y_i(1)) \\perp D_i,\\]\nthe observed conditional distributions coincide with the potential outcome distributions:\n\\[F(y \\mid D_i = 0) = F_0(y), \\qquad F(y \\mid D_i = 1) = F_1(y).\\]\nSo the QTE is directly identified from observables:\n\\[\\underbrace{F_1^{-1}(\\tau) - F_0^{-1}(\\tau)}_{\\text{QTE}_\\tau,\\ \\text{unobserved}} \\;=\\; \\underbrace{F^{-1}(\\tau \\mid D_i=1) - F^{-1}(\\tau \\mid D_i = 0)}_{\\text{observed difference in sample quantiles}}\\]\n\n\n\n\n\n\nTipThe parallel with the ATE\n\n\n\nThis identification result mirrors exactly what we showed for the ATE. Under random assignment:\n\\[\\underbrace{\\mathbb{E}[Y_i(1) - Y_i(0)]}_{\\text{ATE}} = \\underbrace{\\mathbb{E}[Y_i \\mid D_i=1] - \\mathbb{E}[Y_i \\mid D_i=0]}_{\\text{difference in sample means}}\\]\nThe logic is the same: randomization lets us use observed group differences to recover causal quantities. For the ATE we compare means; for the QTE we compare quantiles.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html#interpretation-rank-invariance-and-rank-reversals",
+    "href": "part2_quantile_regression.html#interpretation-rank-invariance-and-rank-reversals",
+    "title": "3  Quantile Treatment Effects",
+    "section": "3.4 Interpretation: Rank Invariance and Rank Reversals",
+    "text": "3.4 Interpretation: Rank Invariance and Rank Reversals\nBefore turning to estimation, it is important to understand what QTEs tell us — and when their interpretation is clean.\n\n3.4.1 Rank Invariance\nRank invariance holds when individuals retain their relative positions in the outcome distribution regardless of treatment status. That is: if person A would have a lower outcome than person B without treatment, they would still rank lower under treatment.\nUnder rank invariance, \\(\\text{QTE}_\\tau\\) has a clean causal interpretation: it tells us how much the treatment changed the outcome for those at the \\((\\tau \\times 100)\\)-th percentile in the absence of treatment.\n\n\n3.4.2 Rank Reversals\nRank invariance is a strong assumption. With heterogeneous treatment effects, some individuals benefit a lot while others benefit little — or even negatively — which can reshuffle the outcome rankings. This is a rank reversal.\nThe table below illustrates this. Five students take a final exam. We observe scores with and without a tutoring program:\n\n\n\nExample of Rank Reversals\n\n\nStudent\nControl Score\nTreatment Score\nChange\n\n\n\n\nAlice\n95\n65\n-30\n\n\nBob\n85\n95\n10\n\n\nCharlie\n75\n75\n0\n\n\nDavid\n65\n55\n-10\n\n\nEve\n55\n85\n30\n\n\n\n\n\nAlice, the top scorer without tutoring (rank 1), drops to rank 4 with it. Eve, the bottom scorer (rank 5), jumps to rank 2. Ranks are reshuffled by treatment.\n\n\n\n\n\n\nImportantConsequence of rank reversals for QTE interpretation\n\n\n\nWhen rank reversals are present, \\(\\text{QTE}_\\tau\\) does not describe the effect for those who would have been at quantile \\(\\tau\\) without treatment. It measures how much quantile \\(\\tau\\) of the distribution shifts — but the individuals composing that quantile may differ between the treated and control worlds.\nA striking consequence: it is possible for all QTEs to equal zero even when every individual has a non-zero treatment effect. In the table above, the sorted control scores (55, 65, 75, 85, 95) equal the sorted treatment scores (55, 65, 75, 85, 95), so \\(\\text{QTE}_\\tau = 0\\) for all \\(\\tau\\) — yet only Charlie has a zero individual treatment effect.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html#the-penn-re-employment-bonus-experiment",
+    "href": "part2_quantile_regression.html#the-penn-re-employment-bonus-experiment",
+    "title": "3  Quantile Treatment Effects",
+    "section": "3.5 The Penn Re-employment Bonus Experiment",
+    "text": "3.5 The Penn Re-employment Bonus Experiment\nWe now turn to data. We use the Pennsylvania Re-employment Bonus Experiment, where unemployed workers were randomized to receive a cash bonus for finding a new job quickly.\n\nTreatment (tg = 2): Eligible for a re-employment bonus\nControl (tg = 0): Standard unemployment insurance, no bonus\nOutcome (inuidur1): Duration of the unemployment spell (in weeks)\nCovariates: female, black\n\n\nraw_data_penn &lt;- read.table(\"data/penn_jae.dat\", header = TRUE)\n\ndata_penn &lt;- raw_data_penn %&gt;%\n  filter(tg == 2 | tg == 0) %&gt;%\n  select(inuidur1, tg, female, black) %&gt;%\n  mutate(\n    inuidur1 = as.numeric(inuidur1),\n    tg       = as.factor(tg)\n  )\n\n\n3.5.1 Visualizing the Distributions\nA natural starting point is to plot the empirical CDFs by group. Recall from the theory: \\(\\text{QTE}_\\tau\\) is the horizontal distance between the two CDFs at height \\(\\tau\\).\n\ndata_penn %&gt;%\n  mutate(group = ifelse(tg == 0, \"Control\", \"Treatment (Bonus)\")) %&gt;%\n  ggplot(aes(x = log(inuidur1), color = group)) +\n  stat_ecdf(linewidth = 1.1) +\n  scale_color_manual(values = c(\"Control\"          = \"tomato\",\n                                \"Treatment (Bonus)\" = \"steelblue\")) +\n  labs(\n    title    = \"Empirical CDFs of Log Unemployment Duration\",\n    subtitle = \"Horizontal distance between curves at any height τ = QTE at quantile τ\",\n    x        = \"Log(Unemployment Duration)\",\n    y        = \"F(y)\",\n    color    = NULL\n  ) +\n  theme_minimal(base_size = 13) +\n  theme(legend.position = \"top\")\n\n\n\n\n\n\n\n\nSince visualization in terms of CDFs might feel unfamiliar, let’s plot the (smoothed) empirical densities of log unemployment by group too.\n\ndata_penn %&gt;%\n  mutate(group = ifelse(tg == 0, \"Control\", \"Treatment (Bonus)\")) %&gt;%\n  ggplot(aes(x = log(inuidur1), fill = group)) +\n  geom_density(alpha = 0.45) +\n  scale_fill_manual(values = c(\"steelblue\", \"tomato\")) +\n  labs(\n    title = \"Distribution of Log Unemployment Duration by Group\",\n    x     = \"Log(Unemployment Duration)\",\n    y     = \"Density\",\n    fill  = NULL\n  ) +\n  theme_minimal(base_size = 13) +\n  theme(legend.position = \"top\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipReading QTEs from the CDF plot\n\n\n\nPick a horizontal line at height \\(\\tau\\). Where it crosses the control CDF gives \\(\\hat{F}_0^{-1}(\\tau)\\); where it crosses the treatment CDF gives \\(\\hat{F}_1^{-1}(\\tau)\\). The horizontal distance between those two points is \\(\\widehat{\\text{QTE}}_\\tau\\). If the treatment CDF lies to the left of the control CDF, treatment reduced unemployment duration — a beneficial effect.\n\n\n\n\n\n\n\n\nTipWhy log?\n\n\n\nUnemployment duration is right-skewed. Working with log(inuidur1) yields a more symmetric distribution and more stable quantile estimates.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html#part-a-qte-without-covariates",
+    "href": "part2_quantile_regression.html#part-a-qte-without-covariates",
+    "title": "3  Quantile Treatment Effects",
+    "section": "3.6 Part A: QTE Without Covariates",
+    "text": "3.6 Part A: QTE Without Covariates\n\n3.6.1 Method 1: Direct Difference in Sample Quantiles\nUnder random assignment, QTEs are simply the difference in empirical quantiles between groups:\n\\[\\widehat{\\text{QTE}}_\\tau = \\hat{F}_1^{-1}(\\tau) - \\hat{F}_0^{-1}(\\tau)\\]\nThis is the most transparent approach — directly analogous to computing the ATE as a difference in sample means.\n\nY1  &lt;- log(data_penn$inuidur1[data_penn$tg == 2])\nY0  &lt;- log(data_penn$inuidur1[data_penn$tg == 0])\ntau &lt;- seq(0.1, 0.9, by = 0.05)\n\nqte_direct &lt;- quantile(Y1, probs = tau) - quantile(Y0, probs = tau)\n\n\n\n3.6.2 Method 2: Quantile Regression Without Covariates\nEquivalently, we can run a quantile regression of the outcome on the treatment indicator:\n\\[Q_\\tau(\\log(\\texttt{inuidur1}) \\mid D_i) = \\alpha(\\tau) + \\beta(\\tau) \\cdot D_i\\]\nThe coefficient \\(\\hat{\\beta}(\\tau)\\) is numerically identical to the difference in sample quantiles — just as OLS on a binary treatment recovers the difference in means.\n\nqte_rq_no_cov &lt;- sapply(tau, function(t) {\n  rq(log(inuidur1) ~ tg, tau = t, data = data_penn)$coef[2]\n})\n\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\n\n\n\n\n3.6.3 Verifying the Equivalence\n\ndata.frame(\n  tau          = tau,\n  Direct       = round(qte_direct, 6),\n  Quantile_Reg = round(qte_rq_no_cov, 6)\n) %&gt;%\n  mutate(Identical = Direct == Quantile_Reg) %&gt;%\n  kbl(\n    col.names = c(\"τ\", \"Diff. in Quantiles\", \"Quantile Reg.\", \"Identical?\"),\n    caption   = \"Direct difference in quantiles vs. quantile regression (no covariates)\"\n  ) %&gt;%\n  kable_styling(bootstrap_options = c(\"striped\", \"hover\"),\n                full_width = FALSE)\n\n\nDirect difference in quantiles vs. quantile regression (no covariates)\n\n\n\nτ\nDiff. in Quantiles\nQuantile Reg.\nIdentical?\n\n\n\n\n10%\n0.10\n0.000000\n0.000000\nTRUE\n\n\n15%\n0.15\n0.000000\n0.000000\nTRUE\n\n\n20%\n0.20\n0.000000\n0.000000\nTRUE\n\n\n25%\n0.25\n-0.101366\n0.000000\nFALSE\n\n\n30%\n0.30\n0.000000\n0.000000\nTRUE\n\n\n35%\n0.35\n-0.182322\n-0.182322\nTRUE\n\n\n40%\n0.40\n-0.287682\n-0.287682\nTRUE\n\n\n45%\n0.45\n-0.117783\n-0.117783\nTRUE\n\n\n50%\n0.50\n-0.095310\n-0.095310\nTRUE\n\n\n55%\n0.55\n-0.080043\n-0.080043\nTRUE\n\n\n60%\n0.60\n-0.068993\n-0.068993\nTRUE\n\n\n65%\n0.65\n-0.117783\n-0.117783\nTRUE\n\n\n70%\n0.70\n-0.048790\n-0.048790\nTRUE\n\n\n75%\n0.75\n-0.080043\n-0.080043\nTRUE\n\n\n80%\n0.80\n0.000000\n0.000000\nTRUE\n\n\n85%\n0.85\n0.000000\n0.000000\nTRUE\n\n\n90%\n0.90\n0.000000\n0.000000\nTRUE\n\n\n\n\n\n\n\n\n\n\n\nNoteThe same logic as the ATE\n\n\n\n\n\n\n\n\n\n\n\n\nMean effect\nQuantile effect at \\(\\tau\\)\n\n\n\n\nDirect\n\\(\\bar{Y}_1 - \\bar{Y}_0\\)\n\\(\\hat{F}_1^{-1}(\\tau) - \\hat{F}_0^{-1}(\\tau)\\)\n\n\nRegression\nOLS of \\(Y\\) on \\(D\\)\nQuantile reg. of \\(Y\\) on \\(D\\)\n\n\nIdentical?\n✓\n✓\n\n\n\nIn a randomized experiment, both routes give the same answer. The regression framing becomes valuable when we want to add covariates.\n\n\n\n\n3.6.4 ATE Without Covariates (Benchmark)\n\nate_no_cov &lt;- mean(Y1) - mean(Y0)\ncat(\"ATE (difference in means):\", round(ate_no_cov, 4), \"\\n\")\n\nATE (difference in means): -0.0788 \n\n\n\n\n3.6.5 Plotting the No-Covariate QTEs\n\nplot_qte_1(qte_rq_no_cov, tau) +\n  geom_hline(yintercept = ate_no_cov, linetype = \"dashed\",\n             color = \"steelblue\", linewidth = 0.9) +\n  annotate(\"text\", x = 0.78, y = ate_no_cov + 0.012,\n           label = \"OLS (ATE)\", color = \"steelblue\", size = 3.5) +\n  labs(\n    title    = \"QTE Without Covariates: Re-employment Bonus\",\n    subtitle = \"Outcome: log(Unemployment Duration)\",\n    x        = \"Quantile (τ)\",\n    y        = \"QTE\",\n    color    = NULL\n  ) +\n  theme_minimal(base_size = 13) +\n  theme(legend.position = \"top\")",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html#part-b-qte-with-covariates",
+    "href": "part2_quantile_regression.html#part-b-qte-with-covariates",
+    "title": "3  Quantile Treatment Effects",
+    "section": "3.7 Part B: QTE With Covariates",
+    "text": "3.7 Part B: QTE With Covariates\n\n3.7.1 Why add covariates?\nTreatment is randomized here, so covariates are not needed for identification. However, including pre-determined covariates (female, black) can improve precision — exactly as in the ATE case. Since both covariates are binary, the adjustment is clean and straightforward; no non-parametric methods are required.\n\\[Q_\\tau(\\log(\\texttt{inuidur1}) \\mid D_i, \\mathbf{X}_i) = \\alpha(\\tau) + \\beta(\\tau) \\cdot D_i + \\gamma_1(\\tau) \\cdot \\texttt{female}_i + \\gamma_2(\\tau) \\cdot \\texttt{black}_i\\]\n\nqte_cov &lt;- sapply(tau, function(t) {\n  rq(log(inuidur1) ~ tg + female + black,\n     tau  = t,\n     data = data_penn)$coef[2]\n})\n\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\n\nreg_ols_cov &lt;- lm(log(inuidur1) ~ tg + female + black, data = data_penn)\nate_cov     &lt;- coef(reg_ols_cov)[2]\ncat(\"ATE (with covariates):\", round(ate_cov, 4), \"\\n\")\n\nATE (with covariates): -0.0799 \n\n\n\n\n3.7.2 Covariate-Adjusted QTEs\n\nplot_qte_1(qte_cov, tau) +\n  geom_hline(yintercept = ate_cov, linetype = \"dashed\",\n             color = \"steelblue\", linewidth = 0.9) +\n  annotate(\"text\", x = 0.78, y = ate_cov + 0.012,\n           label = \"OLS (ATE)\", color = \"steelblue\", size = 3.5) +\n  labs(\n    title    = \"QTE With Covariates: Re-employment Bonus\",\n    subtitle = \"Outcome: log(Unemployment Duration) | Controls: female, black\",\n    x        = \"Quantile (τ)\",\n    y        = \"QTE\",\n    color    = NULL\n  ) +\n  theme_minimal(base_size = 13) +\n  theme(legend.position = \"top\")\n\n\n\n\n\n\n\n\n\n\n3.7.3 Tabular Summary at Selected Quantiles\n\nselected_tau &lt;- c(0.10, 0.25, 0.50, 0.75, 0.90)\n\nqte_no_cov_sel &lt;- sapply(selected_tau, function(t)\n  rq(log(inuidur1) ~ tg, tau = t, data = data_penn)$coef[2])\n\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\n\nqte_cov_sel &lt;- sapply(selected_tau, function(t)\n  rq(log(inuidur1) ~ tg + female + black, tau = t, data = data_penn)$coef[2])\n\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\nWarning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique\n\ndata.frame(\n  tau        = selected_tau,\n  QTE_no_cov = round(qte_no_cov_sel, 4),\n  QTE_cov    = round(qte_cov_sel, 4),\n  ATE_no_cov = round(ate_no_cov, 4),\n  ATE_cov    = round(ate_cov, 4)\n) %&gt;%\n  kbl(\n    col.names = c(\"τ\", \"QTE (no cov.)\", \"QTE (w/ cov.)\",\n                  \"ATE (no cov.)\", \"ATE (w/ cov.)\"),\n    caption   = \"QTE and ATE with and without covariate adjustment\"\n  ) %&gt;%\n  kable_styling(bootstrap_options = c(\"striped\", \"hover\"),\n                full_width = FALSE) %&gt;%\n  add_header_above(c(\" \" = 1, \"Quantile Regression\" = 2, \"OLS\" = 2))\n\nWarning in data.frame(tau = selected_tau, QTE_no_cov = round(qte_no_cov_sel, :\nrow names were found from a short variable and have been discarded\n\n\n\nQTE and ATE with and without covariate adjustment\n\n\n\n\n\n\n\n\n\n\n\nQuantile Regression\n\n\nOLS\n\n\n\nτ\nQTE (no cov.)\nQTE (w/ cov.)\nATE (no cov.)\nATE (w/ cov.)\n\n\n\n\n0.10\n0.0000\n0.0000\n-0.0788\n-0.0799\n\n\n0.25\n0.0000\n0.0000\n-0.0788\n-0.0799\n\n\n0.50\n-0.0953\n-0.0953\n-0.0788\n-0.0799\n\n\n0.75\n-0.0800\n-0.0426\n-0.0788\n-0.0799\n\n\n0.90\n0.0000\n0.0000\n-0.0788\n-0.0799",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  },
+  {
+    "objectID": "part2_quantile_regression.html#key-takeaways",
+    "href": "part2_quantile_regression.html#key-takeaways",
+    "title": "3  Quantile Treatment Effects",
+    "section": "3.8 Key Takeaways",
+    "text": "3.8 Key Takeaways\n\n\n\n\n\n\nImportantSummary\n\n\n\n\nQTEs reveal heterogeneity the ATE hides. A flat QTE curve means constant treatment effects; departures from flatness reveal distributional heterogeneity.\nWithout covariates, QTE = difference in sample quantiles, just as ATE = difference in sample means. Quantile regression is just a convenient — and extensible — way to compute this.\nAdding discrete covariates improves precision without complicating the estimator. With continuous covariates, more sophisticated methods (kernel, propensity score) are needed.\nInterpretation depends on rank invariance. Under rank invariance, \\(\\text{QTE}_\\tau\\) describes the effect on individuals at the \\((\\tau \\times 100)\\)-th percentile. With rank reversals, it describes how the quantile itself shifts — not necessarily the same individuals.\nThe sign here: negative QTEs mean the bonus reduced unemployment duration — workers found jobs faster. This is the intended mechanism of the program.\n\n\n\n\n\n\n\n\n\nNoteGoing further: inference\n\n\n\nFor confidence bands around QTEs, use bootstrap standard errors via summary.rq():\nsummary(rq(log(inuidur1) ~ tg + female + black, tau = 0.5, data = data_penn),\n        se = \"boot\")\nFor simultaneous confidence bands across all quantiles and automatic handling of continuous covariates, see the qte R package.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Quantile Treatment Effects</span>"
+    ]
+  }
+]

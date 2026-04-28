@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; Quantile Treatment Effects – Applied Causal Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./part1_covariate_adjustment.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-acf12a64177840b8d86f2d4f01b2e9fb.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-abfa4615eba2ed0d4bb7fb949ed9c296.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part2_quantile_regression.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Quantile Treatment Effects</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Applied Causal Analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part1_covariate_adjustment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Covariate Adjustment in RCTs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part2_quantile_regression.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Quantile Treatment Effects</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#beyond-the-average-treatment-effect" id="toc-beyond-the-average-treatment-effect" class="nav-link active" data-scroll-target="#beyond-the-average-treatment-effect"><span class="header-section-number">3.1</span> Beyond the Average Treatment Effect</a></li>
+  <li><a href="#quantiles-a-brief-refresher" id="toc-quantiles-a-brief-refresher" class="nav-link" data-scroll-target="#quantiles-a-brief-refresher"><span class="header-section-number">3.2</span> Quantiles: A Brief Refresher</a></li>
+  <li><a href="#definition-and-identification-of-qte" id="toc-definition-and-identification-of-qte" class="nav-link" data-scroll-target="#definition-and-identification-of-qte"><span class="header-section-number">3.3</span> Definition and Identification of QTE</a></li>
+  <li><a href="#interpretation-rank-invariance-and-rank-reversals" id="toc-interpretation-rank-invariance-and-rank-reversals" class="nav-link" data-scroll-target="#interpretation-rank-invariance-and-rank-reversals"><span class="header-section-number">3.4</span> Interpretation: Rank Invariance and Rank Reversals</a>
+  <ul class="collapse">
+  <li><a href="#rank-invariance" id="toc-rank-invariance" class="nav-link" data-scroll-target="#rank-invariance"><span class="header-section-number">3.4.1</span> Rank Invariance</a></li>
+  <li><a href="#rank-reversals" id="toc-rank-reversals" class="nav-link" data-scroll-target="#rank-reversals"><span class="header-section-number">3.4.2</span> Rank Reversals</a></li>
+  </ul></li>
+  <li><a href="#the-penn-re-employment-bonus-experiment" id="toc-the-penn-re-employment-bonus-experiment" class="nav-link" data-scroll-target="#the-penn-re-employment-bonus-experiment"><span class="header-section-number">3.5</span> The Penn Re-employment Bonus Experiment</a>
+  <ul class="collapse">
+  <li><a href="#visualizing-the-distributions" id="toc-visualizing-the-distributions" class="nav-link" data-scroll-target="#visualizing-the-distributions"><span class="header-section-number">3.5.1</span> Visualizing the Distributions</a></li>
+  </ul></li>
+  <li><a href="#part-a-qte-without-covariates" id="toc-part-a-qte-without-covariates" class="nav-link" data-scroll-target="#part-a-qte-without-covariates"><span class="header-section-number">3.6</span> Part A: QTE Without Covariates</a>
+  <ul class="collapse">
+  <li><a href="#method-1-direct-difference-in-sample-quantiles" id="toc-method-1-direct-difference-in-sample-quantiles" class="nav-link" data-scroll-target="#method-1-direct-difference-in-sample-quantiles"><span class="header-section-number">3.6.1</span> Method 1: Direct Difference in Sample Quantiles</a></li>
+  <li><a href="#method-2-quantile-regression-without-covariates" id="toc-method-2-quantile-regression-without-covariates" class="nav-link" data-scroll-target="#method-2-quantile-regression-without-covariates"><span class="header-section-number">3.6.2</span> Method 2: Quantile Regression Without Covariates</a></li>
+  <li><a href="#verifying-the-equivalence" id="toc-verifying-the-equivalence" class="nav-link" data-scroll-target="#verifying-the-equivalence"><span class="header-section-number">3.6.3</span> Verifying the Equivalence</a></li>
+  <li><a href="#ate-without-covariates-benchmark" id="toc-ate-without-covariates-benchmark" class="nav-link" data-scroll-target="#ate-without-covariates-benchmark"><span class="header-section-number">3.6.4</span> ATE Without Covariates (Benchmark)</a></li>
+  <li><a href="#plotting-the-no-covariate-qtes" id="toc-plotting-the-no-covariate-qtes" class="nav-link" data-scroll-target="#plotting-the-no-covariate-qtes"><span class="header-section-number">3.6.5</span> Plotting the No-Covariate QTEs</a></li>
+  </ul></li>
+  <li><a href="#part-b-qte-with-covariates" id="toc-part-b-qte-with-covariates" class="nav-link" data-scroll-target="#part-b-qte-with-covariates"><span class="header-section-number">3.7</span> Part B: QTE With Covariates</a>
+  <ul class="collapse">
+  <li><a href="#why-add-covariates" id="toc-why-add-covariates" class="nav-link" data-scroll-target="#why-add-covariates"><span class="header-section-number">3.7.1</span> Why add covariates?</a></li>
+  <li><a href="#covariate-adjusted-qtes" id="toc-covariate-adjusted-qtes" class="nav-link" data-scroll-target="#covariate-adjusted-qtes"><span class="header-section-number">3.7.2</span> Covariate-Adjusted QTEs</a></li>
+  <li><a href="#tabular-summary-at-selected-quantiles" id="toc-tabular-summary-at-selected-quantiles" class="nav-link" data-scroll-target="#tabular-summary-at-selected-quantiles"><span class="header-section-number">3.7.3</span> Tabular Summary at Selected Quantiles</a></li>
+  </ul></li>
+  <li><a href="#key-takeaways" id="toc-key-takeaways" class="nav-link" data-scroll-target="#key-takeaways"><span class="header-section-number">3.8</span> Key Takeaways</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Quantile Treatment Effects</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="beyond-the-average-treatment-effect" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="beyond-the-average-treatment-effect"><span class="header-section-number">3.1</span> Beyond the Average Treatment Effect</h2>
+<p>In the first part of this lecture, we focused on the <strong>Average Treatment Effect (ATE)</strong>:</p>
+<p><span class="math display">\[\text{ATE} = \mathbb{E}[Y_i(1) - Y_i(0)]\]</span></p>
+<p>The ATE plays a central role in causal inference — but it summarizes the treatment effect by collapsing the entire distribution of individual treatment effects into a single number: the mean. This can mask substantial <strong>heterogeneity</strong> in how the treatment affects different individuals.</p>
+<p><strong>Quantile Treatment Effects (QTEs)</strong> offer an alternative: instead of focusing on one aspect of the distribution (the mean), they let us study how a treatment shifts the entire outcome distribution.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>QTE vs ATE
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The <strong>ATE</strong> answers: <em>“What is the average effect of treatment?”</em></li>
+<li>The <strong>QTE at quantile <span class="math inline">\(\tau\)</span></strong> answers: <em>“By how much does treatment shift the <span class="math inline">\(\tau\)</span>-th quantile of the outcome distribution?”</em></li>
+</ul>
+<p>These can differ substantially when treatment effects are heterogeneous — which is often the case in practice.</p>
+</div>
+</div>
+</section>
+<section id="quantiles-a-brief-refresher" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="quantiles-a-brief-refresher"><span class="header-section-number">3.2</span> Quantiles: A Brief Refresher</h2>
+<p>Suppose <span class="math inline">\(Y \sim F\)</span>. The <span class="math inline">\(\tau\)</span>-quantile of <span class="math inline">\(Y\)</span> is defined as the <strong>inverse CDF</strong>:</p>
+<p><span class="math display">\[F^{-1}(\tau) = \inf\{ y : F(y) \geq \tau \}, \quad \tau \in (0,1)\]</span></p>
+<p>A few properties worth recalling:</p>
+<ul>
+<li>For <span class="math inline">\(\tau = 1/2\)</span>, <span class="math inline">\(F^{-1}(1/2)\)</span> is the <strong>median</strong>.</li>
+<li>Quantiles are robust to long-tailed distributions and outliers.</li>
+<li>Quantiles are often more informative than mean-based summaries when distributions are skewed or heavy-tailed.</li>
+</ul>
+</section>
+<section id="definition-and-identification-of-qte" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="definition-and-identification-of-qte"><span class="header-section-number">3.3</span> Definition and Identification of QTE</h2>
+<p><strong>Setup.</strong> Let <span class="math inline">\(F_0(y)\)</span> denote the CDF of <span class="math inline">\(Y_i(0)\)</span> (the control potential outcome) and <span class="math inline">\(F_1(y)\)</span> the CDF of <span class="math inline">\(Y_i(1)\)</span> (the treated potential outcome). Then:</p>
+<p><span class="math display">\[\text{QTE}_\tau = F_1^{-1}(\tau) - F_0^{-1}(\tau)\]</span></p>
+<p>This is the <strong>horizontal distance</strong> between the two CDFs at a given probability level <span class="math inline">\(\tau\)</span>.</p>
+<p><strong>Identification under random assignment.</strong> QTEs are defined in terms of potential outcomes, which we never fully observe. Under random assignment,</p>
+<p><span class="math display">\[(Y_i(0), Y_i(1)) \perp D_i,\]</span></p>
+<p>the observed conditional distributions coincide with the potential outcome distributions:</p>
+<p><span class="math display">\[F(y \mid D_i = 0) = F_0(y), \qquad F(y \mid D_i = 1) = F_1(y).\]</span></p>
+<p>So the QTE is directly identified from observables:</p>
+<p><span class="math display">\[\underbrace{F_1^{-1}(\tau) - F_0^{-1}(\tau)}_{\text{QTE}_\tau,\ \text{unobserved}} \;=\; \underbrace{F^{-1}(\tau \mid D_i=1) - F^{-1}(\tau \mid D_i = 0)}_{\text{observed difference in sample quantiles}}\]</span></p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>The parallel with the ATE
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This identification result mirrors exactly what we showed for the ATE. Under random assignment:</p>
+<p><span class="math display">\[\underbrace{\mathbb{E}[Y_i(1) - Y_i(0)]}_{\text{ATE}} = \underbrace{\mathbb{E}[Y_i \mid D_i=1] - \mathbb{E}[Y_i \mid D_i=0]}_{\text{difference in sample means}}\]</span></p>
+<p>The logic is the same: randomization lets us use observed group differences to recover causal quantities. For the ATE we compare <strong>means</strong>; for the QTE we compare <strong>quantiles</strong>.</p>
+</div>
+</div>
+</section>
+<section id="interpretation-rank-invariance-and-rank-reversals" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="interpretation-rank-invariance-and-rank-reversals"><span class="header-section-number">3.4</span> Interpretation: Rank Invariance and Rank Reversals</h2>
+<p>Before turning to estimation, it is important to understand what QTEs tell us — and when their interpretation is clean.</p>
+<section id="rank-invariance" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="rank-invariance"><span class="header-section-number">3.4.1</span> Rank Invariance</h3>
+<p><strong>Rank invariance</strong> holds when individuals retain their relative positions in the outcome distribution regardless of treatment status. That is: if person A would have a lower outcome than person B without treatment, they would still rank lower under treatment.</p>
+<p>Under rank invariance, <span class="math inline">\(\text{QTE}_\tau\)</span> has a clean causal interpretation: <strong>it tells us how much the treatment changed the outcome for those at the <span class="math inline">\((\tau \times 100)\)</span>-th percentile in the absence of treatment.</strong></p>
+</section>
+<section id="rank-reversals" class="level3" data-number="3.4.2">
+<h3 data-number="3.4.2" class="anchored" data-anchor-id="rank-reversals"><span class="header-section-number">3.4.2</span> Rank Reversals</h3>
+<p>Rank invariance is a strong assumption. With <strong>heterogeneous treatment effects</strong>, some individuals benefit a lot while others benefit little — or even negatively — which can reshuffle the outcome rankings. This is a <strong>rank reversal</strong>.</p>
+<p>The table below illustrates this. Five students take a final exam. We observe scores with and without a tutoring program:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover caption-top table-sm small">
+<caption>Example of Rank Reversals</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Student</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Control Score</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Treatment Score</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Change</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">Alice</td>
+<td style="text-align: right; font-weight: bold;">95</td>
+<td style="text-align: right; font-weight: bold;">65</td>
+<td style="text-align: right; font-weight: bold;">-30</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bob</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: right;">95</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Charlie</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">David</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">-10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">Eve</td>
+<td style="text-align: right; font-weight: bold;">55</td>
+<td style="text-align: right; font-weight: bold;">85</td>
+<td style="text-align: right; font-weight: bold;">30</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Alice, the top scorer without tutoring (rank 1), drops to rank 4 with it. Eve, the bottom scorer (rank 5), jumps to rank 2. Ranks are reshuffled by treatment.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Consequence of rank reversals for QTE interpretation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When rank reversals are present, <span class="math inline">\(\text{QTE}_\tau\)</span> <strong>does not</strong> describe the effect for those who would have been at quantile <span class="math inline">\(\tau\)</span> without treatment. It measures <strong>how much quantile <span class="math inline">\(\tau\)</span> of the distribution shifts</strong> — but the individuals composing that quantile may differ between the treated and control worlds.</p>
+<p>A striking consequence: it is possible for <strong>all QTEs to equal zero</strong> even when every individual has a non-zero treatment effect. In the table above, the sorted control scores (55, 65, 75, 85, 95) equal the sorted treatment scores (55, 65, 75, 85, 95), so <span class="math inline">\(\text{QTE}_\tau = 0\)</span> for all <span class="math inline">\(\tau\)</span> — yet only Charlie has a zero individual treatment effect.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="the-penn-re-employment-bonus-experiment" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="the-penn-re-employment-bonus-experiment"><span class="header-section-number">3.5</span> The Penn Re-employment Bonus Experiment</h2>
+<p>We now turn to data. We use the <strong>Pennsylvania Re-employment Bonus Experiment</strong>, where unemployed workers were randomized to receive a cash bonus for finding a new job quickly.</p>
+<ul>
+<li><strong>Treatment (<code>tg = 2</code>):</strong> Eligible for a re-employment bonus</li>
+<li><strong>Control (<code>tg = 0</code>):</strong> Standard unemployment insurance, no bonus</li>
+<li><strong>Outcome (<code>inuidur1</code>):</strong> Duration of the unemployment spell (in weeks)</li>
+<li><strong>Covariates:</strong> <code>female</code>, <code>black</code></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>raw_data_penn <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"data/penn_jae.dat"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>data_penn <span class="ot">&lt;-</span> raw_data_penn <span class="sc">%&gt;%</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(tg <span class="sc">==</span> <span class="dv">2</span> <span class="sc">|</span> tg <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(inuidur1, tg, female, black) <span class="sc">%&gt;%</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">inuidur1 =</span> <span class="fu">as.numeric</span>(inuidur1),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">tg       =</span> <span class="fu">as.factor</span>(tg)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="visualizing-the-distributions" class="level3" data-number="3.5.1">
+<h3 data-number="3.5.1" class="anchored" data-anchor-id="visualizing-the-distributions"><span class="header-section-number">3.5.1</span> Visualizing the Distributions</h3>
+<p>A natural starting point is to plot the <strong>empirical CDFs</strong> by group. Recall from the theory: <span class="math inline">\(\text{QTE}_\tau\)</span> is the horizontal distance between the two CDFs at height <span class="math inline">\(\tau\)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data_penn <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">ifelse</span>(tg <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"Control"</span>, <span class="st">"Treatment (Bonus)"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(inuidur1), <span class="at">color =</span> group)) <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_ecdf</span>(<span class="at">linewidth =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Control"</span>          <span class="ot">=</span> <span class="st">"tomato"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"Treatment (Bonus)"</span> <span class="ot">=</span> <span class="st">"steelblue"</span>)) <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"Empirical CDFs of Log Unemployment Duration"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Horizontal distance between curves at any height τ = QTE at quantile τ"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x        =</span> <span class="st">"Log(Unemployment Duration)"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y        =</span> <span class="st">"F(y)"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">color    =</span> <span class="cn">NULL</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="part2_quantile_regression_files/figure-html/cdf-plot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Since visualization in terms of CDFs might feel unfamiliar, let’s plot the (smoothed) empirical densities of log unemployment by group too.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data_penn <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">ifelse</span>(tg <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"Control"</span>, <span class="st">"Treatment (Bonus)"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(inuidur1), <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.45</span>) <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"steelblue"</span>, <span class="st">"tomato"</span>)) <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribution of Log Unemployment Duration by Group"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">x     =</span> <span class="st">"Log(Unemployment Duration)"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">y     =</span> <span class="st">"Density"</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill  =</span> <span class="cn">NULL</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="part2_quantile_regression_files/figure-html/outcome-dist-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Reading QTEs from the CDF plot
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Pick a horizontal line at height <span class="math inline">\(\tau\)</span>. Where it crosses the control CDF gives <span class="math inline">\(\hat{F}_0^{-1}(\tau)\)</span>; where it crosses the treatment CDF gives <span class="math inline">\(\hat{F}_1^{-1}(\tau)\)</span>. The horizontal distance between those two points is <span class="math inline">\(\widehat{\text{QTE}}_\tau\)</span>. If the treatment CDF lies to the <strong>left</strong> of the control CDF, treatment <em>reduced</em> unemployment duration — a beneficial effect.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Why log?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Unemployment duration is right-skewed. Working with <code>log(inuidur1)</code> yields a more symmetric distribution and more stable quantile estimates.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="part-a-qte-without-covariates" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="part-a-qte-without-covariates"><span class="header-section-number">3.6</span> Part A: QTE Without Covariates</h2>
+<section id="method-1-direct-difference-in-sample-quantiles" class="level3" data-number="3.6.1">
+<h3 data-number="3.6.1" class="anchored" data-anchor-id="method-1-direct-difference-in-sample-quantiles"><span class="header-section-number">3.6.1</span> Method 1: Direct Difference in Sample Quantiles</h3>
+<p>Under random assignment, QTEs are simply the difference in empirical quantiles between groups:</p>
+<p><span class="math display">\[\widehat{\text{QTE}}_\tau = \hat{F}_1^{-1}(\tau) - \hat{F}_0^{-1}(\tau)\]</span></p>
+<p>This is the most transparent approach — directly analogous to computing the ATE as a difference in sample means.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Y1  <span class="ot">&lt;-</span> <span class="fu">log</span>(data_penn<span class="sc">$</span>inuidur1[data_penn<span class="sc">$</span>tg <span class="sc">==</span> <span class="dv">2</span>])</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Y0  <span class="ot">&lt;-</span> <span class="fu">log</span>(data_penn<span class="sc">$</span>inuidur1[data_penn<span class="sc">$</span>tg <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>tau <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="at">by =</span> <span class="fl">0.05</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>qte_direct <span class="ot">&lt;-</span> <span class="fu">quantile</span>(Y1, <span class="at">probs =</span> tau) <span class="sc">-</span> <span class="fu">quantile</span>(Y0, <span class="at">probs =</span> tau)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="method-2-quantile-regression-without-covariates" class="level3" data-number="3.6.2">
+<h3 data-number="3.6.2" class="anchored" data-anchor-id="method-2-quantile-regression-without-covariates"><span class="header-section-number">3.6.2</span> Method 2: Quantile Regression Without Covariates</h3>
+<p>Equivalently, we can run a quantile regression of the outcome on the treatment indicator:</p>
+<p><span class="math display">\[Q_\tau(\log(\texttt{inuidur1}) \mid D_i) = \alpha(\tau) + \beta(\tau) \cdot D_i\]</span></p>
+<p>The coefficient <span class="math inline">\(\hat{\beta}(\tau)\)</span> is numerically identical to the difference in sample quantiles — just as OLS on a binary treatment recovers the difference in means.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>qte_rq_no_cov <span class="ot">&lt;-</span> <span class="fu">sapply</span>(tau, <span class="cf">function</span>(t) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg, <span class="at">tau =</span> t, <span class="at">data =</span> data_penn)<span class="sc">$</span>coef[<span class="dv">2</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique</code></pre>
+</div>
+</div>
+</section>
+<section id="verifying-the-equivalence" class="level3" data-number="3.6.3">
+<h3 data-number="3.6.3" class="anchored" data-anchor-id="verifying-the-equivalence"><span class="header-section-number">3.6.3</span> Verifying the Equivalence</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">tau          =</span> tau,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Direct       =</span> <span class="fu">round</span>(qte_direct, <span class="dv">6</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Quantile_Reg =</span> <span class="fu">round</span>(qte_rq_no_cov, <span class="dv">6</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Identical =</span> Direct <span class="sc">==</span> Quantile_Reg) <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"τ"</span>, <span class="st">"Diff. in Quantiles"</span>, <span class="st">"Quantile Reg."</span>, <span class="st">"Identical?"</span>),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption   =</span> <span class="st">"Direct difference in quantiles vs. quantile regression (no covariates)"</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>),</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="table table-striped table-hover caption-top table-sm small">
+<caption>Direct difference in quantiles vs. quantile regression (no covariates)</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">τ</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Diff. in Quantiles</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Quantile Reg.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Identical?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">10%</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">15%</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">20%</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">25%</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">-0.101366</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">30%</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">35%</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">-0.182322</td>
+<td style="text-align: right;">-0.182322</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">40%</td>
+<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">-0.287682</td>
+<td style="text-align: right;">-0.287682</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">45%</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">-0.117783</td>
+<td style="text-align: right;">-0.117783</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">50%</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">-0.095310</td>
+<td style="text-align: right;">-0.095310</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">55%</td>
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">-0.080043</td>
+<td style="text-align: right;">-0.080043</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">60%</td>
+<td style="text-align: right;">0.60</td>
+<td style="text-align: right;">-0.068993</td>
+<td style="text-align: right;">-0.068993</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">65%</td>
+<td style="text-align: right;">0.65</td>
+<td style="text-align: right;">-0.117783</td>
+<td style="text-align: right;">-0.117783</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">70%</td>
+<td style="text-align: right;">0.70</td>
+<td style="text-align: right;">-0.048790</td>
+<td style="text-align: right;">-0.048790</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">75%</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">-0.080043</td>
+<td style="text-align: right;">-0.080043</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">80%</td>
+<td style="text-align: right;">0.80</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">85%</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">90%</td>
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>The same logic as the ATE
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Mean effect</th>
+<th>Quantile effect at <span class="math inline">\(\tau\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Direct</strong></td>
+<td><span class="math inline">\(\bar{Y}_1 - \bar{Y}_0\)</span></td>
+<td><span class="math inline">\(\hat{F}_1^{-1}(\tau) - \hat{F}_0^{-1}(\tau)\)</span></td>
+</tr>
+<tr class="even">
+<td><strong>Regression</strong></td>
+<td>OLS of <span class="math inline">\(Y\)</span> on <span class="math inline">\(D\)</span></td>
+<td>Quantile reg. of <span class="math inline">\(Y\)</span> on <span class="math inline">\(D\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>Identical?</strong></td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<p>In a randomized experiment, both routes give the same answer. The regression framing becomes valuable when we want to <strong>add covariates</strong>.</p>
+</div>
+</div>
+</section>
+<section id="ate-without-covariates-benchmark" class="level3" data-number="3.6.4">
+<h3 data-number="3.6.4" class="anchored" data-anchor-id="ate-without-covariates-benchmark"><span class="header-section-number">3.6.4</span> ATE Without Covariates (Benchmark)</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ate_no_cov <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y1) <span class="sc">-</span> <span class="fu">mean</span>(Y0)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"ATE (difference in means):"</span>, <span class="fu">round</span>(ate_no_cov, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ATE (difference in means): -0.0788 </code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-the-no-covariate-qtes" class="level3" data-number="3.6.5">
+<h3 data-number="3.6.5" class="anchored" data-anchor-id="plotting-the-no-covariate-qtes"><span class="header-section-number">3.6.5</span> Plotting the No-Covariate QTEs</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_qte_1</span>(qte_rq_no_cov, tau) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> ate_no_cov, <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">0.78</span>, <span class="at">y =</span> ate_no_cov <span class="sc">+</span> <span class="fl">0.012</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">label =</span> <span class="st">"OLS (ATE)"</span>, <span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"QTE Without Covariates: Re-employment Bonus"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Outcome: log(Unemployment Duration)"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x        =</span> <span class="st">"Quantile (τ)"</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y        =</span> <span class="st">"QTE"</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">color    =</span> <span class="cn">NULL</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="part2_quantile_regression_files/figure-html/qte-plot-no-cov-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="part-b-qte-with-covariates" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="part-b-qte-with-covariates"><span class="header-section-number">3.7</span> Part B: QTE With Covariates</h2>
+<section id="why-add-covariates" class="level3" data-number="3.7.1">
+<h3 data-number="3.7.1" class="anchored" data-anchor-id="why-add-covariates"><span class="header-section-number">3.7.1</span> Why add covariates?</h3>
+<p>Treatment is randomized here, so covariates are not needed for identification. However, including pre-determined covariates (<code>female</code>, <code>black</code>) can <strong>improve precision</strong> — exactly as in the ATE case. Since both covariates are binary, the adjustment is clean and straightforward; no non-parametric methods are required.</p>
+<p><span class="math display">\[Q_\tau(\log(\texttt{inuidur1}) \mid D_i, \mathbf{X}_i) = \alpha(\tau) + \beta(\tau) \cdot D_i + \gamma_1(\tau) \cdot \texttt{female}_i + \gamma_2(\tau) \cdot \texttt{black}_i\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>qte_cov <span class="ot">&lt;-</span> <span class="fu">sapply</span>(tau, <span class="cf">function</span>(t) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg <span class="sc">+</span> female <span class="sc">+</span> black,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">tau  =</span> t,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">data =</span> data_penn)<span class="sc">$</span>coef[<span class="dv">2</span>]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>reg_ols_cov <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg <span class="sc">+</span> female <span class="sc">+</span> black, <span class="at">data =</span> data_penn)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ate_cov     <span class="ot">&lt;-</span> <span class="fu">coef</span>(reg_ols_cov)[<span class="dv">2</span>]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"ATE (with covariates):"</span>, <span class="fu">round</span>(ate_cov, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ATE (with covariates): -0.0799 </code></pre>
+</div>
+</div>
+</section>
+<section id="covariate-adjusted-qtes" class="level3" data-number="3.7.2">
+<h3 data-number="3.7.2" class="anchored" data-anchor-id="covariate-adjusted-qtes"><span class="header-section-number">3.7.2</span> Covariate-Adjusted QTEs</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_qte_1</span>(qte_cov, tau) <span class="sc">+</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> ate_cov, <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">0.78</span>, <span class="at">y =</span> ate_cov <span class="sc">+</span> <span class="fl">0.012</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">label =</span> <span class="st">"OLS (ATE)"</span>, <span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"QTE With Covariates: Re-employment Bonus"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Outcome: log(Unemployment Duration) | Controls: female, black"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x        =</span> <span class="st">"Quantile (τ)"</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y        =</span> <span class="st">"QTE"</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">color    =</span> <span class="cn">NULL</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="part2_quantile_regression_files/figure-html/qte-plot-cov-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="tabular-summary-at-selected-quantiles" class="level3" data-number="3.7.3">
+<h3 data-number="3.7.3" class="anchored" data-anchor-id="tabular-summary-at-selected-quantiles"><span class="header-section-number">3.7.3</span> Tabular Summary at Selected Quantiles</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>selected_tau <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="fl">0.25</span>, <span class="fl">0.50</span>, <span class="fl">0.75</span>, <span class="fl">0.90</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>qte_no_cov_sel <span class="ot">&lt;-</span> <span class="fu">sapply</span>(selected_tau, <span class="cf">function</span>(t)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg, <span class="at">tau =</span> t, <span class="at">data =</span> data_penn)<span class="sc">$</span>coef[<span class="dv">2</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>qte_cov_sel <span class="ot">&lt;-</span> <span class="fu">sapply</span>(selected_tau, <span class="cf">function</span>(t)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg <span class="sc">+</span> female <span class="sc">+</span> black, <span class="at">tau =</span> t, <span class="at">data =</span> data_penn)<span class="sc">$</span>coef[<span class="dv">2</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique
+Warning in rq.fit.br(x, y, tau = tau, ...): Solution may be nonunique</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">tau        =</span> selected_tau,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">QTE_no_cov =</span> <span class="fu">round</span>(qte_no_cov_sel, <span class="dv">4</span>),</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">QTE_cov    =</span> <span class="fu">round</span>(qte_cov_sel, <span class="dv">4</span>),</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ATE_no_cov =</span> <span class="fu">round</span>(ate_no_cov, <span class="dv">4</span>),</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ATE_cov    =</span> <span class="fu">round</span>(ate_cov, <span class="dv">4</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"τ"</span>, <span class="st">"QTE (no cov.)"</span>, <span class="st">"QTE (w/ cov.)"</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ATE (no cov.)"</span>, <span class="st">"ATE (w/ cov.)"</span>),</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption   =</span> <span class="st">"QTE and ATE with and without covariate adjustment"</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>),</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">" "</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">"Quantile Regression"</span> <span class="ot">=</span> <span class="dv">2</span>, <span class="st">"OLS"</span> <span class="ot">=</span> <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in data.frame(tau = selected_tau, QTE_no_cov = round(qte_no_cov_sel, :
+row names were found from a short variable and have been discarded</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="table table-striped table-hover caption-top table-sm small">
+<caption>QTE and ATE with and without covariate adjustment</caption>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: right; empty-cells: hide; border-bottom: hidden;"></th>
+<th colspan="2" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Quantile Regression
+</div></th>
+<th colspan="2" data-quarto-table-cell-role="th" style="text-align: center; border-bottom: hidden; padding-bottom: 0; padding-left: 3px; padding-right: 3px;"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+OLS
+</div></th>
+</tr>
+<tr class="even">
+<th style="text-align: right;" data-quarto-table-cell-role="th">τ</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">QTE (no cov.)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">QTE (w/ cov.)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">ATE (no cov.)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">ATE (w/ cov.)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">-0.0788</td>
+<td style="text-align: right;">-0.0799</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">-0.0788</td>
+<td style="text-align: right;">-0.0799</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">-0.0953</td>
+<td style="text-align: right;">-0.0953</td>
+<td style="text-align: right;">-0.0788</td>
+<td style="text-align: right;">-0.0799</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">-0.0800</td>
+<td style="text-align: right;">-0.0426</td>
+<td style="text-align: right;">-0.0788</td>
+<td style="text-align: right;">-0.0799</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">-0.0788</td>
+<td style="text-align: right;">-0.0799</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</section>
+<section id="key-takeaways" class="level2" data-number="3.8">
+<h2 data-number="3.8" class="anchored" data-anchor-id="key-takeaways"><span class="header-section-number">3.8</span> Key Takeaways</h2>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Summary
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p><strong>QTEs reveal heterogeneity</strong> the ATE hides. A flat QTE curve means constant treatment effects; departures from flatness reveal distributional heterogeneity.</p></li>
+<li><p><strong>Without covariates, QTE = difference in sample quantiles</strong>, just as ATE = difference in sample means. Quantile regression is just a convenient — and extensible — way to compute this.</p></li>
+<li><p><strong>Adding discrete covariates improves precision</strong> without complicating the estimator. With continuous covariates, more sophisticated methods (kernel, propensity score) are needed.</p></li>
+<li><p><strong>Interpretation depends on rank invariance.</strong> Under rank invariance, <span class="math inline">\(\text{QTE}_\tau\)</span> describes the effect on individuals at the <span class="math inline">\((\tau \times 100)\)</span>-th percentile. With rank reversals, it describes how the quantile itself shifts — not necessarily the same individuals.</p></li>
+<li><p><strong>The sign here:</strong> negative QTEs mean the bonus <em>reduced</em> unemployment duration — workers found jobs faster. This is the intended mechanism of the program.</p></li>
+</ol>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Going further: inference
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For confidence bands around QTEs, use bootstrap standard errors via <code>summary.rq()</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg <span class="sc">+</span> female <span class="sc">+</span> black, <span class="at">tau =</span> <span class="fl">0.5</span>, <span class="at">data =</span> data_penn),</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">se =</span> <span class="st">"boot"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For simultaneous confidence bands across all quantiles and automatic handling of continuous covariates, see the <code>qte</code> R package.</p>
+</div>
+</div>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./part1_covariate_adjustment.html" class="pagination-link" aria-label="Covariate Adjustment in RCTs">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Covariate Adjustment in RCTs</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Quantile Treatment Effects"</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup-p2, include=FALSE}</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(foreign)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quantreg)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(modelsummary)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"R/ACA_Function_Library.r"</span>)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Beyond the Average Treatment Effect</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>In the first part of this lecture, we focused on the **Average Treatment Effect (ATE)**:</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>$$\text{ATE} = \mathbb{E}<span class="co">[</span><span class="ot">Y_i(1) - Y_i(0)</span><span class="co">]</span>$$</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>The ATE plays a central role in causal inference — but it summarizes the treatment effect by collapsing the entire distribution of individual treatment effects into a single number: the mean. This can mask substantial **heterogeneity** in how the treatment affects different individuals.</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>**Quantile Treatment Effects (QTEs)** offer an alternative: instead of focusing on one aspect of the distribution (the mean), they let us study how a treatment shifts the entire outcome distribution.</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## QTE vs ATE</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **ATE** answers: *"What is the average effect of treatment?"*</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **QTE at quantile $\tau$** answers: *"By how much does treatment shift the $\tau$-th quantile of the outcome distribution?"*</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>These can differ substantially when treatment effects are heterogeneous — which is often the case in practice.</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a><span class="fu">## Quantiles: A Brief Refresher</span></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>Suppose $Y \sim F$. The $\tau$-quantile of $Y$ is defined as the **inverse CDF**:</span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>$$F^{-1}(\tau) = \inf<span class="sc">\{</span> y : F(y) \geq \tau <span class="sc">\}</span>, \quad \tau \in (0,1)$$</span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>A few properties worth recalling:</span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For $\tau = 1/2$, $F^{-1}(1/2)$ is the **median**.</span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quantiles are robust to long-tailed distributions and outliers.</span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Quantiles are often more informative than mean-based summaries when distributions are skewed or heavy-tailed.</span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## Definition and Identification of QTE</span></span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a>**Setup.** Let $F_0(y)$ denote the CDF of $Y_i(0)$ (the control potential outcome) and $F_1(y)$ the CDF of $Y_i(1)$ (the treated potential outcome). Then:</span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a>$$\text{QTE}_\tau = F_1^{-1}(\tau) - F_0^{-1}(\tau)$$</span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a>This is the **horizontal distance** between the two CDFs at a given probability level $\tau$.</span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a>**Identification under random assignment.** QTEs are defined in terms of potential outcomes, which we never fully observe. Under random assignment,</span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a>$$(Y_i(0), Y_i(1)) \perp D_i,$$</span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a>the observed conditional distributions coincide with the potential outcome distributions:</span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a>$$F(y \mid D_i = 0) = F_0(y), \qquad F(y \mid D_i = 1) = F_1(y).$$</span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a>So the QTE is directly identified from observables:</span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a>$$\underbrace{F_1^{-1}(\tau) - F_0^{-1}(\tau)}_{\text{QTE}_\tau,\ \text{unobserved}} \;=\; \underbrace{F^{-1}(\tau \mid D_i=1) - F^{-1}(\tau \mid D_i = 0)}_{\text{observed difference in sample quantiles}}$$</span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-66"><a href="#cb23-66" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb23-67"><a href="#cb23-67" aria-hidden="true" tabindex="-1"></a><span class="fu">## The parallel with the ATE</span></span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-69"><a href="#cb23-69" aria-hidden="true" tabindex="-1"></a>This identification result mirrors exactly what we showed for the ATE. Under random assignment:</span>
+<span id="cb23-70"><a href="#cb23-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a>$$\underbrace{\mathbb{E}<span class="co">[</span><span class="ot">Y_i(1) - Y_i(0)</span><span class="co">]</span>}_{\text{ATE}} = \underbrace{\mathbb{E}[Y_i \mid D_i=1] - \mathbb{E}[Y_i \mid D_i=0]}_{\text{difference in sample means}}$$</span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a>The logic is the same: randomization lets us use observed group differences to recover causal quantities. For the ATE we compare **means**; for the QTE we compare **quantiles**.</span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-75"><a href="#cb23-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-76"><a href="#cb23-76" aria-hidden="true" tabindex="-1"></a><span class="fu">## Interpretation: Rank Invariance and Rank Reversals</span></span>
+<span id="cb23-77"><a href="#cb23-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-78"><a href="#cb23-78" aria-hidden="true" tabindex="-1"></a>Before turning to estimation, it is important to understand what QTEs tell us — and when their interpretation is clean.</span>
+<span id="cb23-79"><a href="#cb23-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-80"><a href="#cb23-80" aria-hidden="true" tabindex="-1"></a><span class="fu">### Rank Invariance</span></span>
+<span id="cb23-81"><a href="#cb23-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-82"><a href="#cb23-82" aria-hidden="true" tabindex="-1"></a>**Rank invariance** holds when individuals retain their relative positions in the outcome distribution regardless of treatment status. That is: if person A would have a lower outcome than person B without treatment, they would still rank lower under treatment.</span>
+<span id="cb23-83"><a href="#cb23-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-84"><a href="#cb23-84" aria-hidden="true" tabindex="-1"></a>Under rank invariance, $\text{QTE}_\tau$ has a clean causal interpretation: **it tells us how much the treatment changed the outcome for those at the $(\tau \times 100)$-th percentile in the absence of treatment.**</span>
+<span id="cb23-85"><a href="#cb23-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-86"><a href="#cb23-86" aria-hidden="true" tabindex="-1"></a><span class="fu">### Rank Reversals</span></span>
+<span id="cb23-87"><a href="#cb23-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-88"><a href="#cb23-88" aria-hidden="true" tabindex="-1"></a>Rank invariance is a strong assumption. With **heterogeneous treatment effects**, some individuals benefit a lot while others benefit little — or even negatively — which can reshuffle the outcome rankings. This is a **rank reversal**.</span>
+<span id="cb23-89"><a href="#cb23-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-90"><a href="#cb23-90" aria-hidden="true" tabindex="-1"></a>The table below illustrates this. Five students take a final exam. We observe scores with and without a tutoring program:</span>
+<span id="cb23-91"><a href="#cb23-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-92"><a href="#cb23-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{r rank-reversal-table, echo=FALSE}</span></span>
+<span id="cb23-93"><a href="#cb23-93" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb23-94"><a href="#cb23-94" aria-hidden="true" tabindex="-1"></a>  <span class="at">Student         =</span> <span class="fu">c</span>(<span class="st">"Alice"</span>, <span class="st">"Bob"</span>, <span class="st">"Charlie"</span>, <span class="st">"David"</span>, <span class="st">"Eve"</span>),</span>
+<span id="cb23-95"><a href="#cb23-95" aria-hidden="true" tabindex="-1"></a>  <span class="at">Control_Score   =</span> <span class="fu">c</span>(<span class="dv">95</span>, <span class="dv">85</span>, <span class="dv">75</span>, <span class="dv">65</span>, <span class="dv">55</span>),</span>
+<span id="cb23-96"><a href="#cb23-96" aria-hidden="true" tabindex="-1"></a>  <span class="at">Treatment_Score =</span> <span class="fu">c</span>(<span class="dv">65</span>, <span class="dv">95</span>, <span class="dv">75</span>, <span class="dv">55</span>, <span class="dv">85</span>),</span>
+<span id="cb23-97"><a href="#cb23-97" aria-hidden="true" tabindex="-1"></a>  <span class="at">Change          =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">30</span>, <span class="dv">10</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">10</span>, <span class="dv">30</span>)</span>
+<span id="cb23-98"><a href="#cb23-98" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-99"><a href="#cb23-99" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb23-100"><a href="#cb23-100" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Student"</span>, <span class="st">"Control Score"</span>, <span class="st">"Treatment Score"</span>, <span class="st">"Change"</span>),</span>
+<span id="cb23-101"><a href="#cb23-101" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption   =</span> <span class="st">"Example of Rank Reversals"</span>,</span>
+<span id="cb23-102"><a href="#cb23-102" aria-hidden="true" tabindex="-1"></a>    <span class="at">align     =</span> <span class="st">"lrrr"</span></span>
+<span id="cb23-103"><a href="#cb23-103" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb23-104"><a href="#cb23-104" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>),</span>
+<span id="cb23-105"><a href="#cb23-105" aria-hidden="true" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-106"><a href="#cb23-106" aria-hidden="true" tabindex="-1"></a>  <span class="fu">row_spec</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>), <span class="at">bold =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-107"><a href="#cb23-107" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-108"><a href="#cb23-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-109"><a href="#cb23-109" aria-hidden="true" tabindex="-1"></a>Alice, the top scorer without tutoring (rank 1), drops to rank 4 with it. Eve, the bottom scorer (rank 5), jumps to rank 2. Ranks are reshuffled by treatment.</span>
+<span id="cb23-110"><a href="#cb23-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-111"><a href="#cb23-111" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb23-112"><a href="#cb23-112" aria-hidden="true" tabindex="-1"></a><span class="fu">## Consequence of rank reversals for QTE interpretation</span></span>
+<span id="cb23-113"><a href="#cb23-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-114"><a href="#cb23-114" aria-hidden="true" tabindex="-1"></a>When rank reversals are present, $\text{QTE}_\tau$ **does not** describe the effect for those who would have been at quantile $\tau$ without treatment. It measures **how much quantile $\tau$ of the distribution shifts** — but the individuals composing that quantile may differ between the treated and control worlds.</span>
+<span id="cb23-115"><a href="#cb23-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-116"><a href="#cb23-116" aria-hidden="true" tabindex="-1"></a>A striking consequence: it is possible for **all QTEs to equal zero** even when every individual has a non-zero treatment effect. In the table above, the sorted control scores (55, 65, 75, 85, 95) equal the sorted treatment scores (55, 65, 75, 85, 95), so $\text{QTE}_\tau = 0$ for all $\tau$ — yet only Charlie has a zero individual treatment effect.</span>
+<span id="cb23-117"><a href="#cb23-117" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-118"><a href="#cb23-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-119"><a href="#cb23-119" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb23-120"><a href="#cb23-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-121"><a href="#cb23-121" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Penn Re-employment Bonus Experiment</span></span>
+<span id="cb23-122"><a href="#cb23-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-123"><a href="#cb23-123" aria-hidden="true" tabindex="-1"></a>We now turn to data. We use the **Pennsylvania Re-employment Bonus Experiment**, where unemployed workers were randomized to receive a cash bonus for finding a new job quickly.</span>
+<span id="cb23-124"><a href="#cb23-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-125"><a href="#cb23-125" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Treatment (`tg = 2`):** Eligible for a re-employment bonus</span>
+<span id="cb23-126"><a href="#cb23-126" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Control (`tg = 0`):** Standard unemployment insurance, no bonus</span>
+<span id="cb23-127"><a href="#cb23-127" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Outcome (`inuidur1`):** Duration of the unemployment spell (in weeks)</span>
+<span id="cb23-128"><a href="#cb23-128" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Covariates:** <span class="in">`female`</span>, <span class="in">`black`</span></span>
+<span id="cb23-129"><a href="#cb23-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-130"><a href="#cb23-130" aria-hidden="true" tabindex="-1"></a><span class="in">```{r load-penn}</span></span>
+<span id="cb23-131"><a href="#cb23-131" aria-hidden="true" tabindex="-1"></a>raw_data_penn <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="st">"data/penn_jae.dat"</span>, <span class="at">header =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-132"><a href="#cb23-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-133"><a href="#cb23-133" aria-hidden="true" tabindex="-1"></a>data_penn <span class="ot">&lt;-</span> raw_data_penn <span class="sc">%&gt;%</span></span>
+<span id="cb23-134"><a href="#cb23-134" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(tg <span class="sc">==</span> <span class="dv">2</span> <span class="sc">|</span> tg <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-135"><a href="#cb23-135" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(inuidur1, tg, female, black) <span class="sc">%&gt;%</span></span>
+<span id="cb23-136"><a href="#cb23-136" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb23-137"><a href="#cb23-137" aria-hidden="true" tabindex="-1"></a>    <span class="at">inuidur1 =</span> <span class="fu">as.numeric</span>(inuidur1),</span>
+<span id="cb23-138"><a href="#cb23-138" aria-hidden="true" tabindex="-1"></a>    <span class="at">tg       =</span> <span class="fu">as.factor</span>(tg)</span>
+<span id="cb23-139"><a href="#cb23-139" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-140"><a href="#cb23-140" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-141"><a href="#cb23-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-142"><a href="#cb23-142" aria-hidden="true" tabindex="-1"></a><span class="fu">### Visualizing the Distributions</span></span>
+<span id="cb23-143"><a href="#cb23-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-144"><a href="#cb23-144" aria-hidden="true" tabindex="-1"></a>A natural starting point is to plot the **empirical CDFs** by group. Recall from the theory: $\text{QTE}_\tau$ is the horizontal distance between the two CDFs at height $\tau$.</span>
+<span id="cb23-145"><a href="#cb23-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-146"><a href="#cb23-146" aria-hidden="true" tabindex="-1"></a><span class="in">```{r cdf-plot, warning=FALSE, message=FALSE}</span></span>
+<span id="cb23-147"><a href="#cb23-147" aria-hidden="true" tabindex="-1"></a>data_penn <span class="sc">%&gt;%</span></span>
+<span id="cb23-148"><a href="#cb23-148" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">ifelse</span>(tg <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"Control"</span>, <span class="st">"Treatment (Bonus)"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-149"><a href="#cb23-149" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(inuidur1), <span class="at">color =</span> group)) <span class="sc">+</span></span>
+<span id="cb23-150"><a href="#cb23-150" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_ecdf</span>(<span class="at">linewidth =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb23-151"><a href="#cb23-151" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Control"</span>          <span class="ot">=</span> <span class="st">"tomato"</span>,</span>
+<span id="cb23-152"><a href="#cb23-152" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"Treatment (Bonus)"</span> <span class="ot">=</span> <span class="st">"steelblue"</span>)) <span class="sc">+</span></span>
+<span id="cb23-153"><a href="#cb23-153" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb23-154"><a href="#cb23-154" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"Empirical CDFs of Log Unemployment Duration"</span>,</span>
+<span id="cb23-155"><a href="#cb23-155" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Horizontal distance between curves at any height τ = QTE at quantile τ"</span>,</span>
+<span id="cb23-156"><a href="#cb23-156" aria-hidden="true" tabindex="-1"></a>    <span class="at">x        =</span> <span class="st">"Log(Unemployment Duration)"</span>,</span>
+<span id="cb23-157"><a href="#cb23-157" aria-hidden="true" tabindex="-1"></a>    <span class="at">y        =</span> <span class="st">"F(y)"</span>,</span>
+<span id="cb23-158"><a href="#cb23-158" aria-hidden="true" tabindex="-1"></a>    <span class="at">color    =</span> <span class="cn">NULL</span></span>
+<span id="cb23-159"><a href="#cb23-159" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb23-160"><a href="#cb23-160" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb23-161"><a href="#cb23-161" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span>
+<span id="cb23-162"><a href="#cb23-162" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-163"><a href="#cb23-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-164"><a href="#cb23-164" aria-hidden="true" tabindex="-1"></a>Since visualization in terms of CDFs might feel unfamiliar, let's plot the (smoothed) empirical densities of log unemployment by group too.</span>
+<span id="cb23-165"><a href="#cb23-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-166"><a href="#cb23-166" aria-hidden="true" tabindex="-1"></a><span class="in">```{r outcome-dist, message=FALSE, warning=FALSE}</span></span>
+<span id="cb23-167"><a href="#cb23-167" aria-hidden="true" tabindex="-1"></a>data_penn <span class="sc">%&gt;%</span></span>
+<span id="cb23-168"><a href="#cb23-168" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">ifelse</span>(tg <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"Control"</span>, <span class="st">"Treatment (Bonus)"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb23-169"><a href="#cb23-169" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log</span>(inuidur1), <span class="at">fill =</span> group)) <span class="sc">+</span></span>
+<span id="cb23-170"><a href="#cb23-170" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">alpha =</span> <span class="fl">0.45</span>) <span class="sc">+</span></span>
+<span id="cb23-171"><a href="#cb23-171" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"steelblue"</span>, <span class="st">"tomato"</span>)) <span class="sc">+</span></span>
+<span id="cb23-172"><a href="#cb23-172" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb23-173"><a href="#cb23-173" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribution of Log Unemployment Duration by Group"</span>,</span>
+<span id="cb23-174"><a href="#cb23-174" aria-hidden="true" tabindex="-1"></a>    <span class="at">x     =</span> <span class="st">"Log(Unemployment Duration)"</span>,</span>
+<span id="cb23-175"><a href="#cb23-175" aria-hidden="true" tabindex="-1"></a>    <span class="at">y     =</span> <span class="st">"Density"</span>,</span>
+<span id="cb23-176"><a href="#cb23-176" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill  =</span> <span class="cn">NULL</span></span>
+<span id="cb23-177"><a href="#cb23-177" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb23-178"><a href="#cb23-178" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb23-179"><a href="#cb23-179" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span>
+<span id="cb23-180"><a href="#cb23-180" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-181"><a href="#cb23-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-182"><a href="#cb23-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-183"><a href="#cb23-183" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb23-184"><a href="#cb23-184" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reading QTEs from the CDF plot</span></span>
+<span id="cb23-185"><a href="#cb23-185" aria-hidden="true" tabindex="-1"></a>Pick a horizontal line at height $\tau$. Where it crosses the control CDF gives $\hat{F}_0^{-1}(\tau)$; where it crosses the treatment CDF gives $\hat{F}_1^{-1}(\tau)$. The horizontal distance between those two points is $\widehat{\text{QTE}}_\tau$. If the treatment CDF lies to the **left** of the control CDF, treatment *reduced* unemployment duration — a beneficial effect.</span>
+<span id="cb23-186"><a href="#cb23-186" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-187"><a href="#cb23-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-188"><a href="#cb23-188" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb23-189"><a href="#cb23-189" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why log?</span></span>
+<span id="cb23-190"><a href="#cb23-190" aria-hidden="true" tabindex="-1"></a>Unemployment duration is right-skewed. Working with <span class="in">`log(inuidur1)`</span> yields a more symmetric distribution and more stable quantile estimates.</span>
+<span id="cb23-191"><a href="#cb23-191" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-192"><a href="#cb23-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-193"><a href="#cb23-193" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb23-194"><a href="#cb23-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-195"><a href="#cb23-195" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part A: QTE Without Covariates</span></span>
+<span id="cb23-196"><a href="#cb23-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-197"><a href="#cb23-197" aria-hidden="true" tabindex="-1"></a><span class="fu">### Method 1: Direct Difference in Sample Quantiles</span></span>
+<span id="cb23-198"><a href="#cb23-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-199"><a href="#cb23-199" aria-hidden="true" tabindex="-1"></a>Under random assignment, QTEs are simply the difference in empirical quantiles between groups:</span>
+<span id="cb23-200"><a href="#cb23-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-201"><a href="#cb23-201" aria-hidden="true" tabindex="-1"></a>$$\widehat{\text{QTE}}_\tau = \hat{F}_1^{-1}(\tau) - \hat{F}_0^{-1}(\tau)$$</span>
+<span id="cb23-202"><a href="#cb23-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-203"><a href="#cb23-203" aria-hidden="true" tabindex="-1"></a>This is the most transparent approach — directly analogous to computing the ATE as a difference in sample means.</span>
+<span id="cb23-204"><a href="#cb23-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-205"><a href="#cb23-205" aria-hidden="true" tabindex="-1"></a><span class="in">```{r qte-direct}</span></span>
+<span id="cb23-206"><a href="#cb23-206" aria-hidden="true" tabindex="-1"></a>Y1  <span class="ot">&lt;-</span> <span class="fu">log</span>(data_penn<span class="sc">$</span>inuidur1[data_penn<span class="sc">$</span>tg <span class="sc">==</span> <span class="dv">2</span>])</span>
+<span id="cb23-207"><a href="#cb23-207" aria-hidden="true" tabindex="-1"></a>Y0  <span class="ot">&lt;-</span> <span class="fu">log</span>(data_penn<span class="sc">$</span>inuidur1[data_penn<span class="sc">$</span>tg <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb23-208"><a href="#cb23-208" aria-hidden="true" tabindex="-1"></a>tau <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="at">by =</span> <span class="fl">0.05</span>)</span>
+<span id="cb23-209"><a href="#cb23-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-210"><a href="#cb23-210" aria-hidden="true" tabindex="-1"></a>qte_direct <span class="ot">&lt;-</span> <span class="fu">quantile</span>(Y1, <span class="at">probs =</span> tau) <span class="sc">-</span> <span class="fu">quantile</span>(Y0, <span class="at">probs =</span> tau)</span>
+<span id="cb23-211"><a href="#cb23-211" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-212"><a href="#cb23-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-213"><a href="#cb23-213" aria-hidden="true" tabindex="-1"></a><span class="fu">### Method 2: Quantile Regression Without Covariates</span></span>
+<span id="cb23-214"><a href="#cb23-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-215"><a href="#cb23-215" aria-hidden="true" tabindex="-1"></a>Equivalently, we can run a quantile regression of the outcome on the treatment indicator:</span>
+<span id="cb23-216"><a href="#cb23-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-217"><a href="#cb23-217" aria-hidden="true" tabindex="-1"></a>$$Q_\tau(\log(\texttt{inuidur1}) \mid D_i) = \alpha(\tau) + \beta(\tau) \cdot D_i$$</span>
+<span id="cb23-218"><a href="#cb23-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-219"><a href="#cb23-219" aria-hidden="true" tabindex="-1"></a>The coefficient $\hat{\beta}(\tau)$ is numerically identical to the difference in sample quantiles — just as OLS on a binary treatment recovers the difference in means.</span>
+<span id="cb23-220"><a href="#cb23-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-221"><a href="#cb23-221" aria-hidden="true" tabindex="-1"></a><span class="in">```{r qte-rq-no-cov}</span></span>
+<span id="cb23-222"><a href="#cb23-222" aria-hidden="true" tabindex="-1"></a>qte_rq_no_cov <span class="ot">&lt;-</span> <span class="fu">sapply</span>(tau, <span class="cf">function</span>(t) {</span>
+<span id="cb23-223"><a href="#cb23-223" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg, <span class="at">tau =</span> t, <span class="at">data =</span> data_penn)<span class="sc">$</span>coef[<span class="dv">2</span>]</span>
+<span id="cb23-224"><a href="#cb23-224" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb23-225"><a href="#cb23-225" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-226"><a href="#cb23-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-227"><a href="#cb23-227" aria-hidden="true" tabindex="-1"></a><span class="fu">### Verifying the Equivalence</span></span>
+<span id="cb23-228"><a href="#cb23-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-229"><a href="#cb23-229" aria-hidden="true" tabindex="-1"></a><span class="in">```{r qte-equivalence}</span></span>
+<span id="cb23-230"><a href="#cb23-230" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb23-231"><a href="#cb23-231" aria-hidden="true" tabindex="-1"></a>  <span class="at">tau          =</span> tau,</span>
+<span id="cb23-232"><a href="#cb23-232" aria-hidden="true" tabindex="-1"></a>  <span class="at">Direct       =</span> <span class="fu">round</span>(qte_direct, <span class="dv">6</span>),</span>
+<span id="cb23-233"><a href="#cb23-233" aria-hidden="true" tabindex="-1"></a>  <span class="at">Quantile_Reg =</span> <span class="fu">round</span>(qte_rq_no_cov, <span class="dv">6</span>)</span>
+<span id="cb23-234"><a href="#cb23-234" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-235"><a href="#cb23-235" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Identical =</span> Direct <span class="sc">==</span> Quantile_Reg) <span class="sc">%&gt;%</span></span>
+<span id="cb23-236"><a href="#cb23-236" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb23-237"><a href="#cb23-237" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"τ"</span>, <span class="st">"Diff. in Quantiles"</span>, <span class="st">"Quantile Reg."</span>, <span class="st">"Identical?"</span>),</span>
+<span id="cb23-238"><a href="#cb23-238" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption   =</span> <span class="st">"Direct difference in quantiles vs. quantile regression (no covariates)"</span></span>
+<span id="cb23-239"><a href="#cb23-239" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb23-240"><a href="#cb23-240" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>),</span>
+<span id="cb23-241"><a href="#cb23-241" aria-hidden="true" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-242"><a href="#cb23-242" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-243"><a href="#cb23-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-244"><a href="#cb23-244" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb23-245"><a href="#cb23-245" aria-hidden="true" tabindex="-1"></a><span class="fu">## The same logic as the ATE</span></span>
+<span id="cb23-246"><a href="#cb23-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-247"><a href="#cb23-247" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="pp">|</span> Mean effect <span class="pp">|</span> Quantile effect at $\tau$ <span class="pp">|</span></span>
+<span id="cb23-248"><a href="#cb23-248" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb23-249"><a href="#cb23-249" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Direct** <span class="pp">|</span> $\bar{Y}_1 - \bar{Y}_0$ <span class="pp">|</span> $\hat{F}_1^{-1}(\tau) - \hat{F}_0^{-1}(\tau)$ <span class="pp">|</span></span>
+<span id="cb23-250"><a href="#cb23-250" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Regression** <span class="pp">|</span> OLS of $Y$ on $D$ <span class="pp">|</span> Quantile reg. of $Y$ on $D$ <span class="pp">|</span></span>
+<span id="cb23-251"><a href="#cb23-251" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Identical?** <span class="pp">|</span> ✓ <span class="pp">|</span> ✓ <span class="pp">|</span></span>
+<span id="cb23-252"><a href="#cb23-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-253"><a href="#cb23-253" aria-hidden="true" tabindex="-1"></a>In a randomized experiment, both routes give the same answer. The regression framing becomes valuable when we want to **add covariates**.</span>
+<span id="cb23-254"><a href="#cb23-254" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-255"><a href="#cb23-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-256"><a href="#cb23-256" aria-hidden="true" tabindex="-1"></a><span class="fu">### ATE Without Covariates (Benchmark)</span></span>
+<span id="cb23-257"><a href="#cb23-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-258"><a href="#cb23-258" aria-hidden="true" tabindex="-1"></a><span class="in">```{r ate-no-cov}</span></span>
+<span id="cb23-259"><a href="#cb23-259" aria-hidden="true" tabindex="-1"></a>ate_no_cov <span class="ot">&lt;-</span> <span class="fu">mean</span>(Y1) <span class="sc">-</span> <span class="fu">mean</span>(Y0)</span>
+<span id="cb23-260"><a href="#cb23-260" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"ATE (difference in means):"</span>, <span class="fu">round</span>(ate_no_cov, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb23-261"><a href="#cb23-261" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-262"><a href="#cb23-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-263"><a href="#cb23-263" aria-hidden="true" tabindex="-1"></a><span class="fu">### Plotting the No-Covariate QTEs</span></span>
+<span id="cb23-264"><a href="#cb23-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-265"><a href="#cb23-265" aria-hidden="true" tabindex="-1"></a><span class="in">```{r qte-plot-no-cov, warning=FALSE}</span></span>
+<span id="cb23-266"><a href="#cb23-266" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_qte_1</span>(qte_rq_no_cov, tau) <span class="sc">+</span></span>
+<span id="cb23-267"><a href="#cb23-267" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> ate_no_cov, <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb23-268"><a href="#cb23-268" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span></span>
+<span id="cb23-269"><a href="#cb23-269" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">0.78</span>, <span class="at">y =</span> ate_no_cov <span class="sc">+</span> <span class="fl">0.012</span>,</span>
+<span id="cb23-270"><a href="#cb23-270" aria-hidden="true" tabindex="-1"></a>           <span class="at">label =</span> <span class="st">"OLS (ATE)"</span>, <span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb23-271"><a href="#cb23-271" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb23-272"><a href="#cb23-272" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"QTE Without Covariates: Re-employment Bonus"</span>,</span>
+<span id="cb23-273"><a href="#cb23-273" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Outcome: log(Unemployment Duration)"</span>,</span>
+<span id="cb23-274"><a href="#cb23-274" aria-hidden="true" tabindex="-1"></a>    <span class="at">x        =</span> <span class="st">"Quantile (τ)"</span>,</span>
+<span id="cb23-275"><a href="#cb23-275" aria-hidden="true" tabindex="-1"></a>    <span class="at">y        =</span> <span class="st">"QTE"</span>,</span>
+<span id="cb23-276"><a href="#cb23-276" aria-hidden="true" tabindex="-1"></a>    <span class="at">color    =</span> <span class="cn">NULL</span></span>
+<span id="cb23-277"><a href="#cb23-277" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb23-278"><a href="#cb23-278" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb23-279"><a href="#cb23-279" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span>
+<span id="cb23-280"><a href="#cb23-280" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-281"><a href="#cb23-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-282"><a href="#cb23-282" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb23-283"><a href="#cb23-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-284"><a href="#cb23-284" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part B: QTE With Covariates</span></span>
+<span id="cb23-285"><a href="#cb23-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-286"><a href="#cb23-286" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why add covariates?</span></span>
+<span id="cb23-287"><a href="#cb23-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-288"><a href="#cb23-288" aria-hidden="true" tabindex="-1"></a>Treatment is randomized here, so covariates are not needed for identification. However, including pre-determined covariates (<span class="in">`female`</span>, <span class="in">`black`</span>) can **improve precision** — exactly as in the ATE case. Since both covariates are binary, the adjustment is clean and straightforward; no non-parametric methods are required.</span>
+<span id="cb23-289"><a href="#cb23-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-290"><a href="#cb23-290" aria-hidden="true" tabindex="-1"></a>$$Q_\tau(\log(\texttt{inuidur1}) \mid D_i, \mathbf{X}_i) = \alpha(\tau) + \beta(\tau) \cdot D_i + \gamma_1(\tau) \cdot \texttt{female}_i + \gamma_2(\tau) \cdot \texttt{black}_i$$</span>
+<span id="cb23-291"><a href="#cb23-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-292"><a href="#cb23-292" aria-hidden="true" tabindex="-1"></a><span class="in">```{r qte-with-cov}</span></span>
+<span id="cb23-293"><a href="#cb23-293" aria-hidden="true" tabindex="-1"></a>qte_cov <span class="ot">&lt;-</span> <span class="fu">sapply</span>(tau, <span class="cf">function</span>(t) {</span>
+<span id="cb23-294"><a href="#cb23-294" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg <span class="sc">+</span> female <span class="sc">+</span> black,</span>
+<span id="cb23-295"><a href="#cb23-295" aria-hidden="true" tabindex="-1"></a>     <span class="at">tau  =</span> t,</span>
+<span id="cb23-296"><a href="#cb23-296" aria-hidden="true" tabindex="-1"></a>     <span class="at">data =</span> data_penn)<span class="sc">$</span>coef[<span class="dv">2</span>]</span>
+<span id="cb23-297"><a href="#cb23-297" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb23-298"><a href="#cb23-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-299"><a href="#cb23-299" aria-hidden="true" tabindex="-1"></a>reg_ols_cov <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg <span class="sc">+</span> female <span class="sc">+</span> black, <span class="at">data =</span> data_penn)</span>
+<span id="cb23-300"><a href="#cb23-300" aria-hidden="true" tabindex="-1"></a>ate_cov     <span class="ot">&lt;-</span> <span class="fu">coef</span>(reg_ols_cov)[<span class="dv">2</span>]</span>
+<span id="cb23-301"><a href="#cb23-301" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"ATE (with covariates):"</span>, <span class="fu">round</span>(ate_cov, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb23-302"><a href="#cb23-302" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-303"><a href="#cb23-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-304"><a href="#cb23-304" aria-hidden="true" tabindex="-1"></a><span class="fu">### Covariate-Adjusted QTEs</span></span>
+<span id="cb23-305"><a href="#cb23-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-306"><a href="#cb23-306" aria-hidden="true" tabindex="-1"></a><span class="in">```{r qte-plot-cov, warning=FALSE}</span></span>
+<span id="cb23-307"><a href="#cb23-307" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_qte_1</span>(qte_cov, tau) <span class="sc">+</span></span>
+<span id="cb23-308"><a href="#cb23-308" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> ate_cov, <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb23-309"><a href="#cb23-309" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span></span>
+<span id="cb23-310"><a href="#cb23-310" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">0.78</span>, <span class="at">y =</span> ate_cov <span class="sc">+</span> <span class="fl">0.012</span>,</span>
+<span id="cb23-311"><a href="#cb23-311" aria-hidden="true" tabindex="-1"></a>           <span class="at">label =</span> <span class="st">"OLS (ATE)"</span>, <span class="at">color =</span> <span class="st">"steelblue"</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
+<span id="cb23-312"><a href="#cb23-312" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb23-313"><a href="#cb23-313" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"QTE With Covariates: Re-employment Bonus"</span>,</span>
+<span id="cb23-314"><a href="#cb23-314" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Outcome: log(Unemployment Duration) | Controls: female, black"</span>,</span>
+<span id="cb23-315"><a href="#cb23-315" aria-hidden="true" tabindex="-1"></a>    <span class="at">x        =</span> <span class="st">"Quantile (τ)"</span>,</span>
+<span id="cb23-316"><a href="#cb23-316" aria-hidden="true" tabindex="-1"></a>    <span class="at">y        =</span> <span class="st">"QTE"</span>,</span>
+<span id="cb23-317"><a href="#cb23-317" aria-hidden="true" tabindex="-1"></a>    <span class="at">color    =</span> <span class="cn">NULL</span></span>
+<span id="cb23-318"><a href="#cb23-318" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb23-319"><a href="#cb23-319" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb23-320"><a href="#cb23-320" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span>
+<span id="cb23-321"><a href="#cb23-321" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-322"><a href="#cb23-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-323"><a href="#cb23-323" aria-hidden="true" tabindex="-1"></a><span class="fu">### Tabular Summary at Selected Quantiles</span></span>
+<span id="cb23-324"><a href="#cb23-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-325"><a href="#cb23-325" aria-hidden="true" tabindex="-1"></a><span class="in">```{r qte-full-table}</span></span>
+<span id="cb23-326"><a href="#cb23-326" aria-hidden="true" tabindex="-1"></a>selected_tau <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="fl">0.25</span>, <span class="fl">0.50</span>, <span class="fl">0.75</span>, <span class="fl">0.90</span>)</span>
+<span id="cb23-327"><a href="#cb23-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-328"><a href="#cb23-328" aria-hidden="true" tabindex="-1"></a>qte_no_cov_sel <span class="ot">&lt;-</span> <span class="fu">sapply</span>(selected_tau, <span class="cf">function</span>(t)</span>
+<span id="cb23-329"><a href="#cb23-329" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg, <span class="at">tau =</span> t, <span class="at">data =</span> data_penn)<span class="sc">$</span>coef[<span class="dv">2</span>])</span>
+<span id="cb23-330"><a href="#cb23-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-331"><a href="#cb23-331" aria-hidden="true" tabindex="-1"></a>qte_cov_sel <span class="ot">&lt;-</span> <span class="fu">sapply</span>(selected_tau, <span class="cf">function</span>(t)</span>
+<span id="cb23-332"><a href="#cb23-332" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg <span class="sc">+</span> female <span class="sc">+</span> black, <span class="at">tau =</span> t, <span class="at">data =</span> data_penn)<span class="sc">$</span>coef[<span class="dv">2</span>])</span>
+<span id="cb23-333"><a href="#cb23-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-334"><a href="#cb23-334" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb23-335"><a href="#cb23-335" aria-hidden="true" tabindex="-1"></a>  <span class="at">tau        =</span> selected_tau,</span>
+<span id="cb23-336"><a href="#cb23-336" aria-hidden="true" tabindex="-1"></a>  <span class="at">QTE_no_cov =</span> <span class="fu">round</span>(qte_no_cov_sel, <span class="dv">4</span>),</span>
+<span id="cb23-337"><a href="#cb23-337" aria-hidden="true" tabindex="-1"></a>  <span class="at">QTE_cov    =</span> <span class="fu">round</span>(qte_cov_sel, <span class="dv">4</span>),</span>
+<span id="cb23-338"><a href="#cb23-338" aria-hidden="true" tabindex="-1"></a>  <span class="at">ATE_no_cov =</span> <span class="fu">round</span>(ate_no_cov, <span class="dv">4</span>),</span>
+<span id="cb23-339"><a href="#cb23-339" aria-hidden="true" tabindex="-1"></a>  <span class="at">ATE_cov    =</span> <span class="fu">round</span>(ate_cov, <span class="dv">4</span>)</span>
+<span id="cb23-340"><a href="#cb23-340" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-341"><a href="#cb23-341" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb23-342"><a href="#cb23-342" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"τ"</span>, <span class="st">"QTE (no cov.)"</span>, <span class="st">"QTE (w/ cov.)"</span>,</span>
+<span id="cb23-343"><a href="#cb23-343" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"ATE (no cov.)"</span>, <span class="st">"ATE (w/ cov.)"</span>),</span>
+<span id="cb23-344"><a href="#cb23-344" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption   =</span> <span class="st">"QTE and ATE with and without covariate adjustment"</span></span>
+<span id="cb23-345"><a href="#cb23-345" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb23-346"><a href="#cb23-346" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>),</span>
+<span id="cb23-347"><a href="#cb23-347" aria-hidden="true" tabindex="-1"></a>                <span class="at">full_width =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-348"><a href="#cb23-348" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_header_above</span>(<span class="fu">c</span>(<span class="st">" "</span> <span class="ot">=</span> <span class="dv">1</span>, <span class="st">"Quantile Regression"</span> <span class="ot">=</span> <span class="dv">2</span>, <span class="st">"OLS"</span> <span class="ot">=</span> <span class="dv">2</span>))</span>
+<span id="cb23-349"><a href="#cb23-349" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-350"><a href="#cb23-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-351"><a href="#cb23-351" aria-hidden="true" tabindex="-1"></a><span class="fu">## Key Takeaways</span></span>
+<span id="cb23-352"><a href="#cb23-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-353"><a href="#cb23-353" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb23-354"><a href="#cb23-354" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
+<span id="cb23-355"><a href="#cb23-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-356"><a href="#cb23-356" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**QTEs reveal heterogeneity** the ATE hides. A flat QTE curve means constant treatment effects; departures from flatness reveal distributional heterogeneity.</span>
+<span id="cb23-357"><a href="#cb23-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-358"><a href="#cb23-358" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Without covariates, QTE = difference in sample quantiles**, just as ATE = difference in sample means. Quantile regression is just a convenient — and extensible — way to compute this.</span>
+<span id="cb23-359"><a href="#cb23-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-360"><a href="#cb23-360" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Adding discrete covariates improves precision** without complicating the estimator. With continuous covariates, more sophisticated methods (kernel, propensity score) are needed.</span>
+<span id="cb23-361"><a href="#cb23-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-362"><a href="#cb23-362" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Interpretation depends on rank invariance.** Under rank invariance, $\text{QTE}_\tau$ describes the effect on individuals at the $(\tau \times 100)$-th percentile. With rank reversals, it describes how the quantile itself shifts — not necessarily the same individuals.</span>
+<span id="cb23-363"><a href="#cb23-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-364"><a href="#cb23-364" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>**The sign here:** negative QTEs mean the bonus *reduced* unemployment duration — workers found jobs faster. This is the intended mechanism of the program.</span>
+<span id="cb23-365"><a href="#cb23-365" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb23-366"><a href="#cb23-366" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-367"><a href="#cb23-367" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb23-368"><a href="#cb23-368" aria-hidden="true" tabindex="-1"></a><span class="fu">## Going further: inference</span></span>
+<span id="cb23-369"><a href="#cb23-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-370"><a href="#cb23-370" aria-hidden="true" tabindex="-1"></a>For confidence bands around QTEs, use bootstrap standard errors via <span class="in">`summary.rq()`</span>:</span>
+<span id="cb23-371"><a href="#cb23-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-372"><a href="#cb23-372" aria-hidden="true" tabindex="-1"></a><span class="in">```r</span></span>
+<span id="cb23-373"><a href="#cb23-373" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">rq</span>(<span class="fu">log</span>(inuidur1) <span class="sc">~</span> tg <span class="sc">+</span> female <span class="sc">+</span> black, <span class="at">tau =</span> <span class="fl">0.5</span>, <span class="at">data =</span> data_penn),</span>
+<span id="cb23-374"><a href="#cb23-374" aria-hidden="true" tabindex="-1"></a>        <span class="at">se =</span> <span class="st">"boot"</span>)</span>
+<span id="cb23-375"><a href="#cb23-375" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb23-376"><a href="#cb23-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-377"><a href="#cb23-377" aria-hidden="true" tabindex="-1"></a>For simultaneous confidence bands across all quantiles and automatic handling of continuous covariates, see the <span class="in">`qte`</span> R package.</span>
+<span id="cb23-378"><a href="#cb23-378" aria-hidden="true" tabindex="-1"></a>:::</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
