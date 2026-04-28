@@ -1,0 +1,172 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Applied Causal Analysis",
+    "section": "",
+    "text": "0.1 Goals\nThis lecture illustrates two foundational results of large sample theory in the context of the OLS estimator:\nThe key message is that these results hold across very different data generating processes (DGPs). We will verify this by running Monte Carlo simulations under three DGPs that differ in how errors are distributed.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#goals",
+    "href": "index.html#goals",
+    "title": "Applied Causal Analysis",
+    "section": "",
+    "text": "Law of Large Numbers (LLN) — As the sample size grows, the OLS estimator concentrates around the true parameter value.\nCentral Limit Theorem (CLT) — Once properly recentered and scaled, the OLS estimator converges in distribution to a standard normal, regardless of the shape of the error distribution.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#monte-carlo-design",
+    "href": "index.html#monte-carlo-design",
+    "title": "Applied Causal Analysis",
+    "section": "0.2 Monte Carlo Design",
+    "text": "0.2 Monte Carlo Design\nRather than working with a single dataset, we simulate many datasets of varying sizes and track how the OLS estimate of the treatment coefficient \\(\\hat{\\beta}\\) behaves across those repetitions. This gives us an empirical picture of the sampling distribution of \\(\\hat{\\beta}\\) — something we cannot observe in practice but can study through simulation.\nAll three DGPs share the same structural equation:\n\\[Y_i = \\beta \\cdot D_i + X_i'\\gamma + \\varepsilon_i, \\quad \\beta = 1\\]\nwhere \\(D_i\\) is a binary treatment indicator (assigned with probability 0.5), \\(X_i\\) includes a constant, a standard normal covariate, and a uniform covariate, and \\(\\gamma = (0.5,\\ 2,\\ -1)'\\). The DGPs differ only in the distribution of \\(\\varepsilon_i\\):\n\n\n\n\n\n\n\n\nDGP\nError distribution\nKey feature\n\n\n\n\nModel 1\n\\(\\varepsilon_i \\sim \\mathcal{N}(0, 1)\\)\nHomoskedastic errors\n\n\nModel 2\n\\(\\varepsilon_i \\sim \\mathcal{N}(0,\\ e^{0.4 X_{2i}})\\)\nHeteroskedastic errors\n\n\nModel 3\n\\(\\varepsilon_i \\sim t_{2.01}\\)\nHeavy-tailed errors",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#setup",
+    "href": "index.html#setup",
+    "title": "Applied Causal Analysis",
+    "section": "0.3 Setup",
+    "text": "0.3 Setup\nRun this first. It loads all required packages and the shared function library.\n\nlibrary(tidyverse)\nlibrary(kableExtra)\n\nsource(\"R/ACA_Function_Library.r\")\n\nset.seed(42, kind = \"L'Ecuyer-CMRG\")\n\n# Simulation parameters (shared across all chapters)\nsample_sizes    &lt;- c(50, 100, 1000)\nnum_simulations &lt;- 1000",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "part1_lln.html",
+    "href": "part1_lln.html",
+    "title": "2  Law of Large Numbers",
+    "section": "",
+    "text": "2.1 The LLN for OLS\nUnder mild regularity conditions, the OLS estimator is consistent: as the sample size \\(n \\to \\infty\\),\n\\[\\hat{\\beta} \\xrightarrow{p} \\beta.\\]\nThis is a consequence of the Law of Large Numbers. What it means in practice: if we repeated our experiment many times with a large sample, the estimates would cluster tightly around the true value \\(\\beta = 1\\). With a small sample, the estimates are more spread out — but they are still centered on the right value.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Law of Large Numbers</span>"
+    ]
+  },
+  {
+    "objectID": "part1_lln.html#the-lln-for-ols",
+    "href": "part1_lln.html#the-lln-for-ols",
+    "title": "2  Law of Large Numbers",
+    "section": "",
+    "text": "NoteWhat consistency does and does not say\n\n\n\nConsistency tells us that \\(\\hat{\\beta}\\) is eventually close to \\(\\beta\\) — but it says nothing about how fast the convergence happens or the shape of the sampling distribution. That is the job of the CLT, covered in the next chapter.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Law of Large Numbers</span>"
+    ]
+  },
+  {
+    "objectID": "part1_lln.html#simulation",
+    "href": "part1_lln.html#simulation",
+    "title": "2  Law of Large Numbers",
+    "section": "2.2 Simulation",
+    "text": "2.2 Simulation\nWe run 1,000 simulations for each of three sample sizes (\\(n \\in \\{50, 100, 1000\\}\\)) and store the OLS estimate of \\(\\hat{\\beta}\\) from each. We do this separately for all three DGPs.\n\n2.2.1 Model 1: Homoskedastic Errors\n\\(\\varepsilon_i \\overset{iid}{\\sim} \\mathcal{N}(0, 1)\\). This is the textbook case: errors are well-behaved and identically distributed.\n\nsim_m1 &lt;- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)\n\nfor (t in seq_along(sample_sizes)) {\n  for (s in 1:num_simulations) {\n    data    &lt;- gen_data(n = sample_sizes[t], dgp = \"model 1\")\n    reg     &lt;- lm(data$Y ~ data$D + data$X[, 2] + data$X[, 3])\n    sim_m1[t, s] &lt;- coef(reg)[2]\n  }\n}\n\nplot_asympt(sample_sizes, sim_m1) +\n  geom_vline(xintercept = 1, color = \"white\", linetype = \"dashed\", linewidth = 0.8) +\n  labs(title = \"LLN — Model 1: Homoskedastic Errors\",\n       subtitle = \"Dashed line = true β = 1\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipWhat to look for\n\n\n\nAs \\(n\\) increases from 50 to 1000, the density concentrates tightly around \\(\\beta = 1\\). This is the LLN in action: more data means less variability in the estimate.\n\n\n\n\n2.2.2 Model 2: Heteroskedastic Errors\n\\(\\varepsilon_i \\sim \\mathcal{N}(0,\\ e^{0.4 X_{2i}})\\). The variance of the error now depends on the covariate \\(X_2\\). OLS remains consistent (heteroskedasticity does not cause bias), but the sampling distribution may be wider.\n\nsim_m2 &lt;- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)\n\nfor (t in seq_along(sample_sizes)) {\n  for (s in 1:num_simulations) {\n    data    &lt;- gen_data(n = sample_sizes[t], dgp = \"model 2\")\n    reg     &lt;- lm(data$Y ~ data$D + data$X[, 2] + data$X[, 3])\n    sim_m2[t, s] &lt;- coef(reg)[2]\n  }\n}\n\nplot_asympt(sample_sizes, sim_m2) +\n  geom_vline(xintercept = 1, color = \"white\", linetype = \"dashed\", linewidth = 0.8) +\n  labs(title = \"LLN — Model 2: Heteroskedastic Errors\",\n       subtitle = \"Dashed line = true β = 1\") +\n  theme(\n      panel.background  = element_rect(fill = \"#1e1e2e\"),\n      plot.background   = element_rect(fill = \"#1e1e2e\"),\n      panel.grid.major  = element_line(color = \"#3e3e5e\"),\n      panel.grid.minor  = element_line(color = \"#2e2e4e\"),\n      text              = element_text(color = \"white\"),\n      axis.text         = element_text(color = \"white\"),\n      legend.background = element_rect(fill = \"#1e1e2e\"),\n      legend.text       = element_text(color = \"white\"),\n      legend.title      = element_text(color = \"white\"),\n      legend.key        = element_rect(fill = NA)\n    )\n\n\n\n\n\n\n\n\n\n\n2.2.3 Model 3: Heavy-Tailed Errors\n\\(\\varepsilon_i \\sim t_{2.01}\\). The \\(t\\)-distribution with just over 2 degrees of freedom has very heavy tails — extreme observations are much more likely than under a normal distribution. This is a stress test for the LLN.\n\nsim_m3 &lt;- matrix(NA, nrow = length(sample_sizes), ncol = num_simulations)\n\nfor (t in seq_along(sample_sizes)) {\n  for (s in 1:num_simulations) {\n    data    &lt;- gen_data(n = sample_sizes[t], dgp = \"model 3\")\n    reg     &lt;- lm(data$Y ~ data$D + data$X[, 2] + data$X[, 3])\n    sim_m3[t, s] &lt;- coef(reg)[2]\n  }\n}\n\nplot_asympt(sample_sizes, sim_m3) +\n  geom_vline(xintercept = 1, color = \"white\", linetype = \"dashed\", linewidth = 0.8) +\n  labs(title = \"LLN — Model 3: Heavy-Tailed Errors (t₂.₀₁)\",\n       subtitle = \"Dashed line = true β = 1\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nImportantHeavy tails slow convergence — but do not prevent it\n\n\n\nWith \\(t_{2.01}\\) errors, the sampling distribution is noticeably wider at \\(n = 50\\) and still somewhat wider at \\(n = 100\\) compared to Models 1 and 2. But by \\(n = 1000\\) the estimates concentrate around \\(\\beta = 1\\) just as before. The LLN holds — convergence is just slower when errors are more extreme.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Law of Large Numbers</span>"
+    ]
+  },
+  {
+    "objectID": "part1_lln.html#summary-bias-and-spread-across-dgps",
+    "href": "part1_lln.html#summary-bias-and-spread-across-dgps",
+    "title": "2  Law of Large Numbers",
+    "section": "2.3 Summary: Bias and Spread Across DGPs",
+    "text": "2.3 Summary: Bias and Spread Across DGPs\nThe table below reports the mean and standard deviation of \\(\\hat{\\beta}\\) across the 1,000 simulations for each DGP and sample size. A well-behaved estimator should have a mean close to 1 and a standard deviation that shrinks as \\(n\\) grows.\n\nmake_summary &lt;- function(sim_mat, label) {\n  do.call(rbind, lapply(seq_along(sample_sizes), function(i) {\n    data.frame(\n      DGP    = label,\n      n      = sample_sizes[i],\n      Mean   = round(mean(sim_mat[i, ]), 4),\n      SD     = round(sd(sim_mat[i, ]), 4)\n    )\n  }))\n}\n\nbind_rows(\n  make_summary(sim_m1, \"Model 1 (Homoskedastic)\"),\n  make_summary(sim_m2, \"Model 2 (Heteroskedastic)\"),\n  make_summary(sim_m3, \"Model 3 (Heavy tails)\")\n) %&gt;%\n  kbl(caption = \"Sampling distribution of β̂ across DGPs and sample sizes\",\n      col.names = c(\"DGP\", \"n\", \"Mean(β̂)\", \"SD(β̂)\")) %&gt;%\n  kable_styling(bootstrap_options = c(\"striped\", \"hover\"), full_width = FALSE)\n\n\nSampling distribution of β̂ across DGPs and sample sizes\n\n\nDGP\nn\nMean(β̂)\nSD(β̂)\n\n\n\n\nModel 1 (Homoskedastic)\n50\n0.9755\n0.2856\n\n\nModel 1 (Homoskedastic)\n100\n1.0034\n0.2036\n\n\nModel 1 (Homoskedastic)\n1000\n1.0016\n0.0644\n\n\nModel 2 (Heteroskedastic)\n50\n0.9920\n0.2919\n\n\nModel 2 (Heteroskedastic)\n100\n0.9904\n0.2055\n\n\nModel 2 (Heteroskedastic)\n1000\n1.0003\n0.0677\n\n\nModel 3 (Heavy tails)\n50\n1.0000\n0.7538\n\n\nModel 3 (Heavy tails)\n100\n1.0307\n0.6073\n\n\nModel 3 (Heavy tails)\n1000\n0.9987\n0.2650\n\n\n\n\n\n\n\n\n\n\n\nNoteReading the table\n\n\n\n\nMean(β̂) ≈ 1 across all DGPs and sample sizes: OLS is unbiased (or at least consistent).\nSD(β̂) decreases with n: the estimator becomes more precise as we get more data.\nSD is largest for Model 3: heavy tails inflate variability, especially at small \\(n\\).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Law of Large Numbers</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html",
+    "href": "part2_clt.html",
+    "title": "3  Central Limit Theorem",
+    "section": "",
+    "text": "3.1 The CLT for OLS\nThe LLN tells us that \\(\\hat{\\beta}\\) converges to \\(\\beta\\) as \\(n\\) grows. The Central Limit Theorem goes further: it tells us the rate at which this happens and the shape of the sampling distribution.\nSpecifically, under standard regularity conditions:\n\\[\\sqrt{n}(\\hat{\\beta} - \\beta) \\xrightarrow{d} \\mathcal{N}(0,\\ V)\\]\nwhere \\(V\\) is the asymptotic variance of the estimator. The key implication: if we recenter \\(\\hat{\\beta}\\) by subtracting the true value \\(\\beta = 1\\) and rescale by \\(\\sqrt{n}\\), the resulting quantity should look approximately standard normal — no matter what the underlying error distribution is.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html#the-clt-for-ols",
+    "href": "part2_clt.html#the-clt-for-ols",
+    "title": "3  Central Limit Theorem",
+    "section": "",
+    "text": "ImportantWhy this is remarkable\n\n\n\nThe CLT holds even when errors are heteroskedastic (Model 2) or heavy-tailed (Model 3). The normality in the limit comes not from the errors being normal, but from the averaging that OLS performs. This is the mathematical foundation for the \\(t\\)-tests and confidence intervals we use in practice.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html#standardizing-the-estimator",
+    "href": "part2_clt.html#standardizing-the-estimator",
+    "title": "3  Central Limit Theorem",
+    "section": "3.2 Standardizing the Estimator",
+    "text": "3.2 Standardizing the Estimator\nFor each simulation draw \\(s\\) and sample size \\(n_t\\), we compute the standardized statistic:\n\\[Z_{t,s} = \\sqrt{n_t} \\cdot (\\hat{\\beta}_{t,s} - 1)\\]\nIf the CLT approximation is good, the distribution of \\(Z_{t,s}\\) across simulations should resemble \\(\\mathcal{N}(0, V)\\). We then overlay the standard normal density to assess the quality of the approximation.\n\n# Standardize: recenter and scale by sqrt(n)\nstand &lt;- function(sim_mat) {\n  mat &lt;- matrix(NA, nrow = nrow(sim_mat), ncol = ncol(sim_mat))\n  for (t in seq_along(sample_sizes)) {\n    mat[t, ] &lt;- (sim_mat[t, ] - 1) * sqrt(sample_sizes[t])\n  }\n  mat\n}\n\nstd_m1 &lt;- stand(sim_m1)\nstd_m2 &lt;- stand(sim_m2)\nstd_m3 &lt;- stand(sim_m3)",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html#helper-overlaying-the-normal-approximation",
+    "href": "part2_clt.html#helper-overlaying-the-normal-approximation",
+    "title": "3  Central Limit Theorem",
+    "section": "3.3 Helper: Overlaying the Normal Approximation",
+    "text": "3.3 Helper: Overlaying the Normal Approximation\nThe plot_asympt() function from the library produces the density plots. We add a standard normal density curve on top to assess how well the normal approximation fits.\n\n# Build a ggplot-friendly overlay with the standard normal\nplot_clt &lt;- function(sim_stand, title_str, subtitle_str = NULL) {\n  results_df &lt;- do.call(rbind, lapply(seq_along(sample_sizes), function(i) {\n    data.frame(\n      sample_size = factor(sample_sizes[i]),\n      z           = sim_stand[i, ]\n    )\n  }))\n\n  ggplot(results_df, aes(x = z, fill = sample_size)) +\n    geom_density(alpha = 0.45) +\n    labs(title    = title_str,\n         subtitle = subtitle_str,\n         x        = expression(sqrt(n) * (hat(beta) - beta)),\n         y        = \"Density\",\n         fill     = \"Sample Size\") +\n    theme_minimal(base_size = 13) +\n    theme(\n      panel.background  = element_rect(fill = \"#1e1e2e\"),\n      plot.background   = element_rect(fill = \"#1e1e2e\"),\n      panel.grid.major  = element_line(color = \"#3e3e5e\"),\n      panel.grid.minor  = element_line(color = \"#2e2e4e\"),\n      text              = element_text(color = \"white\"),\n      axis.text         = element_text(color = \"white\"),\n      legend.background = element_rect(fill = \"#1e1e2e\"),\n      legend.text       = element_text(color = \"white\"),\n      legend.title      = element_text(color = \"white\"),\n      legend.key        = element_rect(fill = NA)\n    )\n}\n\n\n\n\n\n\n\nNoteReading the plots below\n\n\n\n\nThe dashed white curve is the standard normal density \\(\\mathcal{N}(0, 1)\\) — the theoretical limit predicted by the CLT.\nThe colored densities are empirical distributions of \\(\\sqrt{n}(\\hat\\beta - 1)\\) from the 1,000 simulations.\nAs \\(n\\) increases, the empirical density should get closer to the white curve.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html#model-1-homoskedastic-errors",
+    "href": "part2_clt.html#model-1-homoskedastic-errors",
+    "title": "3  Central Limit Theorem",
+    "section": "3.4 Model 1: Homoskedastic Errors",
+    "text": "3.4 Model 1: Homoskedastic Errors\n\\(\\varepsilon_i \\overset{iid}{\\sim} \\mathcal{N}(0,1)\\). Since errors are already normal, we expect the CLT approximation to be excellent even at small \\(n\\).\n\nplot_clt(std_m1,\n         title_str    = \"CLT — Model 1: Homoskedastic Errors\",\n         subtitle_str = \"\")\n\n\n\n\n\n\n\n\nEven at \\(n = 50\\), the empirical distribution is already close to normal. This is the easiest case for the CLT.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html#model-2-heteroskedastic-errors",
+    "href": "part2_clt.html#model-2-heteroskedastic-errors",
+    "title": "3  Central Limit Theorem",
+    "section": "3.5 Model 2: Heteroskedastic Errors",
+    "text": "3.5 Model 2: Heteroskedastic Errors\n\\(\\varepsilon_i \\sim \\mathcal{N}(0,\\ e^{0.4 X_{2i}})\\). OLS is still consistent and asymptotically normal, but the asymptotic variance \\(V\\) is different from the homoskedastic case (it involves the sandwich formula). The shape still converges to normal; the scale may differ from 1.\n\nplot_clt(std_m2,\n         title_str    = \"CLT — Model 2: Heteroskedastic Errors\",\n         subtitle_str = \"\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipHeteroskedasticity and the sandwich variance\n\n\n\nUnder heteroskedasticity, the asymptotic variance of \\(\\sqrt{n}\\hat\\beta\\) is not simply \\(\\sigma^2(X'X)^{-1}\\) — it involves the heteroskedasticity-robust (sandwich) variance estimator. The empirical density may not align perfectly with \\(\\mathcal{N}(0,1)\\) because \\(V \\neq 1\\) here, but the shape is still normal for large \\(n\\). In practice, this is why we use HC-robust standard errors.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html#model-3-heavy-tailed-errors",
+    "href": "part2_clt.html#model-3-heavy-tailed-errors",
+    "title": "3  Central Limit Theorem",
+    "section": "3.6 Model 3: Heavy-Tailed Errors",
+    "text": "3.6 Model 3: Heavy-Tailed Errors\n\\(\\varepsilon_i \\sim t_{2.01}\\). This is the most demanding DGP. With barely more than 2 degrees of freedom, the \\(t_{2.01}\\) distribution has a finite variance — but only barely. The CLT still applies, but convergence to normality is much slower.\n\nplot_clt(std_m3,\n         title_str    = \"CLT — Model 3: Heavy-Tailed Errors (t₂.₀₁)\",\n         subtitle_str = \"\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nImportantThe CLT holds — but convergence is slow with heavy tails\n\n\n\nAt \\(n = 50\\) and even \\(n = 100\\), the empirical distribution is visibly heavier-tailed than the normal. This is because occasional extreme draws from the \\(t_{2.01}\\) distribution create large outliers in \\(\\hat\\beta\\). By \\(n = 1000\\) the normal approximation has improved substantially — but it is still less tight than in Models 1 and 2.\nPractical implication: when errors are heavy-tailed, \\(t\\)-tests and confidence intervals based on the normal approximation may be unreliable in small samples. Bootstrap inference (covered elsewhere in the course) can be more trustworthy in such settings.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html#comparison-quality-of-normal-approximation",
+    "href": "part2_clt.html#comparison-quality-of-normal-approximation",
+    "title": "3  Central Limit Theorem",
+    "section": "3.7 Comparison: Quality of Normal Approximation",
+    "text": "3.7 Comparison: Quality of Normal Approximation\nThe table below summarizes how close the standardized estimator is to \\(\\mathcal{N}(0,1)\\) by reporting its mean and standard deviation. A perfect normal approximation would give mean \\(\\approx 0\\) and SD \\(\\approx \\sqrt{V}\\) (which equals 1 only under homoskedasticity).\n\nmake_clt_summary &lt;- function(std_mat, label) {\n  do.call(rbind, lapply(seq_along(sample_sizes), function(i) {\n    data.frame(\n      DGP  = label,\n      n    = sample_sizes[i],\n      Mean = round(mean(std_mat[i, ]), 4),\n      SD   = round(sd(std_mat[i, ]), 4),\n      P5   = round(quantile(std_mat[i, ], 0.05), 4),\n      P95  = round(quantile(std_mat[i, ], 0.95), 4)\n    )\n  }))\n}\n\nbind_rows(\n  make_clt_summary(std_m1, \"Model 1 (Homoskedastic)\"),\n  make_clt_summary(std_m2, \"Model 2 (Heteroskedastic)\"),\n  make_clt_summary(std_m3, \"Model 3 (Heavy tails)\")\n) %&gt;%\n  kbl(\n    caption   = \"Properties of the standardized OLS estimator √n(β̂ − 1) across DGPs\",\n    col.names = c(\"DGP\", \"n\", \"Mean\", \"SD\", \"5th pct.\", \"95th pct.\")\n  ) %&gt;%\n  kable_styling(bootstrap_options = c(\"striped\", \"hover\"), full_width = FALSE) \n\n\nProperties of the standardized OLS estimator √n(β̂ − 1) across DGPs\n\n\n\nDGP\nn\nMean\nSD\n5th pct.\n95th pct.\n\n\n\n\n5%...1\nModel 1 (Homoskedastic)\n50\n-0.1138\n2.0639\n-3.5687\n3.1969\n\n\n5%1...2\nModel 1 (Homoskedastic)\n100\n0.0083\n2.0008\n-3.2683\n3.3484\n\n\n5%2...3\nModel 1 (Homoskedastic)\n1000\n-0.0380\n2.0022\n-3.3692\n3.3865\n\n\n5%...4\nModel 2 (Heteroskedastic)\n50\n0.0561\n2.1134\n-3.5020\n3.4752\n\n\n5%1...5\nModel 2 (Heteroskedastic)\n100\n0.1393\n2.0898\n-3.2226\n3.5465\n\n\n5%2...6\nModel 2 (Heteroskedastic)\n1000\n-0.0130\n2.0552\n-3.5121\n3.2640\n\n\n5%...7\nModel 3 (Heavy tails)\n50\n0.0148\n5.8275\n-8.1984\n7.9615\n\n\n5%1...8\nModel 3 (Heavy tails)\n100\n0.2953\n5.8309\n-8.1449\n8.9026\n\n\n5%2...9\nModel 3 (Heavy tails)\n1000\n0.3797\n5.8736\n-9.4657\n9.4246\n\n\n\n\n\n\n\n\n\n\n\nNoteReading the table\n\n\n\n\nMean ≈ 0 for all DGPs at all \\(n\\): the estimator is unbiased after centering.\nSD tells you the spread of the standardized statistic. Under homoskedasticity with \\(\\sigma = 1\\) we expect this to be close to 1 once properly scaled; under the other DGPs it reflects \\(\\sqrt{V}\\) for the relevant asymptotic variance.\n5th and 95th percentiles: under a perfect \\(\\mathcal{N}(0,1)\\) approximation these should be \\(-1.645\\) and \\(+1.645\\). Heavy tails (Model 3, small \\(n\\)) produce wider percentiles, reflecting the slower convergence.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  },
+  {
+    "objectID": "part2_clt.html#key-takeaways",
+    "href": "part2_clt.html#key-takeaways",
+    "title": "3  Central Limit Theorem",
+    "section": "3.8 Key Takeaways",
+    "text": "3.8 Key Takeaways\n\n\n\n\n\n\nImportantSummary\n\n\n\n\nThe CLT is distribution-free in the limit. Regardless of whether errors are normal, heteroskedastic, or heavy-tailed, \\(\\sqrt{n}(\\hat\\beta - \\beta) \\xrightarrow{d} \\mathcal{N}(0, V)\\).\nThe quality of the approximation depends on the DGP. With well-behaved errors (Model 1), the normal approximation is excellent even at \\(n = 50\\). With heavy tails (Model 3), convergence is much slower and the approximation can be poor at moderate sample sizes.\nHeteroskedasticity changes the variance, not the shape. Under Model 2, the limiting distribution is still normal — but the asymptotic variance \\(V\\) is the sandwich variance, not the homoskedastic formula. This is why HC-robust standard errors matter.\nBootstrap inference is an alternative when the normal approximation is poor. For small samples with heavy-tailed errors, bootstrap confidence intervals can provide better finite-sample coverage than asymptotic \\(t\\)-intervals.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Central Limit Theorem</span>"
+    ]
+  }
+]
