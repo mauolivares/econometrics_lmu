@@ -285,7 +285,7 @@ window.Quarto = {
 <section id="sec-clt-char" class="level2" data-number="4.2">
 <h2 data-number="4.2" class="anchored" data-anchor-id="sec-clt-char"><span class="header-section-number">4.2</span> Why the normal though? The characteristic function argument</h2>
 <p>To see <em>why</em> the limit is normal and not something else, consider the <strong>characteristic function</strong> of <span class="math inline">\(S_n\)</span>. Let <span class="math inline">\(\phi_Y(t) = \mathbb{E}[e^{itY}]\)</span> be the characteristic function of a single centered observation <span class="math inline">\(Y_i - \mu\)</span>.</p>
-<p>Since the <span class="math inline">\(\{Y_i\,1\le i \le n\}}\)</span> are i.i.d., the characteristic function of <span class="math inline">\(S_n = \frac{1}{\sqrt{n}}\sum(Y_i - \mu)\)</span> is:</p>
+<p>Since the <span class="math inline">\(\{Y_i,1\le i \le n\}}\)</span> are i.i.d., the characteristic function of <span class="math inline">\(S_n = \frac{1}{\sqrt{n}}\sum(Y_i - \mu)\)</span> is:</p>
 <p><span class="math display">\[\phi_{S_n}(t) = \left[\phi_Y\!\left(\tfrac{t}{\sqrt{n}}\right)\right]^n\]</span></p>
 <p>Now expand <span class="math inline">\(\phi_Y\)</span> in a Taylor series around <span class="math inline">\(t = 0\)</span>. Using <span class="math inline">\(\mathbb{E}[Y_i - \mu] = 0\)</span> and <span class="math inline">\(\mathbb{E}[(Y_i-\mu)^2] = \sigma^2\)</span>:</p>
 <p><span class="math display">\[\phi_Y\!\left(\tfrac{t}{\sqrt{n}}\right) = 1 - \frac{\sigma^2 t^2}{2n} - \underbrace{\frac{i^3 \kappa_3}{6} \cdot \frac{t^3}{n^{3/2}}}_{\text{skewness term}} - \underbrace{\frac{\kappa_4}{24} \cdot \frac{t^4}{n^2}}_{\text{kurtosis term}} - \cdots\]</span></p>
@@ -1082,7 +1082,7 @@ select { padding: 4px 6px; border-radius: 4px; border: 1px solid #ccc; font-size
 <span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>To see *why* the limit is normal and not something else, consider the **characteristic function** of $S_n$. Let $\phi_Y(t) = \mathbb{E}<span class="co">[</span><span class="ot">e^{itY}</span><span class="co">]</span>$ be the characteristic function of a single centered observation $Y_i - \mu$.</span>
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>Since the $<span class="sc">\{</span>Y_i\,1\le i \le n<span class="sc">\}</span>}$ are i.i.d., the characteristic function of $S_n = \frac{1}{\sqrt{n}}\sum(Y_i - \mu)$ is:</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>Since the $<span class="sc">\{</span>Y_i,1\le i \le n<span class="sc">\}</span>}$ are i.i.d., the characteristic function of $S_n = \frac{1}{\sqrt{n}}\sum(Y_i - \mu)$ is:</span>
 <span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>$$\phi_{S_n}(t) = \left<span class="co">[</span><span class="ot">\phi_Y\!\left(\tfrac{t}{\sqrt{n}}\right)\right</span><span class="co">]</span>^n$$</span>
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
