@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; Central Limit Theorem – Applied Causal Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./part2_clt.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-acf12a64177840b8d86f2d4f01b2e9fb.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-abfa4615eba2ed0d4bb7fb949ed9c296.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./clt_chapter.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Central Limit Theorem</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Applied Causal Analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part1_lln.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Law of Large Numbers</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part2_clt.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Limit Theorem</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./clt_chapter.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Central Limit Theorem</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-clt-scaling" id="toc-sec-clt-scaling" class="nav-link active" data-scroll-target="#sec-clt-scaling"><span class="header-section-number">4.1</span> The scaled and centered sum</a></li>
+  <li><a href="#sec-clt-char" id="toc-sec-clt-char" class="nav-link" data-scroll-target="#sec-clt-char"><span class="header-section-number">4.2</span> Why the normal? The characteristic function argument</a></li>
+  <li><a href="#sec-clt-intuition" id="toc-sec-clt-intuition" class="nav-link" data-scroll-target="#sec-clt-intuition"><span class="header-section-number">4.3</span> Three angles of intuition</a>
+  <ul class="collapse">
+  <li><a href="#angle-1-the-normal-as-a-fixed-point" id="toc-angle-1-the-normal-as-a-fixed-point" class="nav-link" data-scroll-target="#angle-1-the-normal-as-a-fixed-point"><span class="header-section-number">4.3.1</span> Angle 1: The normal as a fixed point</a></li>
+  <li><a href="#angle-2-entropy-maximization" id="toc-angle-2-entropy-maximization" class="nav-link" data-scroll-target="#angle-2-entropy-maximization"><span class="header-section-number">4.3.2</span> Angle 2: Entropy maximization</a></li>
+  <li><a href="#angle-3-convolutions-smooth-everything-out" id="toc-angle-3-convolutions-smooth-everything-out" class="nav-link" data-scroll-target="#angle-3-convolutions-smooth-everything-out"><span class="header-section-number">4.3.3</span> Angle 3: Convolutions smooth everything out</a></li>
+  </ul></li>
+  <li><a href="#sec-clt-sim" id="toc-sec-clt-sim" class="nav-link" data-scroll-target="#sec-clt-sim"><span class="header-section-number">4.4</span> Interactive simulation</a></li>
+  <li><a href="#sec-clt-takeaways" id="toc-sec-clt-takeaways" class="nav-link" data-scroll-target="#sec-clt-takeaways"><span class="header-section-number">4.5</span> Key takeaways</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span id="sec-clt" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Central Limit Theorem</span></span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The Law of Large Numbers tells us that <span class="math inline">\(\hat{\beta}\)</span> converges to <span class="math inline">\(\beta\)</span> as <span class="math inline">\(n\)</span> grows. The <strong>Central Limit Theorem</strong> goes further: it tells us the <em>rate</em> at which this happens and, more strikingly, the <em>shape</em> of the sampling distribution.</p>
+<p>Specifically, under standard regularity conditions and an i.i.d. sample with finite variance:</p>
+<p><span class="math display">\[\sqrt{n}\!\left(\mathbb{E}_n[Y] - \mathbb{E}[Y]\right) \xrightarrow{d} \mathcal{N}\!\left(0,\, \mathbb{V}[Y]\right)\]</span></p>
+<p>The key implication: if we <strong>recenter</strong> the sample mean by subtracting the true population mean and <strong>rescale</strong> by <span class="math inline">\(\sqrt{n}\)</span>, the resulting quantity converges in distribution to a standard normal — <em>no matter what the underlying distribution of <span class="math inline">\(Y\)</span> is</em>, provided it has finite variance.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Why this is remarkable
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The normality in the limit does not come from <span class="math inline">\(Y\)</span> being normally distributed. It emerges purely from the <em>averaging</em> process itself. This is the mathematical foundation for <span class="math inline">\(t\)</span>-tests and confidence intervals in virtually all of econometrics.</p>
+</div>
+</div>
+<hr>
+<section id="sec-clt-scaling" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="sec-clt-scaling"><span class="header-section-number">4.1</span> The scaled and centered sum</h2>
+<p>Let <span class="math inline">\(Y_1, \ldots, Y_n\)</span> be i.i.d. with mean <span class="math inline">\(\mu = \mathbb{E}[Y]\)</span> and finite variance <span class="math inline">\(\sigma^2 = \mathbb{V}[Y]\)</span>. Define the sample mean:</p>
+<p><span class="math display">\[\mathbb{E}_n[Y] = \frac{1}{n}\sum_{i=1}^n Y_i\]</span></p>
+<p>Now consider the <strong>centered</strong> version, scaled by <span class="math inline">\(\sqrt{n}\)</span>:</p>
+<p><span class="math display">\[S_n \;=\; \sqrt{n}\!\left(\mathbb{E}_n[Y] - \mu\right) \;=\; \frac{1}{\sqrt{n}}\sum_{i=1}^n (Y_i - \mu)\]</span></p>
+<p><strong>Step 1 — Mean is zero.</strong></p>
+<p><span class="math display">\[\mathbb{E}[S_n] = \frac{1}{\sqrt{n}}\sum_{i=1}^n \mathbb{E}[Y_i - \mu] = 0\]</span></p>
+<p><strong>Step 2 — Variance is <span class="math inline">\(\sigma^2\)</span>.</strong></p>
+<p>By independence:</p>
+<p><span class="math display">\[\mathbb{V}[S_n] = \frac{1}{n}\sum_{i=1}^n \mathbb{V}[Y_i - \mu] = \frac{1}{n} \cdot n\sigma^2 = \sigma^2\]</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why multiply by <span class="math inline">\(\sqrt{n}\)</span> and not <span class="math inline">\(n\)</span>?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The raw sample mean <span class="math inline">\(\mathbb{E}_n[Y]\)</span> has variance <span class="math inline">\(\sigma^2/n\)</span>, which collapses to zero. Multiplying by <span class="math inline">\(\sqrt{n}\)</span> exactly offsets this shrinkage, keeping the variance at a fixed, finite level <span class="math inline">\(\sigma^2\)</span>. This is why <span class="math inline">\(\sqrt{n}\)</span> is the right normalizing rate — it is the unique rate that produces a non-degenerate limit.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="sec-clt-char" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="sec-clt-char"><span class="header-section-number">4.2</span> Why the normal? The characteristic function argument</h2>
+<p>To see <em>why</em> the limit is normal and not something else, consider the <strong>characteristic function</strong> (Fourier transform) of <span class="math inline">\(S_n\)</span>. Let <span class="math inline">\(\phi_Y(t) = \mathbb{E}[e^{itY}]\)</span> be the characteristic function of a single centered observation <span class="math inline">\(Y_i - \mu\)</span>.</p>
+<p>Since the <span class="math inline">\(Y_i\)</span> are i.i.d., the characteristic function of <span class="math inline">\(S_n = \frac{1}{\sqrt{n}}\sum(Y_i - \mu)\)</span> is:</p>
+<p><span class="math display">\[\phi_{S_n}(t) = \left[\phi_Y\!\left(\tfrac{t}{\sqrt{n}}\right)\right]^n\]</span></p>
+<p>Now expand <span class="math inline">\(\phi_Y\)</span> in a Taylor series around <span class="math inline">\(t = 0\)</span>. Using <span class="math inline">\(\mathbb{E}[Y_i - \mu] = 0\)</span> and <span class="math inline">\(\mathbb{E}[(Y_i-\mu)^2] = \sigma^2\)</span>:</p>
+<p><span class="math display">\[\phi_Y\!\left(\tfrac{t}{\sqrt{n}}\right) = 1 - \frac{\sigma^2 t^2}{2n} - \underbrace{\frac{i^3 \kappa_3}{6} \cdot \frac{t^3}{n^{3/2}}}_{\text{skewness term}} - \underbrace{\frac{\kappa_4}{24} \cdot \frac{t^4}{n^2}}_{\text{kurtosis term}} - \cdots\]</span></p>
+<p>where <span class="math inline">\(\kappa_3, \kappa_4, \ldots\)</span> are the cumulants (skewness, excess kurtosis, …) of <span class="math inline">\(Y\)</span>.</p>
+<p>Raising this to the <span class="math inline">\(n\)</span>-th power and taking <span class="math inline">\(n \to \infty\)</span>:</p>
+<p><span class="math display">\[\phi_{S_n}(t) = \left[1 - \frac{\sigma^2 t^2}{2n} - O(n^{-3/2})\right]^n \;\longrightarrow\; e^{-\sigma^2 t^2/2}\]</span></p>
+<p>This is <strong>precisely</strong> the characteristic function of <span class="math inline">\(\mathcal{N}(0, \sigma^2)\)</span>.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>The key insight
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Notice what happens to each higher-order term as <span class="math inline">\(n \to \infty\)</span>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 72%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Shrinks at rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Variance (<span class="math inline">\(\kappa_2\)</span>)</td>
+<td>Stays fixed (by design of the <span class="math inline">\(\sqrt{n}\)</span> scaling)</td>
+</tr>
+<tr class="even">
+<td>Skewness (<span class="math inline">\(\kappa_3\)</span>)</td>
+<td><span class="math inline">\(n^{-1/2} \to 0\)</span></td>
+</tr>
+<tr class="odd">
+<td>Excess kurtosis (<span class="math inline">\(\kappa_4\)</span>)</td>
+<td><span class="math inline">\(n^{-1} \to 0\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(k\)</span>-th cumulant (<span class="math inline">\(\kappa_k\)</span>, <span class="math inline">\(k \geq 3\)</span>)</td>
+<td><span class="math inline">\(n^{-(k-2)/2} \to 0\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Averaging destroys higher-moment information faster than it destroys variance. The mean and variance are pinned — everything else vanishes. The normal distribution is the <em>unique</em> distribution with finite variance for which all cumulants beyond the second are zero. It is the only distribution that survives.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="sec-clt-intuition" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="sec-clt-intuition"><span class="header-section-number">4.3</span> Three angles of intuition</h2>
+<p>Students often accept the <em>statement</em> of the CLT but struggle to see <em>why</em> the normal appears rather than some other distribution. Here are three complementary perspectives.</p>
+<section id="angle-1-the-normal-as-a-fixed-point" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="angle-1-the-normal-as-a-fixed-point"><span class="header-section-number">4.3.1</span> Angle 1: The normal as a fixed point</h3>
+<p>The characteristic function argument above shows that repeated averaging is an operator on distributions, and <span class="math inline">\(\mathcal{N}(0, \sigma^2)\)</span> is the <strong>fixed point</strong> of that operator. Any distribution with finite variance gets pulled toward the normal under averaging, the way iterating a contraction mapping pulls you to a fixed point.</p>
+</section>
+<section id="angle-2-entropy-maximization" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="angle-2-entropy-maximization"><span class="header-section-number">4.3.2</span> Angle 2: Entropy maximization</h3>
+<p>Among all distributions with a fixed mean <span class="math inline">\(\mu\)</span> and fixed variance <span class="math inline">\(\sigma^2\)</span>, the normal distribution uniquely <strong>maximizes entropy</strong> (differential Shannon entropy). Entropy measures how much information — or “interesting structure” — a distribution carries beyond its first two moments.</p>
+<p>When you average <span class="math inline">\(n\)</span> i.i.d. draws, the skewness of the result shrinks at rate <span class="math inline">\(1/\sqrt{n}\)</span>, the excess kurtosis at rate <span class="math inline">\(1/n\)</span>, and so on. All the idiosyncratic structure of the original distribution is progressively erased. What remains, once only the mean and variance are left standing, is the distribution that makes the fewest additional claims — the one with maximum entropy. That distribution is the normal.</p>
+<p><strong>An analogy that often lands.</strong> Imagine describing a person’s face with many numbers: eye color, nose shape, jawline, freckles, skin texture. Now suppose a process keeps blurring the photo slightly at each step. The specific details — freckles, eye color — disappear first. Eventually all you can make out is the rough oval of a face. That oval is the “maximum entropy face” given the constraint that it’s still a human head. The normal distribution is the statistical equivalent of that oval.</p>
+</section>
+<section id="angle-3-convolutions-smooth-everything-out" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="angle-3-convolutions-smooth-everything-out"><span class="header-section-number">4.3.3</span> Angle 3: Convolutions smooth everything out</h3>
+<p>When you add two independent random variables, you <strong>convolve</strong> their densities. Each convolution makes the result smoother and more symmetric — it irons out bumps, fills in gaps, and spreads mass more evenly. After enough convolutions, the shape is entirely determined by just the mean and variance, and the only shape with those two properties and no others is the normal.</p>
+<p>Students can <em>see</em> this happening in the simulation below: even a bimodal or heavily skewed population produces a beautifully bell-shaped sampling distribution once <span class="math inline">\(n\)</span> is large enough.</p>
+<hr>
+</section>
+</section>
+<section id="sec-clt-sim" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="sec-clt-sim"><span class="header-section-number">4.4</span> Interactive simulation</h2>
+<p>The simulation below lets you choose any population distribution and watch the sampling distribution of the mean evolve as <span class="math inline">\(n\)</span> grows. The orange curve is the normal fit — notice how it tracks the histogram more and more closely as <span class="math inline">\(n\)</span> increases.</p>
+<style>
+.clt-sim-wrap { font-family: inherit; margin: 1.5rem 0; }
+.clt-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.25rem; }
+.clt-ctrl { display: flex; flex-direction: column; gap: 5px; }
+.clt-ctrl label { font-size: 0.8rem; color: #555; font-weight: 500; }
+.clt-val-row { display: flex; align-items: center; gap: 8px; }
+.clt-val-row input[type=range] { flex: 1; }
+.clt-badge { font-size: 0.85rem; font-weight: 600; min-width: 30px; color: #222; }
+.clt-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1rem; }
+.clt-chart-label { font-size: 0.78rem; color: #555; margin-bottom: 4px; }
+.clt-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.clt-stat { background: #f5f5f5; border-radius: 6px; padding: 8px 14px; flex: 1; min-width: 110px; }
+.clt-stat-label { font-size: 0.72rem; color: #777; }
+.clt-stat-val { font-size: 1rem; font-weight: 600; color: #222; }
+.clt-run { margin-top: 12px; padding: 7px 18px; cursor: pointer; border-radius: 5px; border: 1px solid #888; background: white; font-size: 0.85rem; }
+.clt-run:hover { background: #f0f0f0; }
+.clt-note { font-size: 0.75rem; color: #888; margin-top: 10px; }
+select { padding: 4px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.85rem; }
+</style>
+
+<div class="clt-sim-wrap">
+
+<div class="clt-controls">
+  <div class="clt-ctrl">
+    <label>Population distribution</label>
+    <select id="clt-dist">
+      <option value="uniform">Uniform [0, 1]</option>
+      <option value="exp">Exponential (λ = 1)</option>
+      <option value="bimodal">Bimodal (two humps)</option>
+      <option value="bernoulli">Bernoulli (p = 0.3)</option>
+      <option value="triangle">Right-skewed triangle</option>
+    </select>
+  </div>
+  <div class="clt-ctrl">
+    <label>Sample size n</label>
+    <div class="clt-val-row">
+      <input type="range" id="clt-n" min="1" max="100" value="1" step="1">
+      <span class="clt-badge" id="clt-n-val">1</span>
+    </div>
+  </div>
+  <div class="clt-ctrl">
+    <label>Number of simulated means</label>
+    <div class="clt-val-row">
+      <input type="range" id="clt-sim" min="100" max="1000" value="500" step="100">
+      <span class="clt-badge" id="clt-sim-val">500</span>
+    </div>
+  </div>
+  <div class="clt-ctrl" style="justify-content: flex-end;">
+    <button class="clt-run" id="clt-run-btn">Run simulation</button>
+  </div>
+</div>
+
+<div class="clt-charts">
+  <div>
+    <div class="clt-chart-label">Population distribution</div>
+    <div style="position:relative;height:200px;"><canvas id="clt-pop" role="img" aria-label="Population distribution histogram"></canvas></div>
+  </div>
+  <div>
+    <div class="clt-chart-label">Sampling distribution of $\bar{Y}$ — with normal fit</div>
+    <div style="position:relative;height:200px;"><canvas id="clt-samp" role="img" aria-label="Sampling distribution of the mean with normal overlay"></canvas></div>
+  </div>
+</div>
+
+<div class="clt-stats">
+  <div class="clt-stat"><div class="clt-stat-label">Population mean μ</div><div class="clt-stat-val" id="cs-mu">—</div></div>
+  <div class="clt-stat"><div class="clt-stat-label">Population σ</div><div class="clt-stat-val" id="cs-sigma">—</div></div>
+  <div class="clt-stat"><div class="clt-stat-label">Theoretical SE = σ/√n</div><div class="clt-stat-val" id="cs-se">—</div></div>
+  <div class="clt-stat"><div class="clt-stat-label">Observed SD of means</div><div class="clt-stat-val" id="cs-obs">—</div></div>
+  <div class="clt-stat"><div class="clt-stat-label">Skewness of means</div><div class="clt-stat-val" id="cs-skew">—</div></div>
+</div>
+
+<p class="clt-note">Drag the n slider slowly and watch the bell shape emerge. Even bimodal or heavily skewed populations converge to normal. The skewness stat above tracks how quickly the asymmetry washes out.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+(function() {
+  function randNorm(mu, sigma) {
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random();
+    while(v === 0) v = Math.random();
+    return mu + sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  const DISTS = {
+    uniform:  { sample: () => Math.random(),                                      mu: 0.5,   sigma: Math.sqrt(1/12) },
+    exp:      { sample: () => -Math.log(1 - Math.random()),                       mu: 1,     sigma: 1              },
+    bimodal:  { sample: () => Math.random() < 0.5 ? randNorm(0.2,0.07) : randNorm(0.8,0.07), mu: 0.5, sigma: null },
+    bernoulli:{ sample: () => Math.random() < 0.3 ? 1 : 0,                       mu: 0.3,   sigma: Math.sqrt(0.3*0.7) },
+    triangle: { sample: () => 1 - Math.sqrt(1 - Math.random()),                  mu: 1/3,   sigma: null           }
+  };
+
+  function mean(a) { return a.reduce((s,x) => s+x, 0) / a.length; }
+  function std(a)  { const m = mean(a); return Math.sqrt(a.reduce((s,x) => s+(x-m)**2, 0)/a.length); }
+  function skew(a) { const m = mean(a), s = std(a); return s===0?0: a.reduce((t,x)=>t+((x-m)/s)**3,0)/a.length; }
+
+  function histogram(data, bins) {
+    const mn = Math.min(...data), mx = Math.max(...data), w = (mx-mn)/bins;
+    const counts = Array(bins).fill(0);
+    const labels = [];
+    for(let i=0;i<bins;i++) labels.push((mn+i*w+w/2).toFixed(3));
+    data.forEach(v => { let b=Math.floor((v-mn)/w); if(b>=bins)b=bins-1; counts[b]++; });
+    return { labels, density: counts.map(c=>c/data.length/w) };
+  }
+
+  function normalPDF(x, mu, sigma) {
+    return Math.exp(-0.5*((x-mu)/sigma)**2)/(sigma*Math.sqrt(2*Math.PI));
+  }
+
+  let popChart, sampChart;
+
+  function run() {
+    const key  = document.getElementById('clt-dist').value;
+    const n    = parseInt(document.getElementById('clt-n').value);
+    const B    = parseInt(document.getElementById('clt-sim').value);
+    const dist = DISTS[key];
+
+    const popData = Array.from({length: 3000}, dist.sample);
+    const ph = histogram(popData, 30);
+
+    if(popChart) popChart.destroy();
+    popChart = new Chart(document.getElementById('clt-pop'), {
+      type: 'bar',
+      data: { labels: ph.labels, datasets: [{ data: ph.density, backgroundColor: '#185FA5aa', borderWidth: 0, barPercentage:1, categoryPercentage:1 }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{ x:{ticks:{maxTicksLimit:5},grid:{display:false}}, y:{ticks:{maxTicksLimit:4},title:{display:true,text:'density',font:{size:11}}} } }
+    });
+
+    const means = Array.from({length: B}, () => {
+      let s=0; for(let i=0;i<n;i++) s+=dist.sample(); return s/n;
+    });
+    const empMu = mean(means), empSD = std(means), empSkew = skew(means);
+    const sh = histogram(means, 40);
+    const normalLine = sh.labels.map(l => normalPDF(parseFloat(l), empMu, empSD));
+
+    if(sampChart) sampChart.destroy();
+    sampChart = new Chart(document.getElementById('clt-samp'), {
+      type: 'bar',
+      data: { labels: sh.labels, datasets: [
+        { type:'bar',  data: sh.density,  backgroundColor:'#1D9E7566', borderWidth:0, barPercentage:1, categoryPercentage:1 },
+        { type:'line', data: normalLine,  borderColor:'#D85A30', borderWidth:2, pointRadius:0, tension:0.4 }
+      ]},
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{ x:{ticks:{maxTicksLimit:5},grid:{display:false}}, y:{ticks:{maxTicksLimit:4},title:{display:true,text:'density',font:{size:11}}} } }
+    });
+
+    const mu    = dist.mu;
+    const sigma = dist.sigma || empSD * Math.sqrt(n);
+    document.getElementById('cs-mu').textContent    = mu.toFixed(3);
+    document.getElementById('cs-sigma').textContent = sigma.toFixed(3);
+    document.getElementById('cs-se').textContent    = (sigma/Math.sqrt(n)).toFixed(4);
+    document.getElementById('cs-obs').textContent   = empSD.toFixed(4);
+    document.getElementById('cs-skew').textContent  = empSkew.toFixed(3);
+  }
+
+  document.getElementById('clt-n').addEventListener('input', e => {
+    document.getElementById('clt-n-val').textContent = e.target.value; run();
+  });
+  document.getElementById('clt-sim').addEventListener('input', e => {
+    document.getElementById('clt-sim-val').textContent = e.target.value;
+  });
+  document.getElementById('clt-dist').addEventListener('change', run);
+  document.getElementById('clt-run-btn').addEventListener('click', run);
+
+  if(typeof Chart !== 'undefined') { run(); } else {
+    window.addEventListener('load', run);
+  }
+})();
+</script>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>How to read the simulation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Left panel</strong> — the population distribution. Notice it can be far from bell-shaped.</li>
+<li><strong>Right panel</strong> — the sampling distribution of <span class="math inline">\(\bar Y\)</span> across all simulated samples, with an orange normal curve overlaid.</li>
+<li>Try the <strong>bimodal</strong> distribution first. Set <span class="math inline">\(n=1\)</span>: two clear humps. Set <span class="math inline">\(n=5\)</span>: humps soften. By <span class="math inline">\(n=30\)</span> the fit is already very good.</li>
+<li>Try <strong>exponential</strong> (heavily right-skewed). The convergence is slower — you need a larger <span class="math inline">\(n\)</span> before the skewness stat drops close to zero.</li>
+<li>The <strong>Bernoulli</strong> (p = 0.3) case is a good reminder that the CLT applies even to discrete distributions: for large <span class="math inline">\(n\)</span>, the sampling distribution of a proportion is approximately normal.</li>
+</ul>
+</div>
+</div>
+<hr>
+</section>
+<section id="sec-clt-takeaways" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="sec-clt-takeaways"><span class="header-section-number">4.5</span> Key takeaways</h2>
+<ol type="1">
+<li><p><strong>Centering and scaling matter.</strong> The raw sample mean collapses to a point (LLN). Multiplying by <span class="math inline">\(\sqrt{n}\)</span> holds the variance fixed and reveals the distributional shape.</p></li>
+<li><p><strong>Higher moments vanish at increasing rates.</strong> Skewness shrinks at <span class="math inline">\(n^{-1/2}\)</span>, kurtosis at <span class="math inline">\(n^{-1}\)</span>, and so on. The <span class="math inline">\(\sqrt{n}\)</span>-scaled sum retains only the variance.</p></li>
+<li><p><strong>The normal is the attractor.</strong> It is the unique fixed point of the averaging operator for distributions with finite variance, the maximum-entropy distribution given mean and variance, and the limit of any convolution sequence. It is not assumed — it emerges.</p></li>
+<li><p><strong>Finite variance is the key condition.</strong> If <span class="math inline">\(\mathbb{V}[Y] = \infty\)</span> (e.g., Cauchy distribution), the CLT fails and the <span class="math inline">\(\sqrt{n}\)</span> rate no longer applies.</p></li>
+<li><p><strong>Practical consequence.</strong> Even when errors are skewed, bimodal, or heteroskedastic, <span class="math inline">\(t\)</span>-tests and confidence intervals based on the normal approximation are asymptotically valid — because the CLT operates on the <em>sample mean</em>, not on the raw errors.</p></li>
+</ol>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./part2_clt.html" class="pagination-link" aria-label="Central Limit Theorem">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Limit Theorem</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Central Limit Theorem {#sec-clt}</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>The Law of Large Numbers tells us that $\hat{\beta}$ converges to $\beta$ as $n$ grows. The **Central Limit Theorem** goes further: it tells us the *rate* at which this happens and, more strikingly, the *shape* of the sampling distribution.</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>Specifically, under standard regularity conditions and an i.i.d. sample with finite variance:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>$$\sqrt{n}<span class="sc">\!</span>\left(\mathbb{E}_n<span class="co">[</span><span class="ot">Y</span><span class="co">]</span> - \mathbb{E}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span>\right) \xrightarrow{d} \mathcal{N}<span class="sc">\!</span>\left(0,\, \mathbb{V}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span>\right)$$</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>The key implication: if we **recenter** the sample mean by subtracting the true population mean and **rescale** by $\sqrt{n}$, the resulting quantity converges in distribution to a standard normal — *no matter what the underlying distribution of $Y$ is*, provided it has finite variance.</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why this is remarkable</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>The normality in the limit does not come from $Y$ being normally distributed. It emerges purely from the *averaging* process itself. This is the mathematical foundation for $t$-tests and confidence intervals in virtually all of econometrics.</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## The scaled and centered sum {#sec-clt-scaling}</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>Let $Y_1, \ldots, Y_n$ be i.i.d. with mean $\mu = \mathbb{E}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span>$ and finite variance $\sigma^2 = \mathbb{V}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span>$. Define the sample mean:</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}_n[Y] = \frac{1}{n}\sum_{i=1}^n Y_i$$</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>Now consider the **centered** version, scaled by $\sqrt{n}$:</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>$$S_n \;=\; \sqrt{n}<span class="sc">\!</span>\left(\mathbb{E}_n[Y] - \mu\right) \;=\; \frac{1}{\sqrt{n}}\sum_{i=1}^n (Y_i - \mu)$$</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>**Step 1 — Mean is zero.**</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>$$\mathbb{E}<span class="co">[</span><span class="ot">S_n</span><span class="co">]</span> = \frac{1}{\sqrt{n}}\sum_{i=1}^n \mathbb{E}<span class="co">[</span><span class="ot">Y_i - \mu</span><span class="co">]</span> = 0$$</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>**Step 2 — Variance is $\sigma^2$.**</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>By independence:</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>$$\mathbb{V}<span class="co">[</span><span class="ot">S_n</span><span class="co">]</span> = \frac{1}{n}\sum_{i=1}^n \mathbb{V}<span class="co">[</span><span class="ot">Y_i - \mu</span><span class="co">]</span> = \frac{1}{n} \cdot n\sigma^2 = \sigma^2$$</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why multiply by $\sqrt{n}$ and not $n$?</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>The raw sample mean $\mathbb{E}_n<span class="co">[</span><span class="ot">Y</span><span class="co">]</span>$ has variance $\sigma^2/n$, which collapses to zero. Multiplying by $\sqrt{n}$ exactly offsets this shrinkage, keeping the variance at a fixed, finite level $\sigma^2$. This is why $\sqrt{n}$ is the right normalizing rate — it is the unique rate that produces a non-degenerate limit.</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why the normal? The characteristic function argument {#sec-clt-char}</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>To see *why* the limit is normal and not something else, consider the **characteristic function** (Fourier transform) of $S_n$. Let $\phi_Y(t) = \mathbb{E}<span class="co">[</span><span class="ot">e^{itY}</span><span class="co">]</span>$ be the characteristic function of a single centered observation $Y_i - \mu$.</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>Since the $Y_i$ are i.i.d., the characteristic function of $S_n = \frac{1}{\sqrt{n}}\sum(Y_i - \mu)$ is:</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>$$\phi_{S_n}(t) = \left<span class="co">[</span><span class="ot">\phi_Y\!\left(\tfrac{t}{\sqrt{n}}\right)\right</span><span class="co">]</span>^n$$</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>Now expand $\phi_Y$ in a Taylor series around $t = 0$. Using $\mathbb{E}<span class="co">[</span><span class="ot">Y_i - \mu</span><span class="co">]</span> = 0$ and $\mathbb{E}<span class="co">[</span><span class="ot">(Y_i-\mu)^2</span><span class="co">]</span> = \sigma^2$:</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>$$\phi_Y<span class="sc">\!</span>\left(\tfrac{t}{\sqrt{n}}\right) = 1 - \frac{\sigma^2 t^2}{2n} - \underbrace{\frac{i^3 \kappa_3}{6} \cdot \frac{t^3}{n^{3/2}}}_{\text{skewness term}} - \underbrace{\frac{\kappa_4}{24} \cdot \frac{t^4}{n^2}}_{\text{kurtosis term}} - \cdots$$</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>where $\kappa_3, \kappa_4, \ldots$ are the cumulants (skewness, excess kurtosis, …) of $Y$.</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>Raising this to the $n$-th power and taking $n \to \infty$:</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>$$\phi_{S_n}(t) = \left<span class="co">[</span><span class="ot">1 - \frac{\sigma^2 t^2}{2n} - O(n^{-3/2})\right</span><span class="co">]</span>^n \;\longrightarrow\; e^{-\sigma^2 t^2/2}$$</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>This is **precisely** the characteristic function of $\mathcal{N}(0, \sigma^2)$.</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="fu">## The key insight</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>Notice what happens to each higher-order term as $n \to \infty$:</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Term <span class="pp">|</span> Shrinks at rate <span class="pp">|</span></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a><span class="pp">|------|----------------|</span></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Variance ($\kappa_2$) <span class="pp">|</span> Stays fixed (by design of the $\sqrt{n}$ scaling) <span class="pp">|</span></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Skewness ($\kappa_3$) <span class="pp">|</span> $n^{-1/2} \to 0$ <span class="pp">|</span></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Excess kurtosis ($\kappa_4$) <span class="pp">|</span> $n^{-1} \to 0$ <span class="pp">|</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $k$-th cumulant ($\kappa_k$, $k \geq 3$) <span class="pp">|</span> $n^{-(k-2)/2} \to 0$ <span class="pp">|</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>Averaging destroys higher-moment information faster than it destroys variance. The mean and variance are pinned — everything else vanishes. The normal distribution is the *unique* distribution with finite variance for which all cumulants beyond the second are zero. It is the only distribution that survives.</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a><span class="fu">## Three angles of intuition {#sec-clt-intuition}</span></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>Students often accept the *statement* of the CLT but struggle to see *why* the normal appears rather than some other distribution. Here are three complementary perspectives.</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a><span class="fu">### Angle 1: The normal as a fixed point</span></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>The characteristic function argument above shows that repeated averaging is an operator on distributions, and $\mathcal{N}(0, \sigma^2)$ is the **fixed point** of that operator. Any distribution with finite variance gets pulled toward the normal under averaging, the way iterating a contraction mapping pulls you to a fixed point.</span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a><span class="fu">### Angle 2: Entropy maximization</span></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a>Among all distributions with a fixed mean $\mu$ and fixed variance $\sigma^2$, the normal distribution uniquely **maximizes entropy** (differential Shannon entropy). Entropy measures how much information — or "interesting structure" — a distribution carries beyond its first two moments.</span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>When you average $n$ i.i.d. draws, the skewness of the result shrinks at rate $1/\sqrt{n}$, the excess kurtosis at rate $1/n$, and so on. All the idiosyncratic structure of the original distribution is progressively erased. What remains, once only the mean and variance are left standing, is the distribution that makes the fewest additional claims — the one with maximum entropy. That distribution is the normal.</span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>**An analogy that often lands.** Imagine describing a person's face with many numbers: eye color, nose shape, jawline, freckles, skin texture. Now suppose a process keeps blurring the photo slightly at each step. The specific details — freckles, eye color — disappear first. Eventually all you can make out is the rough oval of a face. That oval is the "maximum entropy face" given the constraint that it's still a human head. The normal distribution is the statistical equivalent of that oval.</span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a><span class="fu">### Angle 3: Convolutions smooth everything out</span></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>When you add two independent random variables, you **convolve** their densities. Each convolution makes the result smoother and more symmetric — it irons out bumps, fills in gaps, and spreads mass more evenly. After enough convolutions, the shape is entirely determined by just the mean and variance, and the only shape with those two properties and no others is the normal.</span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>Students can *see* this happening in the simulation below: even a bimodal or heavily skewed population produces a beautifully bell-shaped sampling distribution once $n$ is large enough.</span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a><span class="fu">## Interactive simulation {#sec-clt-sim}</span></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>The simulation below lets you choose any population distribution and watch the sampling distribution of the mean evolve as $n$ grows. The orange curve is the normal fit — notice how it tracks the histogram more and more closely as $n$ increases.</span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{=html}</span></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;style&gt;</span></span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-sim-wrap { font-family: inherit; margin: 1.5rem 0; }</span></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1.25rem; }</span></span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-ctrl { display: flex; flex-direction: column; gap: 5px; }</span></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-ctrl label { font-size: 0.8rem; color: #555; font-weight: 500; }</span></span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-val-row { display: flex; align-items: center; gap: 8px; }</span></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-val-row input[type=range] { flex: 1; }</span></span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-badge { font-size: 0.85rem; font-weight: 600; min-width: 30px; color: #222; }</span></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 1rem; }</span></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-chart-label { font-size: 0.78rem; color: #555; margin-bottom: 4px; }</span></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-stats { display: flex; gap: 12px; flex-wrap: wrap; }</span></span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-stat { background: #f5f5f5; border-radius: 6px; padding: 8px 14px; flex: 1; min-width: 110px; }</span></span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-stat-label { font-size: 0.72rem; color: #777; }</span></span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-stat-val { font-size: 1rem; font-weight: 600; color: #222; }</span></span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-run { margin-top: 12px; padding: 7px 18px; cursor: pointer; border-radius: 5px; border: 1px solid #888; background: white; font-size: 0.85rem; }</span></span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-run:hover { background: #f0f0f0; }</span></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a><span class="in">.clt-note { font-size: 0.75rem; color: #888; margin-top: 10px; }</span></span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a><span class="in">select { padding: 4px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.85rem; }</span></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/style&gt;</span></span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;div class="clt-sim-wrap"&gt;</span></span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;div class="clt-controls"&gt;</span></span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-ctrl"&gt;</span></span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;label&gt;Population distribution&lt;/label&gt;</span></span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;select id="clt-dist"&gt;</span></span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;option value="uniform"&gt;Uniform [0, 1]&lt;/option&gt;</span></span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;option value="exp"&gt;Exponential (λ = 1)&lt;/option&gt;</span></span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;option value="bimodal"&gt;Bimodal (two humps)&lt;/option&gt;</span></span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;option value="bernoulli"&gt;Bernoulli (p = 0.3)&lt;/option&gt;</span></span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;option value="triangle"&gt;Right-skewed triangle&lt;/option&gt;</span></span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;/select&gt;</span></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;/div&gt;</span></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-ctrl"&gt;</span></span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;label&gt;Sample size n&lt;/label&gt;</span></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="clt-val-row"&gt;</span></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;input type="range" id="clt-n" min="1" max="100" value="1" step="1"&gt;</span></span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;span class="clt-badge" id="clt-n-val"&gt;1&lt;/span&gt;</span></span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;/div&gt;</span></span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;/div&gt;</span></span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-ctrl"&gt;</span></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;label&gt;Number of simulated means&lt;/label&gt;</span></span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="clt-val-row"&gt;</span></span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;input type="range" id="clt-sim" min="100" max="1000" value="500" step="100"&gt;</span></span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;span class="clt-badge" id="clt-sim-val"&gt;500&lt;/span&gt;</span></span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;/div&gt;</span></span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;/div&gt;</span></span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-ctrl" style="justify-content: flex-end;"&gt;</span></span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;button class="clt-run" id="clt-run-btn"&gt;Run simulation&lt;/button&gt;</span></span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;/div&gt;</span></span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/div&gt;</span></span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;div class="clt-charts"&gt;</span></span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div&gt;</span></span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="clt-chart-label"&gt;Population distribution&lt;/div&gt;</span></span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div style="position:relative;height:200px;"&gt;&lt;canvas id="clt-pop" role="img" aria-label="Population distribution histogram"&gt;&lt;/canvas&gt;&lt;/div&gt;</span></span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;/div&gt;</span></span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div&gt;</span></span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="clt-chart-label"&gt;Sampling distribution of $\bar{Y}$ — with normal fit&lt;/div&gt;</span></span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div style="position:relative;height:200px;"&gt;&lt;canvas id="clt-samp" role="img" aria-label="Sampling distribution of the mean with normal overlay"&gt;&lt;/canvas&gt;&lt;/div&gt;</span></span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;/div&gt;</span></span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/div&gt;</span></span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;div class="clt-stats"&gt;</span></span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-stat"&gt;&lt;div class="clt-stat-label"&gt;Population mean μ&lt;/div&gt;&lt;div class="clt-stat-val" id="cs-mu"&gt;—&lt;/div&gt;&lt;/div&gt;</span></span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-stat"&gt;&lt;div class="clt-stat-label"&gt;Population σ&lt;/div&gt;&lt;div class="clt-stat-val" id="cs-sigma"&gt;—&lt;/div&gt;&lt;/div&gt;</span></span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-stat"&gt;&lt;div class="clt-stat-label"&gt;Theoretical SE = σ/√n&lt;/div&gt;&lt;div class="clt-stat-val" id="cs-se"&gt;—&lt;/div&gt;&lt;/div&gt;</span></span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-stat"&gt;&lt;div class="clt-stat-label"&gt;Observed SD of means&lt;/div&gt;&lt;div class="clt-stat-val" id="cs-obs"&gt;—&lt;/div&gt;&lt;/div&gt;</span></span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="clt-stat"&gt;&lt;div class="clt-stat-label"&gt;Skewness of means&lt;/div&gt;&lt;div class="clt-stat-val" id="cs-skew"&gt;—&lt;/div&gt;&lt;/div&gt;</span></span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/div&gt;</span></span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;p class="clt-note"&gt;Drag the n slider slowly and watch the bell shape emerge. Even bimodal or heavily skewed populations converge to normal. The skewness stat above tracks how quickly the asymmetry washes out.&lt;/p&gt;</span></span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/div&gt;</span></span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"&gt;&lt;/script&gt;</span></span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;script&gt;</span></span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a><span class="in">(function() {</span></span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a><span class="in">  function randNorm(mu, sigma) {</span></span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a><span class="in">    let u = 0, v = 0;</span></span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a><span class="in">    while(u === 0) u = Math.random();</span></span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a><span class="in">    while(v === 0) v = Math.random();</span></span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a><span class="in">    return mu + sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);</span></span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a><span class="in">  const DISTS = {</span></span>
+<span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a><span class="in">    uniform:  { sample: () =&gt; Math.random(),                                      mu: 0.5,   sigma: Math.sqrt(1/12) },</span></span>
+<span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a><span class="in">    exp:      { sample: () =&gt; -Math.log(1 - Math.random()),                       mu: 1,     sigma: 1              },</span></span>
+<span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a><span class="in">    bimodal:  { sample: () =&gt; Math.random() &lt; 0.5 ? randNorm(0.2,0.07) : randNorm(0.8,0.07), mu: 0.5, sigma: null },</span></span>
+<span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a><span class="in">    bernoulli:{ sample: () =&gt; Math.random() &lt; 0.3 ? 1 : 0,                       mu: 0.3,   sigma: Math.sqrt(0.3*0.7) },</span></span>
+<span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a><span class="in">    triangle: { sample: () =&gt; 1 - Math.sqrt(1 - Math.random()),                  mu: 1/3,   sigma: null           }</span></span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a><span class="in">  };</span></span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a><span class="in">  function mean(a) { return a.reduce((s,x) =&gt; s+x, 0) / a.length; }</span></span>
+<span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a><span class="in">  function std(a)  { const m = mean(a); return Math.sqrt(a.reduce((s,x) =&gt; s+(x-m)**2, 0)/a.length); }</span></span>
+<span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a><span class="in">  function skew(a) { const m = mean(a), s = std(a); return s===0?0: a.reduce((t,x)=&gt;t+((x-m)/s)**3,0)/a.length; }</span></span>
+<span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a><span class="in">  function histogram(data, bins) {</span></span>
+<span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a><span class="in">    const mn = Math.min(...data), mx = Math.max(...data), w = (mx-mn)/bins;</span></span>
+<span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a><span class="in">    const counts = Array(bins).fill(0);</span></span>
+<span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a><span class="in">    const labels = [];</span></span>
+<span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a><span class="in">    for(let i=0;i&lt;bins;i++) labels.push((mn+i*w+w/2).toFixed(3));</span></span>
+<span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a><span class="in">    data.forEach(v =&gt; { let b=Math.floor((v-mn)/w); if(b&gt;=bins)b=bins-1; counts[b]++; });</span></span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a><span class="in">    return { labels, density: counts.map(c=&gt;c/data.length/w) };</span></span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a><span class="in">  function normalPDF(x, mu, sigma) {</span></span>
+<span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a><span class="in">    return Math.exp(-0.5*((x-mu)/sigma)**2)/(sigma*Math.sqrt(2*Math.PI));</span></span>
+<span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a><span class="in">  let popChart, sampChart;</span></span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a><span class="in">  function run() {</span></span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a><span class="in">    const key  = document.getElementById('clt-dist').value;</span></span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a><span class="in">    const n    = parseInt(document.getElementById('clt-n').value);</span></span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a><span class="in">    const B    = parseInt(document.getElementById('clt-sim').value);</span></span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a><span class="in">    const dist = DISTS[key];</span></span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a><span class="in">    const popData = Array.from({length: 3000}, dist.sample);</span></span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a><span class="in">    const ph = histogram(popData, 30);</span></span>
+<span id="cb1-240"><a href="#cb1-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-241"><a href="#cb1-241" aria-hidden="true" tabindex="-1"></a><span class="in">    if(popChart) popChart.destroy();</span></span>
+<span id="cb1-242"><a href="#cb1-242" aria-hidden="true" tabindex="-1"></a><span class="in">    popChart = new Chart(document.getElementById('clt-pop'), {</span></span>
+<span id="cb1-243"><a href="#cb1-243" aria-hidden="true" tabindex="-1"></a><span class="in">      type: 'bar',</span></span>
+<span id="cb1-244"><a href="#cb1-244" aria-hidden="true" tabindex="-1"></a><span class="in">      data: { labels: ph.labels, datasets: [{ data: ph.density, backgroundColor: '#185FA5aa', borderWidth: 0, barPercentage:1, categoryPercentage:1 }] },</span></span>
+<span id="cb1-245"><a href="#cb1-245" aria-hidden="true" tabindex="-1"></a><span class="in">      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},</span></span>
+<span id="cb1-246"><a href="#cb1-246" aria-hidden="true" tabindex="-1"></a><span class="in">        scales:{ x:{ticks:{maxTicksLimit:5},grid:{display:false}}, y:{ticks:{maxTicksLimit:4},title:{display:true,text:'density',font:{size:11}}} } }</span></span>
+<span id="cb1-247"><a href="#cb1-247" aria-hidden="true" tabindex="-1"></a><span class="in">    });</span></span>
+<span id="cb1-248"><a href="#cb1-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-249"><a href="#cb1-249" aria-hidden="true" tabindex="-1"></a><span class="in">    const means = Array.from({length: B}, () =&gt; {</span></span>
+<span id="cb1-250"><a href="#cb1-250" aria-hidden="true" tabindex="-1"></a><span class="in">      let s=0; for(let i=0;i&lt;n;i++) s+=dist.sample(); return s/n;</span></span>
+<span id="cb1-251"><a href="#cb1-251" aria-hidden="true" tabindex="-1"></a><span class="in">    });</span></span>
+<span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a><span class="in">    const empMu = mean(means), empSD = std(means), empSkew = skew(means);</span></span>
+<span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a><span class="in">    const sh = histogram(means, 40);</span></span>
+<span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a><span class="in">    const normalLine = sh.labels.map(l =&gt; normalPDF(parseFloat(l), empMu, empSD));</span></span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a><span class="in">    if(sampChart) sampChart.destroy();</span></span>
+<span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a><span class="in">    sampChart = new Chart(document.getElementById('clt-samp'), {</span></span>
+<span id="cb1-258"><a href="#cb1-258" aria-hidden="true" tabindex="-1"></a><span class="in">      type: 'bar',</span></span>
+<span id="cb1-259"><a href="#cb1-259" aria-hidden="true" tabindex="-1"></a><span class="in">      data: { labels: sh.labels, datasets: [</span></span>
+<span id="cb1-260"><a href="#cb1-260" aria-hidden="true" tabindex="-1"></a><span class="in">        { type:'bar',  data: sh.density,  backgroundColor:'#1D9E7566', borderWidth:0, barPercentage:1, categoryPercentage:1 },</span></span>
+<span id="cb1-261"><a href="#cb1-261" aria-hidden="true" tabindex="-1"></a><span class="in">        { type:'line', data: normalLine,  borderColor:'#D85A30', borderWidth:2, pointRadius:0, tension:0.4 }</span></span>
+<span id="cb1-262"><a href="#cb1-262" aria-hidden="true" tabindex="-1"></a><span class="in">      ]},</span></span>
+<span id="cb1-263"><a href="#cb1-263" aria-hidden="true" tabindex="-1"></a><span class="in">      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},</span></span>
+<span id="cb1-264"><a href="#cb1-264" aria-hidden="true" tabindex="-1"></a><span class="in">        scales:{ x:{ticks:{maxTicksLimit:5},grid:{display:false}}, y:{ticks:{maxTicksLimit:4},title:{display:true,text:'density',font:{size:11}}} } }</span></span>
+<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a><span class="in">    });</span></span>
+<span id="cb1-266"><a href="#cb1-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-267"><a href="#cb1-267" aria-hidden="true" tabindex="-1"></a><span class="in">    const mu    = dist.mu;</span></span>
+<span id="cb1-268"><a href="#cb1-268" aria-hidden="true" tabindex="-1"></a><span class="in">    const sigma = dist.sigma || empSD * Math.sqrt(n);</span></span>
+<span id="cb1-269"><a href="#cb1-269" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById('cs-mu').textContent    = mu.toFixed(3);</span></span>
+<span id="cb1-270"><a href="#cb1-270" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById('cs-sigma').textContent = sigma.toFixed(3);</span></span>
+<span id="cb1-271"><a href="#cb1-271" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById('cs-se').textContent    = (sigma/Math.sqrt(n)).toFixed(4);</span></span>
+<span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById('cs-obs').textContent   = empSD.toFixed(4);</span></span>
+<span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById('cs-skew').textContent  = empSkew.toFixed(3);</span></span>
+<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById('clt-n').addEventListener('input', e =&gt; {</span></span>
+<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById('clt-n-val').textContent = e.target.value; run();</span></span>
+<span id="cb1-278"><a href="#cb1-278" aria-hidden="true" tabindex="-1"></a><span class="in">  });</span></span>
+<span id="cb1-279"><a href="#cb1-279" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById('clt-sim').addEventListener('input', e =&gt; {</span></span>
+<span id="cb1-280"><a href="#cb1-280" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById('clt-sim-val').textContent = e.target.value;</span></span>
+<span id="cb1-281"><a href="#cb1-281" aria-hidden="true" tabindex="-1"></a><span class="in">  });</span></span>
+<span id="cb1-282"><a href="#cb1-282" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById('clt-dist').addEventListener('change', run);</span></span>
+<span id="cb1-283"><a href="#cb1-283" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById('clt-run-btn').addEventListener('click', run);</span></span>
+<span id="cb1-284"><a href="#cb1-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-285"><a href="#cb1-285" aria-hidden="true" tabindex="-1"></a><span class="in">  if(typeof Chart !== 'undefined') { run(); } else {</span></span>
+<span id="cb1-286"><a href="#cb1-286" aria-hidden="true" tabindex="-1"></a><span class="in">    window.addEventListener('load', run);</span></span>
+<span id="cb1-287"><a href="#cb1-287" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-288"><a href="#cb1-288" aria-hidden="true" tabindex="-1"></a><span class="in">})();</span></span>
+<span id="cb1-289"><a href="#cb1-289" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/script&gt;</span></span>
+<span id="cb1-290"><a href="#cb1-290" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-291"><a href="#cb1-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-292"><a href="#cb1-292" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb1-293"><a href="#cb1-293" aria-hidden="true" tabindex="-1"></a><span class="fu">## How to read the simulation</span></span>
+<span id="cb1-294"><a href="#cb1-294" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-295"><a href="#cb1-295" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Left panel** — the population distribution. Notice it can be far from bell-shaped.</span>
+<span id="cb1-296"><a href="#cb1-296" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Right panel** — the sampling distribution of $\bar Y$ across all simulated samples, with an orange normal curve overlaid.</span>
+<span id="cb1-297"><a href="#cb1-297" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Try the **bimodal** distribution first. Set $n=1$: two clear humps. Set $n=5$: humps soften. By $n=30$ the fit is already very good.</span>
+<span id="cb1-298"><a href="#cb1-298" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Try **exponential** (heavily right-skewed). The convergence is slower — you need a larger $n$ before the skewness stat drops close to zero.</span>
+<span id="cb1-299"><a href="#cb1-299" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **Bernoulli** (p = 0.3) case is a good reminder that the CLT applies even to discrete distributions: for large $n$, the sampling distribution of a proportion is approximately normal.</span>
+<span id="cb1-300"><a href="#cb1-300" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-301"><a href="#cb1-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-302"><a href="#cb1-302" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb1-303"><a href="#cb1-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-304"><a href="#cb1-304" aria-hidden="true" tabindex="-1"></a><span class="fu">## Key takeaways {#sec-clt-takeaways}</span></span>
+<span id="cb1-305"><a href="#cb1-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-306"><a href="#cb1-306" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Centering and scaling matter.** The raw sample mean collapses to a point (LLN). Multiplying by $\sqrt{n}$ holds the variance fixed and reveals the distributional shape.</span>
+<span id="cb1-307"><a href="#cb1-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-308"><a href="#cb1-308" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Higher moments vanish at increasing rates.** Skewness shrinks at $n^{-1/2}$, kurtosis at $n^{-1}$, and so on. The $\sqrt{n}$-scaled sum retains only the variance.</span>
+<span id="cb1-309"><a href="#cb1-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-310"><a href="#cb1-310" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**The normal is the attractor.** It is the unique fixed point of the averaging operator for distributions with finite variance, the maximum-entropy distribution given mean and variance, and the limit of any convolution sequence. It is not assumed — it emerges.</span>
+<span id="cb1-311"><a href="#cb1-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-312"><a href="#cb1-312" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Finite variance is the key condition.** If $\mathbb{V}<span class="co">[</span><span class="ot">Y</span><span class="co">]</span> = \infty$ (e.g., Cauchy distribution), the CLT fails and the $\sqrt{n}$ rate no longer applies.</span>
+<span id="cb1-313"><a href="#cb1-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-314"><a href="#cb1-314" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>**Practical consequence.** Even when errors are skewed, bimodal, or heteroskedastic, $t$-tests and confidence intervals based on the normal approximation are asymptotically valid — because the CLT operates on the *sample mean*, not on the raw errors.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
