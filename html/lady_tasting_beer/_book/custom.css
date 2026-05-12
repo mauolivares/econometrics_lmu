@@ -1,0 +1,38 @@
+/* Custom styling for permutation test book */
+
+/* Header color matching lecture slides */
+.navbar {
+  background-color: #1a3560 !important;
+}
+
+/* Callout borders */
+.callout-important {
+  border-left-color: #D85A30 !important;
+}
+.callout-note {
+  border-left-color: #185FA5 !important;
+}
+.callout-tip {
+  border-left-color: #1D9E75 !important;
+}
+
+/* Code blocks */
+pre.sourceCode {
+  background-color: #f4f6f9;
+  border-radius: 6px;
+  font-size: 0.88em;
+}
+
+/* Tables */
+table {
+  font-size: 0.9em;
+}
+thead th {
+  background-color: #1a3560;
+  color: white;
+}
+
+/* Highlighted row in distribution table */
+tr.crit-row {
+  background-color: #fff3cd !important;
+}

@@ -1,0 +1,112 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Permutation Tests",
+    "section": "",
+    "text": "0.1 Welcome\nThis lecture note introduces permutation tests — an exact, distribution-free approach to hypothesis testing that does not rely on asymptotic approximations or parametric assumptions.\nThe central idea is simple: under the null hypothesis of no treatment effect, the observed outcome vector \\(Y\\) is independent of the treatment assignment \\(W\\). If that is true, then any re-assignment of \\(W\\) is equally likely, and we can construct the exact null distribution of any test statistic by enumerating all such re-assignments.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#what-you-will-find-here",
+    "href": "index.html#what-you-will-find-here",
+    "title": "Permutation Tests",
+    "section": "0.2 What You Will Find Here",
+    "text": "0.2 What You Will Find Here\n\n\n\n\n\n\n\nChapter\nContent\n\n\n\n\n2 — Permutation Tests\nSetup, test statistic, permutation distribution, critical values, and an interactive simulation",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#setup",
+    "href": "index.html#setup",
+    "title": "Permutation Tests",
+    "section": "0.3 Setup",
+    "text": "0.3 Setup\n\n\nCode\nlibrary(tidyverse)",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "chapter_permtest.html",
+    "href": "chapter_permtest.html",
+    "title": "2  Permutation Tests",
+    "section": "",
+    "text": "2.1 Setup and Hypothesis\nConsider a sample of \\(n = 8\\) units (beer cups in our example). In class, we represented the two brands as 0 or 1. Thus, for each cup \\(i\\), we have \\(W_i \\in \\{0,1\\}\\). The lady tasting beer reports her )educated) guess for each cup \\(i\\), so also a binary reporting \\(Y_i \\in \\{0,1\\}\\). Suppose we the observed report \\(Y\\) and true types \\(W\\) (unknown to the lady) are:\n\\[Y = (0,1,1,1,0,1,0,0), \\qquad W = (1,1,1,1,0,0,0,0).\\]\nThe null hypothesis is that \\(Y\\) and \\(W\\) are statistically independent:\n\\[H_0: Y \\perp W\\]\nmeaning that the lady cannot distinguish the two labels (her guesses are completely uninformative of the true types).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Permutation Tests</span>"
+    ]
+  },
+  {
+    "objectID": "chapter_permtest.html#sec-setup",
+    "href": "chapter_permtest.html#sec-setup",
+    "title": "2  Permutation Tests",
+    "section": "",
+    "text": "ImportantWhat can we randomize in this experiment?\n\n\n\nWhile the vector \\(Y\\) is treated as a random variable, once the reporting is made, we treat it as fixed. What is random and entirely up to the experiment design is the sequence of types \\(W\\). This allows us to construct an exact null distribution by varying \\(W\\) over all its possible realizations, with no asymptotic approximation required.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Permutation Tests</span>"
+    ]
+  },
+  {
+    "objectID": "chapter_permtest.html#sec-statistic",
+    "href": "chapter_permtest.html#sec-statistic",
+    "title": "2  Permutation Tests",
+    "section": "2.2 Test Statistic",
+    "text": "2.2 Test Statistic\nA natural test statistic:\n\\[T_n(W, Y) \\;=\\; \\sum_{i=1}^n W_i Y_i,\\]\nwhich counts the number of agreements between educated guesses and true types. Notice that large values of \\(T_n\\) provide evidence against \\(H_0\\).\nObserved value. With the data above:\n\\[T_n^{\\mathrm{obs}} = W^\\top Y = 1\\cdot 0 + 1\\cdot 1 + 1\\cdot 1 + 1\\cdot 1 + 0\\cdot 0 + 0\\cdot 1 + 0\\cdot 0 + 0\\cdot 0 = 3.\\]\n\n\nCode\nY &lt;- c(0, 1, 1, 1, 0, 1, 0, 0)\nW &lt;- c(1, 1, 1, 1, 0, 0, 0, 0)\nT_obs &lt;- sum(W * Y)\ncat(\"Observed test statistic: T_obs =\", T_obs)\n\n\nObserved test statistic: T_obs = 3",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Permutation Tests</span>"
+    ]
+  },
+  {
+    "objectID": "chapter_permtest.html#sec-group",
+    "href": "chapter_permtest.html#sec-group",
+    "title": "2  Permutation Tests",
+    "section": "2.3 The Permutation Group \\(\\mathbf{G}_n\\)",
+    "text": "2.3 The Permutation Group \\(\\mathbf{G}_n\\)\nUnder \\(H_0\\), every vector \\(w \\in \\{0,1\\}^8\\) with exactly four 1s and four 0s was equally likely to have been the realized treatment assignment (compare this with the way we did it in class). Define:\n\\[\\mathbf{G}_n \\;=\\; \\bigl\\{ w \\in \\{0,1\\}^8 : \\textstyle\\sum_i w_i = 4 \\bigr\\}.\\]\nThe cardinality of \\(\\mathbf{G}_n\\) is \\(M := \\#\\{\\mathbf{G}_n\\} = \\binom{8}{4} = 70\\).\n\n\nCode\n# Generate all elements of G_n: vectors of length 8 with exactly four 1s\nG_n &lt;- as.data.frame(t(combn(8, 4))) |&gt;\n  apply(1, function(idx) {\n    w &lt;- integer(8)\n    w[idx] &lt;- 1L\n    w\n  }) |&gt;\n  t()\n\ncat(\"Number of elements in G_n:\", nrow(G_n))\n\n\nNumber of elements in G_n: 70\n\n\n\n2.3.1 All 70 permutation vectors\nThe table below displays the complete set \\(\\mathbf{G}_n\\). Each row is a distinct treatment assignment \\(w \\in \\mathbf{G}_n\\), and the last column reports \\(T_n(w, Y) = \\sum_i w_i Y_i\\).\n\n\nCode\nY &lt;- c(0, 1, 1, 1, 0, 1, 0, 0)\n\n# Compute T_n(w, Y) for each permutation\nT_vals &lt;- apply(G_n, 1, function(w) sum(w * Y))\n\n# Build display table\nperm_df &lt;- as.data.frame(G_n)\ncolnames(perm_df) &lt;- paste0(\"w\", 1:8)\nperm_df$T_n &lt;- T_vals\nperm_df$Permutation &lt;- seq_len(nrow(perm_df))\nperm_df &lt;- perm_df[, c(\"Permutation\", paste0(\"w\", 1:8), \"T_n\")]\n\nknitr::kable(\n  perm_df,\n  align = \"c\",\n  caption = \"All 70 elements of $\\\\mathbf{G}_n$ and the corresponding test statistic $T_n(w, Y)$.\"\n)\n\n\n\nAll 70 elements of \\(\\mathbf{G}_n\\) and the corresponding test statistic \\(T_n(w, Y)\\).\n\n\nPermutation\nw1\nw2\nw3\nw4\nw5\nw6\nw7\nw8\nT_n\n\n\n\n\n1\n1\n1\n1\n1\n0\n0\n0\n0\n3\n\n\n2\n1\n1\n1\n0\n1\n0\n0\n0\n2\n\n\n3\n1\n1\n1\n0\n0\n1\n0\n0\n3\n\n\n4\n1\n1\n1\n0\n0\n0\n1\n0\n2\n\n\n5\n1\n1\n1\n0\n0\n0\n0\n1\n2\n\n\n6\n1\n1\n0\n1\n1\n0\n0\n0\n2\n\n\n7\n1\n1\n0\n1\n0\n1\n0\n0\n3\n\n\n8\n1\n1\n0\n1\n0\n0\n1\n0\n2\n\n\n9\n1\n1\n0\n1\n0\n0\n0\n1\n2\n\n\n10\n1\n1\n0\n0\n1\n1\n0\n0\n2\n\n\n11\n1\n1\n0\n0\n1\n0\n1\n0\n1\n\n\n12\n1\n1\n0\n0\n1\n0\n0\n1\n1\n\n\n13\n1\n1\n0\n0\n0\n1\n1\n0\n2\n\n\n14\n1\n1\n0\n0\n0\n1\n0\n1\n2\n\n\n15\n1\n1\n0\n0\n0\n0\n1\n1\n1\n\n\n16\n1\n0\n1\n1\n1\n0\n0\n0\n2\n\n\n17\n1\n0\n1\n1\n0\n1\n0\n0\n3\n\n\n18\n1\n0\n1\n1\n0\n0\n1\n0\n2\n\n\n19\n1\n0\n1\n1\n0\n0\n0\n1\n2\n\n\n20\n1\n0\n1\n0\n1\n1\n0\n0\n2\n\n\n21\n1\n0\n1\n0\n1\n0\n1\n0\n1\n\n\n22\n1\n0\n1\n0\n1\n0\n0\n1\n1\n\n\n23\n1\n0\n1\n0\n0\n1\n1\n0\n2\n\n\n24\n1\n0\n1\n0\n0\n1\n0\n1\n2\n\n\n25\n1\n0\n1\n0\n0\n0\n1\n1\n1\n\n\n26\n1\n0\n0\n1\n1\n1\n0\n0\n2\n\n\n27\n1\n0\n0\n1\n1\n0\n1\n0\n1\n\n\n28\n1\n0\n0\n1\n1\n0\n0\n1\n1\n\n\n29\n1\n0\n0\n1\n0\n1\n1\n0\n2\n\n\n30\n1\n0\n0\n1\n0\n1\n0\n1\n2\n\n\n31\n1\n0\n0\n1\n0\n0\n1\n1\n1\n\n\n32\n1\n0\n0\n0\n1\n1\n1\n0\n1\n\n\n33\n1\n0\n0\n0\n1\n1\n0\n1\n1\n\n\n34\n1\n0\n0\n0\n1\n0\n1\n1\n0\n\n\n35\n1\n0\n0\n0\n0\n1\n1\n1\n1\n\n\n36\n0\n1\n1\n1\n1\n0\n0\n0\n3\n\n\n37\n0\n1\n1\n1\n0\n1\n0\n0\n4\n\n\n38\n0\n1\n1\n1\n0\n0\n1\n0\n3\n\n\n39\n0\n1\n1\n1\n0\n0\n0\n1\n3\n\n\n40\n0\n1\n1\n0\n1\n1\n0\n0\n3\n\n\n41\n0\n1\n1\n0\n1\n0\n1\n0\n2\n\n\n42\n0\n1\n1\n0\n1\n0\n0\n1\n2\n\n\n43\n0\n1\n1\n0\n0\n1\n1\n0\n3\n\n\n44\n0\n1\n1\n0\n0\n1\n0\n1\n3\n\n\n45\n0\n1\n1\n0\n0\n0\n1\n1\n2\n\n\n46\n0\n1\n0\n1\n1\n1\n0\n0\n3\n\n\n47\n0\n1\n0\n1\n1\n0\n1\n0\n2\n\n\n48\n0\n1\n0\n1\n1\n0\n0\n1\n2\n\n\n49\n0\n1\n0\n1\n0\n1\n1\n0\n3\n\n\n50\n0\n1\n0\n1\n0\n1\n0\n1\n3\n\n\n51\n0\n1\n0\n1\n0\n0\n1\n1\n2\n\n\n52\n0\n1\n0\n0\n1\n1\n1\n0\n2\n\n\n53\n0\n1\n0\n0\n1\n1\n0\n1\n2\n\n\n54\n0\n1\n0\n0\n1\n0\n1\n1\n1\n\n\n55\n0\n1\n0\n0\n0\n1\n1\n1\n2\n\n\n56\n0\n0\n1\n1\n1\n1\n0\n0\n3\n\n\n57\n0\n0\n1\n1\n1\n0\n1\n0\n2\n\n\n58\n0\n0\n1\n1\n1\n0\n0\n1\n2\n\n\n59\n0\n0\n1\n1\n0\n1\n1\n0\n3\n\n\n60\n0\n0\n1\n1\n0\n1\n0\n1\n3\n\n\n61\n0\n0\n1\n1\n0\n0\n1\n1\n2\n\n\n62\n0\n0\n1\n0\n1\n1\n1\n0\n2\n\n\n63\n0\n0\n1\n0\n1\n1\n0\n1\n2\n\n\n64\n0\n0\n1\n0\n1\n0\n1\n1\n1\n\n\n65\n0\n0\n1\n0\n0\n1\n1\n1\n2\n\n\n66\n0\n0\n0\n1\n1\n1\n1\n0\n2\n\n\n67\n0\n0\n0\n1\n1\n1\n0\n1\n2\n\n\n68\n0\n0\n0\n1\n1\n0\n1\n1\n1\n\n\n69\n0\n0\n0\n1\n0\n1\n1\n1\n2\n\n\n70\n0\n0\n0\n0\n1\n1\n1\n1\n1",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Permutation Tests</span>"
+    ]
+  },
+  {
+    "objectID": "chapter_permtest.html#sec-dist",
+    "href": "chapter_permtest.html#sec-dist",
+    "title": "2  Permutation Tests",
+    "section": "2.4 Distribution of \\(T_n\\)",
+    "text": "2.4 Distribution of \\(T_n\\)\nUnder \\(H_0\\) with a uniformly random assignment over \\(\\mathbf{G}_n\\), the test statistic \\(T_n\\) follows a Hypergeometric distribution:\n\\[T_n \\;\\sim\\; \\mathrm{Hypergeometric}(n, k, m), \\quad n = 8,\\; k = 4,\\; m = 4.\\]\nThis is because \\(T_n = \\sum_{i=1}^n W_i Y_i\\) counts the overlap between a randomly drawn set of 4 treated indices and a fixed set of 4 units with \\(Y_i = 1\\).\n\n\nCode\ndist_df &lt;- data.frame(t = T_vals) |&gt;\n  count(t) |&gt;\n  mutate(\n    prob      = n / sum(n),\n    cum_prob  = cumsum(prob),\n    label     = paste0(n, \"/70\")\n  )\n\nggplot(dist_df, aes(x = factor(t), y = prob)) +\n  geom_col(fill = \"#185FA5\", alpha = 0.85, width = 0.55) +\n  geom_text(aes(label = label), vjust = -0.5, size = 3.5, color = \"#333333\") +\n  geom_vline(xintercept = which(levels(factor(dist_df$t)) == as.character(T_obs)),\n             linetype = \"dashed\", color = \"#D85A30\", linewidth = 0.8) +\n  annotate(\"text\", x = which(levels(factor(dist_df$t)) == as.character(T_obs)) + 0.3,\n           y = max(dist_df$prob) * 0.9,\n           label = expression(T[n]^obs == 3),\n           color = \"#D85A30\", size = 4, hjust = 0) +\n  scale_y_continuous(labels = scales::percent_format(accuracy = 1), expand = expansion(mult = c(0, 0.12))) +\n  labs(\n    x     = expression(T[n]),\n    y     = \"Probability\",\n    title = \"Distribution of $T_n$ under $H_0$\",\n    caption = \"Hypergeometric(n=8, k=4, m=4). Dashed line marks the observed statistic.\"\n  ) +\n  theme_minimal(base_size = 13) +\n  theme(\n    plot.title   = element_text(face = \"bold\", size = 13),\n    panel.grid.major.x = element_blank()\n  )\n\n\n\n\n\n\n\n\n\n\n2.4.1 Tabulated probabilities\nSince we know the distribution of \\(T_n\\), we can tabulate the probabilities.\n\n\nCode\nknitr::kable(\n  dist_df |&gt; select(t, n, prob, cum_prob) |&gt;\n    rename(`$t$` = t, `Count` = n, `$\\\\mathrm{P}[T_n = t]$` = prob,\n           `$\\\\mathrm{P}[T_n \\\\leq t]$` = cum_prob) |&gt;\n    mutate(across(where(is.numeric), ~round(., 4))),\n  align = \"c\",\n  caption = \"Distribution of $T_n$.\"\n)\n\n\n\nDistribution of \\(T_n\\).\n\n\n\\(t\\)\nCount\n\\(\\mathrm{P}[T_n = t]\\)\n\\(\\mathrm{P}[T_n \\leq t]\\)\n\n\n\n\n0\n1\n0.0143\n0.0143\n\n\n1\n16\n0.2286\n0.2429\n\n\n2\n36\n0.5143\n0.7571\n\n\n3\n16\n0.2286\n0.9857\n\n\n4\n1\n0.0143\n1.0000\n\n\n\n\n\nand calculate the critical values for any fixed nominal level \\(\\alpha\\in(0,1)\\), denoted \\(\\hat{c}_n(1-\\alpha)\\). That is, \\(\\hat{c}_n(1-\\alpha)\\) is the smallest \\(t\\) in the support of \\(T_n\\) such that the cumulative distribution function (CDF) of the distribution exceeds \\(1 - \\alpha\\):\n\\[\\hat{c}_n(1 - \\alpha) = \\inf\\bigl\\{ t \\in \\{0, \\ldots, 4\\} : \\mathrm{P}[T_n \\leq t] \\geq 1 - \\alpha \\bigr\\}.\\]\nFor \\(\\alpha = 0.05\\), \\(\\hat{c}_n(0.95)=3\\). Since \\(T_n^{\\mathrm{obs}} = 3 \\not&gt; 3\\), we do not reject \\(H_0\\) at level \\(\\alpha = 0.05\\).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Permutation Tests</span>"
+    ]
+  },
+  {
+    "objectID": "chapter_permtest.html#sec-critical",
+    "href": "chapter_permtest.html#sec-critical",
+    "title": "2  Permutation Tests",
+    "section": "2.5 Another look at the critical values",
+    "text": "2.5 Another look at the critical values\nLet \\(T_n^{(1)} \\leq T_n^{(2)} \\leq \\cdots \\leq T_n^{(70)}\\) denote the order statistics of \\(\\{T_n(w, Y) : w \\in \\mathbf{G}_n\\}\\).\nFix a nominal level \\(\\alpha \\in (0,1)\\). Define:\n\\[k \\;=\\; M - \\lfloor M\\alpha \\rfloor,\\]\nwhere \\(\\lfloor \\cdot \\rfloor\\) denotes the floor function. The permutation critical value is then defined as the \\(k\\)-th order statistic:\n\\[\\hat{c}_n(1 - \\alpha) \\;:=\\; T_n^{(k)}.\\]\nFor \\(\\alpha = 0.05\\):\n\\[k = 70 - \\lfloor 70 \\times 0.05 \\rfloor = 70 - 3 = 67, \\qquad \\hat{c}_n(0.95) = T_n^{(67)} = 3.\\]\n\n\nCode\nalpha &lt;- 0.05\nM     &lt;- nrow(G_n)\nk     &lt;- M - floor(M * alpha)\nc_hat &lt;- sort(T_vals)[k]\ncat(sprintf(\"alpha = %.2f | M = %d | k = %d | c_hat(1-alpha) = %d\\n\",\n            alpha, M, k, c_hat))\n\n\nalpha = 0.05 | M = 70 | k = 67 | c_hat(1-alpha) = 3\n\n\nSo we obtained the same critical value by brute force. Decision rule. Reject \\(H_0\\) if and only if \\(T_n^{\\mathrm{obs}} &gt; \\hat{c}_n(1-\\alpha)\\).\nSince \\(T_n^{\\mathrm{obs}} = 3 \\not&gt; 3\\), we do not reject \\(H_0\\) at level \\(\\alpha = 0.05\\).\n\n\n\n\n\n\nNoteExact size control\n\n\n\nThe permutation test achieves exact finite-sample size control. That is, for any \\(\\alpha \\in (0,1)\\) and regardless of the distribution of \\(Y\\):\n\\[\\mathrm{P}_{H_0}\\bigl[T_n &gt; \\hat{c}_n(1-\\alpha)\\bigr] \\;\\leq\\; \\alpha.\\]\nThis follows from the fact that, under \\(H_0\\), each of the \\(M = 70\\) values of \\(T_n(w, Y)\\) is equally likely, so the tail probability above \\(\\hat c_n(1-\\alpha)\\) is exactly \\(\\lfloor M\\alpha \\rfloor / M \\leq \\alpha\\).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Permutation Tests</span>"
+    ]
+  },
+  {
+    "objectID": "chapter_permtest.html#sec-interactive",
+    "href": "chapter_permtest.html#sec-interactive",
+    "title": "2  Permutation Tests",
+    "section": "2.6 Interactive Simulation",
+    "text": "2.6 Interactive Simulation\nThe widget below lets you explore how the permutation distribution and critical value change as you modify the outcome vector \\(Y\\) and the significance level \\(\\alpha\\). The treatment assignment is fixed at \\(W = (1,1,1,1,0,0,0,0)\\).\n\n\n\n  Interactive Permutation Test Explorer\n\n  \n    \n      Outcome vector Y (click to toggle 0/1)\n      \n      \n    \n    \n      Significance level α\n      \n        \n        0.05\n      \n    \n    \n       \n      Update\n    \n  \n\n  \n    \n      Observed statistic Tnobs\n      —\n    \n    \n      Critical value ĉn(1−α)\n      —\n    \n    \n      k = M − ⌊Mα⌋\n      —\n    \n    \n      Decision\n      —\n    \n  \n\n  \n    \n  \n\n  \n\n\n\nt\nCount\nP[Tn = t]\nP[Tn ≤ t]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTipHow to use the widget\n\n\n\n\nToggle \\(Y_i\\): click any of the eight buttons to flip the corresponding outcome between 0 and 1.\nAdjust \\(\\alpha\\): drag the slider to change the nominal level.\nPress Update to recompute the permutation distribution, the critical value, and the decision.\nBars shaded in red correspond to values of \\(T_n\\) that fall in the rejection region \\(\\{t : t &gt; \\hat{c}_n(1-\\alpha)\\}\\).\nThe row highlighted in yellow in the table marks the critical value.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Permutation Tests</span>"
+    ]
+  },
+  {
+    "objectID": "chapter_permtest.html#sec-takeaways",
+    "href": "chapter_permtest.html#sec-takeaways",
+    "title": "2  Permutation Tests",
+    "section": "2.7 Key Takeaways",
+    "text": "2.7 Key Takeaways\n\nExact finite-sample validity. The permutation test controls size exactly for any finite \\(n\\), with no distributional assumption on \\(Y\\).\nThe critical value is an order statistic. \\(\\hat{c}_n(1-\\alpha) = T_n^{(k)}\\) with \\(k = M - \\lfloor M\\alpha \\rfloor\\) is the \\(k\\)-th largest value of the statistic across all permutations.\nThe permutation distribution is discrete. For small samples, the achievable significance levels are restricted to multiples of \\(1/M\\). In this example, \\(M = 70\\), so the finest achievable level is \\(1/70 \\approx 0.014\\).\nEquivalence with the hypergeometric. Under \\(H_0\\), \\(T_n = \\sum_i W_i Y_i \\sim \\mathrm{Hypergeometric}(n, k, m)\\). The permutation distribution is thus fully characterized by \\(n\\), the number of treated units, and the number of \\(Y_i = 1\\).\nInsufficient power in small samples. With \\(n = 8\\) and \\(\\alpha = 0.05\\), the critical value is \\(\\hat{c}_n(0.95) = 3\\) and \\(T_n^{\\mathrm{obs}} = 3\\), so we fail to reject \\(H_0\\). This reflects a genuine power limitation of exact tests with very small samples.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Permutation Tests</span>"
+    ]
+  }
+]
