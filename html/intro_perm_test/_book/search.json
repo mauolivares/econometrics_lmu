@@ -1,0 +1,272 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Applied Causal Analysis",
+    "section": "",
+    "text": "Overview\nThese notes accompany the Applied Causal Analysis course at LMU Munich (Chair of Statistics and Econometrics). They introduce permutation tests from first principles, with a focus on their role in causal inference.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#birds-eye-view",
+    "href": "index.html#birds-eye-view",
+    "title": "Applied Causal Analysis",
+    "section": "0.1 Bird’s Eye View",
+    "text": "0.1 Bird’s Eye View\nA classical hypothesis test requires four ingredients:\n\nA hypothesis — a population statement. For example, \\[H_0 : \\beta = 0 \\quad \\text{vs} \\quad H_1 : \\beta \\neq 0.\\]\nA test statistic to evaluate \\(H_0\\), denoted \\(T_n\\).\nAn approximation to the sampling distribution of \\(T_n\\) (e.g., the standard normal distribution).\nA decision rule at a significance level \\(\\alpha \\in (0,1)\\). For example, the asymptotic test rejects whenever \\[\\phi_n^{\\text{asy}} = \\mathbf{1}\\{|T_n| &gt; z_{1 - \\alpha/2}\\}.\\]\n\nIn these notes we replace step 3 with a data-driven critical value \\(\\hat{c}_n(1 - \\alpha/2)\\), and use the decision rule \\[\\phi_n^{\\text{perm}} = \\mathbf{1}\\left\\{|T_n| &gt; \\hat{c}_n\\!\\left(1 - \\tfrac{\\alpha}{2}\\right)\\right\\},\\] which enjoys additional finite-sample guarantees relative to the asymptotic test under some additional assumptions.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#advantages-of-permutation-tests",
+    "href": "index.html#advantages-of-permutation-tests",
+    "title": "Applied Causal Analysis",
+    "section": "0.2 Advantages of Permutation Tests",
+    "text": "0.2 Advantages of Permutation Tests\nPermutation tests have a long history dating back to Fisher (1935). From a modern causal inference perspective they offer three key advantages:\n\nThey remain agnostic about the data-generating process (DGP).\nTheir construction is the same regardless of the choice of \\(T_n\\).\nThey yield exact finite-sample Type I error control under the randomization hypothesis (see Section 4.8).",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#notation",
+    "href": "index.html#notation",
+    "title": "Applied Causal Analysis",
+    "section": "0.3 Notation",
+    "text": "0.3 Notation\n\n\n\n\n\n\n\nSymbol\nMeaning\n\n\n\n\n\\(W^{(n)} = (W_1, \\ldots, W_n)\\)\nObserved data\n\n\n\\(P_n\\)\nUnknown DGP generating \\(W^{(n)}\\)\n\n\n\\(\\Omega_0 \\subset \\Omega\\)\nNull family of distributions\n\n\n\\(\\mathcal{G}_n\\)\nGroup of transformations\n\n\n\\(M = \\#\\mathcal{G}_n\\)\nCardinality of the group\n\n\n\\(T_n\\)\nTest statistic\n\n\n\\(T_n^{(k)}(w)\\)\n\\(k\\)-th order statistic of the permutation distribution\n\n\n\\(\\alpha\\)\nNominal significance level\n\n\n\\(B\\)\nNumber of Monte Carlo draws (when \\(M\\) is large)",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#structure-of-these-notes",
+    "href": "index.html#structure-of-these-notes",
+    "title": "Applied Causal Analysis",
+    "section": "0.4 Structure of These Notes",
+    "text": "0.4 Structure of These Notes\n\n\n\n\n\n\n\nChapter\nContent\n\n\n\n\nChapter 3\nEnvironment setup and data generation\n\n\nChapter 4\nThe permutation test: theory and implementation\n\n\nChapter 5\nMonte Carlo comparison: permutation vs asymptotic test",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html",
+    "href": "part1_setup.html",
+    "title": "2  Setup and Data Generation",
+    "section": "",
+    "text": "3 Setup and Data Generation",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup and Data Generation</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html#environment",
+    "href": "part1_setup.html#environment",
+    "title": "2  Setup and Data Generation",
+    "section": "3.1 Environment",
+    "text": "3.1 Environment\nWe begin by clearing the workspace and loading the project-specific function library. The library provides, among other things, the gen_data_PO() and group.action() functions that are central to these notes.\n\n\nLoad libraries and function library\nrm(list = ls())\n\n# Load required packages\nlibrary(ggplot2)\n\n# Source the function library from the programs directory\nsource(\"../../programs/ACA_Function_Library.r\")\n\n# Set seed for reproducibility (L'Ecuyer-CMRG for parallel safety)\nset.seed(42, kind = \"L'Ecuyer-CMRG\")\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe seed is fixed with the L’Ecuyer-CMRG generator. This generator is safe for parallel execution (e.g., parallel::mclapply) and ensures reproducibility across sessions.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup and Data Generation</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html#potential-outcomes-framework",
+    "href": "part1_setup.html#potential-outcomes-framework",
+    "title": "2  Setup and Data Generation",
+    "section": "3.2 Potential Outcomes Framework",
+    "text": "3.2 Potential Outcomes Framework\nThe data-generating process follows a location-scale model for potential outcomes:\n\\[Y_i(0) \\sim F, \\qquad Y_i(1) = Y_i(0) + \\tau_i,\\]\nwhere the individual treatment effect is\n\\[\\tau_i = \\mu_\\tau + \\sigma_\\tau \\cdot Y_i(0).\\]\nSetting \\(\\mu_\\tau = 0\\) and \\(\\sigma_\\tau = 0\\) imposes the sharp null hypothesis of no treatment effect:\n\\[H_0 : Y_i(1) = Y_i(0) \\quad \\text{a.s.} \\quad \\Longleftrightarrow \\quad Y \\perp D.\\]\nTreatment is assigned completely at random with probability \\(p = 0.5\\), so \\(\\{(Y_i(1), Y_i(0))\\}_{i=1}^n \\perp \\{D_i\\}_{i=1}^n\\).\n\n\nGenerate data under the sharp null\n# Generate data under the sharp null (te.mean = te.sd = 0)\ndata &lt;- gen_data_PO(\n  n      = 100,\n  te.mean = 0,\n  te.sd   = 0,\n  p       = 0.5,\n  type    = \"normal\"\n)\n\nstr(data)\n\n\n'data.frame':   100 obs. of  2 variables:\n $ Y: num  0.53 0.979 1.415 0.78 0.843 ...\n $ D: num  0 1 1 1 1 0 1 0 0 0 ...\n\n\nGenerate data under the sharp null\nhead(data)\n\n\n            Y D\n1  0.53046146 0\n2  0.97916029 1\n3  1.41470675 1\n4  0.78032090 1\n5  0.84298228 1\n6 -0.06451182 0\n\n\nThe returned object is a data.frame with two columns:\n\nY: observed outcome.\nD: binary treatment indicator (\\(D_i = 1\\) for treated, \\(D_i = 0\\) for control).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup and Data Generation</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html#visualising-the-potential-outcomes",
+    "href": "part1_setup.html#visualising-the-potential-outcomes",
+    "title": "2  Setup and Data Generation",
+    "section": "3.3 Visualising the Potential Outcomes",
+    "text": "3.3 Visualising the Potential Outcomes\nUnder the sharp null \\(Y_i(1) = Y_i(0)\\), the marginal distributions of the treated and control outcomes should look similar. We can verify this:\n\n\nPlot density of observed outcomes by treatment arm\nY_treated &lt;- data$Y[data$D == 1]\nY_control &lt;- data$Y[data$D == 0]\n\ndf_plot &lt;- data.frame(\n  value = c(Y_treated, Y_control),\n  group = factor(\n    c(rep(\"Treated (D=1)\", length(Y_treated)),\n      rep(\"Control (D=0)\", length(Y_control)))\n  )\n)\n\nggplot(df_plot, aes(x = value, fill = group)) +\n  geom_density(alpha = 0.5) +\n  scale_fill_manual(values = c(\"steelblue\", \"tomato\")) +\n  labs(\n    x     = \"Outcome Y\",\n    y     = \"Density\",\n    fill  = NULL,\n    title = \"Observed Outcomes by Treatment Arm\"\n  ) +\n  theme_minimal(base_size = 13)\n\n\n\n\n\n\n\n\nFigure 3.1: Kernel density estimates of the observed outcomes by treatment arm under the sharp null.\n\n\n\n\n\nAs expected, the two distributions are nearly indistinguishable when the sharp null holds.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup and Data Generation</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html",
+    "href": "part2_permtest.html",
+    "title": "3  The Permutation Test",
+    "section": "",
+    "text": "4 The Permutation Test",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#the-randomization-hypothesis",
+    "href": "part2_permtest.html#the-randomization-hypothesis",
+    "title": "3  The Permutation Test",
+    "section": "4.1 The Randomization Hypothesis",
+    "text": "4.1 The Randomization Hypothesis\nLet \\(W^{(n)} = (W_1, \\ldots, W_n)\\) denote the observed data taking values in a sample space \\(\\mathcal{W}\\), generated by an unknown law \\(P_n\\). Our goal is to test\n\\[H_0 : P_n \\in \\Omega_0 \\subset \\Omega.\\]\nLet \\(\\mathcal{G}_n\\) be a group of transformations acting on \\(\\mathcal{W}\\), with cardinality \\(M = \\#\\mathcal{G}_n\\).\n\n\n\n\n\n\nImportantRandomization Hypothesis\n\n\n\nThe law \\(P_n\\) satisfies the randomization hypothesis with respect to \\(\\mathcal{G}_n\\) if\n\\[W^{(n)} \\stackrel{d}{=} g W^{(n)} \\quad \\forall\\, g \\in \\mathcal{G}_n, \\quad \\text{whenever } P_n \\in \\Omega_0.\\]\nIn words: under the null, permuting the data does not change its distribution.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#the-test-statistic",
+    "href": "part2_permtest.html#the-test-statistic",
+    "title": "3  The Permutation Test",
+    "section": "4.2 The Test Statistic",
+    "text": "4.2 The Test Statistic\nLet \\(T_n \\equiv T_n(W^{(n)})\\) be a real-valued test statistic chosen to detect departures from \\(H_0\\). In our two-sample setting we test whether the variance of the treated potential outcomes equals that of the control potential outcomes,\n\\[H_0 : \\text{Var}[Y(1)] = \\text{Var}[Y(0)].\\]\nThe standardised variance-ratio statistic is\n\\[T_n = \\frac{\\hat{\\sigma}_1^2 - \\hat{\\sigma}_0^2}{\\sqrt{\\widehat{\\text{Var}}(\\hat{\\sigma}_1^2 - \\hat{\\sigma}_0^2)}},\\]\nwhere \\(\\hat{\\sigma}_d^2\\) is the sample variance in arm \\(d \\in \\{0,1\\}\\) and the denominator uses the delta-method variance estimator implemented in Tn_stat_variance().\n\n\nCompute the observed test statistic\nY1 &lt;- data$Y[data$D == 1]\nY0 &lt;- data$Y[data$D == 0]\n\nTn_obs &lt;- abs(Tn_stat_variance(Y1, Y0))\ncat(\"Observed test statistic |T_n|:\", round(Tn_obs, 4), \"\\n\")\n\n\nObserved test statistic |T_n|: 0.6787",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#the-group-action-permutations",
+    "href": "part2_permtest.html#the-group-action-permutations",
+    "title": "3  The Permutation Test",
+    "section": "4.3 The Group Action: Permutations",
+    "text": "4.3 The Group Action: Permutations\nUnder completely randomised assignment with \\(p = 0.5\\), the natural group is the collection of all permutations of the treatment vector \\(\\mathbf{D} = (D_1, \\ldots, D_n)\\). Applying \\(g \\in \\mathcal{G}_n\\) to \\(W^{(n)}\\) reassigns treatment labels while keeping outcomes fixed:\n\\[(D_1, \\ldots, D_n) \\xrightarrow{g} (D_{\\pi(1)}, \\ldots, D_{\\pi(n)}).\\]\nSince \\(M = n!\\) grows super-exponentially, we draw \\(B\\) permutations uniformly at random (Monte Carlo approximation):\n\n\nDraw B random permutations via group.action()\nB &lt;- 100\nperm_data &lt;- group.action(data$D, B, type = \"permutations\")\n\n# perm_data is an n x B matrix; column b contains the b-th permuted D vector\ndim(perm_data)\n\n\n[1] 100 100",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#recomputing-t_n-over-permutations",
+    "href": "part2_permtest.html#recomputing-t_n-over-permutations",
+    "title": "3  The Permutation Test",
+    "section": "4.4 Recomputing \\(T_n\\) Over Permutations",
+    "text": "4.4 Recomputing \\(T_n\\) Over Permutations\nFor each column \\(b = 1, \\ldots, B\\) of perm_data we recompute the test statistic under the permuted assignment:\n\n\nRecompute T_n over all B permutations\nTn_perm &lt;- numeric(B)\n\nfor (b in seq_len(B)) {\n  Y1_b &lt;- data$Y[perm_data[, b] == 1]\n  Y0_b &lt;- data$Y[perm_data[, b] == 0]\n  Tn_perm[b] &lt;- abs(Tn_stat_variance(Y1_b, Y0_b))\n}\n\n\nThe collection \\(\\{T_n(g_b W^{(n)})\\}_{b=1}^{B}\\) approximates the randomization distribution of \\(T_n\\) under \\(H_0\\).",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#the-permutation-critical-value",
+    "href": "part2_permtest.html#the-permutation-critical-value",
+    "title": "3  The Permutation Test",
+    "section": "4.5 The Permutation Critical Value",
+    "text": "4.5 The Permutation Critical Value\nFix \\(\\alpha \\in (0,1)\\). Define\n\\[k = M - \\lfloor M\\alpha \\rfloor,\\]\nand let \\(T_n^{(1)}(w) \\leq T_n^{(2)}(w) \\leq \\cdots \\leq T_n^{(M)}(w)\\) be the sorted permutation statistics. The permutation critical value is\n\\[\\hat{c}_n(1-\\alpha) = T_n^{(k)}(w).\\]\n\n4.5.1 Handling Ties\nDefine\n\\[M^+(w) = \\#\\{j : T_n^{(j)}(w) &gt; T_n^{(k)}(w)\\}, \\qquad\nM^0(w) = \\#\\{j : T_n^{(j)}(w) = T_n^{(k)}(w)\\}.\\]\nThe exact permutation test is\n\\[\\phi_n^{\\text{perm}} = \\begin{cases}\n1 & \\text{if } T_n &gt; T_n^{(k)}(w), \\\\\na(w) & \\text{if } T_n = T_n^{(k)}(w), \\\\\n0 & \\text{if } T_n &lt; T_n^{(k)}(w),\n\\end{cases}\n\\quad \\text{with } a(w) = \\frac{M\\alpha - M^+(w)}{M^0(w)}.\\]\nThe function perm_test() implements this rule. It expects a vector whose last entry is the observed statistic \\(T_n\\):\n\n\nApply perm_test() to obtain the rejection decision\nalpha &lt;- 0.05\n\n# Append the observed statistic as the last element\nresult &lt;- perm_test(c(Tn_perm, Tn_obs), alpha)\n\ncat(\"Reject H0 (1 = yes, 0 = no):\", result, \"\\n\")\n\n\nReject H0 (1 = yes, 0 = no): 0",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#visualising-the-randomization-distribution",
+    "href": "part2_permtest.html#visualising-the-randomization-distribution",
+    "title": "3  The Permutation Test",
+    "section": "4.6 Visualising the Randomization Distribution",
+    "text": "4.6 Visualising the Randomization Distribution\n\n\nPlot the randomization distribution\n# Compute the critical value explicitly for annotation\nall_stats  &lt;- sort(c(Tn_perm, Tn_obs))\nn_total    &lt;- length(all_stats)\nk_idx      &lt;- n_total - floor(n_total * alpha)\ncv_perm    &lt;- all_stats[k_idx]\n\ndf_hist &lt;- data.frame(Tn = Tn_perm)\n\nggplot(df_hist, aes(x = Tn)) +\n  geom_histogram(bins = 20, fill = \"lightblue\", colour = \"white\") +\n  geom_vline(xintercept = cv_perm,  colour = \"red\",      linetype = \"dashed\",  linewidth = 1) +\n  geom_vline(xintercept = Tn_obs,   colour = \"steelblue\", linetype = \"dotted\", linewidth = 1) +\n  annotate(\"text\", x = cv_perm + 0.05, y = Inf, vjust = 2,\n           label = paste0(\"Perm. c.v. = \", round(cv_perm, 3)),\n           colour = \"red\", size = 3.5, hjust = 0) +\n  annotate(\"text\", x = Tn_obs + 0.05, y = Inf, vjust = 4,\n           label = paste0(\"|T_n| = \", round(Tn_obs, 3)),\n           colour = \"steelblue\", size = 3.5, hjust = 0) +\n  labs(\n    x     = expression(\"|\" * T[n] * \"|\"),\n    y     = \"Count\",\n    title = \"Randomization Distribution\"\n  ) +\n  theme_minimal(base_size = 13)\n\n\n\n\n\n\n\n\nFigure 4.1: Randomization distribution of \\(|T_n|\\) across \\(B = 100\\) permutations. The red dashed line marks the permutation critical value; the blue dotted line marks the observed statistic.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#permutation-p-value",
+    "href": "part2_permtest.html#permutation-p-value",
+    "title": "3  The Permutation Test",
+    "section": "4.7 Permutation P-Value",
+    "text": "4.7 Permutation P-Value\nAn equivalent summary is the permutation p-value\n\\[\\hat{p} = \\frac{1}{M} \\sum_{g \\in \\mathcal{G}_n} \\mathbf{1}\\{T_n(g W^{(n)}) \\geq T_n(W^{(n)})\\}.\\]\n\n\nCompute the permutation p-value\np_perm &lt;- mean(c(Tn_perm, Tn_obs) &gt;= Tn_obs)\ncat(\"Permutation p-value:\", round(p_perm, 4), \"\\n\")\n\n\nPermutation p-value: 0.6931",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#sec-exactness",
+    "href": "part2_permtest.html#sec-exactness",
+    "title": "3  The Permutation Test",
+    "section": "4.8 Exactness under the Randomization Hypothesis",
+    "text": "4.8 Exactness under the Randomization Hypothesis\n\n\n\n\n\n\nTipTheorem (Finite-Sample Exactness)\n\n\n\nIf \\(P_n \\in \\Omega_0\\) satisfies the randomization hypothesis, then\n\\[\\mathbb{E}\\!\\left[\\phi_n^{\\text{perm}}\\!\\left(W^{(n)}\\right)\\right] = \\alpha\n\\quad \\text{for all } P_n \\in \\Omega_0.\\]\n\n\nThis result is non-asymptotic: it holds for every sample size \\(n\\) and does not require any distributional assumptions beyond the randomization hypothesis.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_permtest.html#computational-remarks",
+    "href": "part2_permtest.html#computational-remarks",
+    "title": "3  The Permutation Test",
+    "section": "4.9 Computational Remarks",
+    "text": "4.9 Computational Remarks\nThe exact construction requires evaluating \\(T_n\\) a total of \\(M\\) times. When \\(\\mathcal{G}_n\\) is the group of all permutations of \\(\\{1, \\ldots, N\\}\\), we have \\(M = N!\\). In base R the maximum vector length is \\(2^{31} - 1 \\approx 2 \\times 10^9\\), so exact enumeration becomes infeasible already at \\(N = 13\\) (since \\(13! &gt; 6 \\times 10^9\\)). In practice we therefore draw \\(B \\ll M\\) permutations uniformly at random, as done above.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_simulation.html",
+    "href": "part3_simulation.html",
+    "title": "4  Monte Carlo: Permutation vs Asymptotic Test",
+    "section": "",
+    "text": "5 Monte Carlo Comparison",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Monte Carlo: Permutation vs Asymptotic Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_simulation.html#design",
+    "href": "part3_simulation.html#design",
+    "title": "4  Monte Carlo: Permutation vs Asymptotic Test",
+    "section": "5.1 Design",
+    "text": "5.1 Design\nWe compare the empirical rejection probabilities of two tests at significance level \\(\\alpha = 0.05\\):\n\n\n\nTest\nDecision rule\n\n\n\n\nPermutation\n\\(\\phi_n^{\\text{perm}} = 1\\) if perm_test() returns 1\n\n\nAsymptotic\n\\(\\phi_n^{\\text{asy}} = \\mathbf{1}\\{|T_n| &gt; 1.96\\}\\)\n\n\n\nUnder the sharp null \\(H_0 : Y_i(1) = Y_i(0)\\) a.s., both tests should reject approximately \\(100\\alpha\\%\\) of the time. A rejection frequency below \\(\\alpha\\) indicates a conservative test; a rejection frequency above \\(\\alpha\\) indicates an anti-conservative (size-distorted) test. Anti-conservatism is particularly problematic because it means the nominal level \\(\\alpha\\) is not controlled.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Monte Carlo: Permutation vs Asymptotic Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_simulation.html#simulation-parameters",
+    "href": "part3_simulation.html#simulation-parameters",
+    "title": "4  Monte Carlo: Permutation vs Asymptotic Test",
+    "section": "5.2 Simulation Parameters",
+    "text": "5.2 Simulation Parameters\n\n\nSet simulation parameters\nn_sims &lt;- 1000   # Monte Carlo replications\nn      &lt;- 100    # Sample size\nB      &lt;- 100    # Permutations per replication\nalpha  &lt;- 0.05   # Nominal level",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Monte Carlo: Permutation vs Asymptotic Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_simulation.html#main-loop",
+    "href": "part3_simulation.html#main-loop",
+    "title": "4  Monte Carlo: Permutation vs Asymptotic Test",
+    "section": "5.3 Main Loop",
+    "text": "5.3 Main Loop\n\n\nMonte Carlo loop: permutation and asymptotic test across S replications\n# output[i, 1] = permutation test result\n# output[i, 2] = asymptotic test result\noutput &lt;- matrix(NA_real_, nrow = n_sims, ncol = 2)\n\nfor (i in seq_len(n_sims)) {\n\n  # 1. Generate data under the sharp null\n  data_i &lt;- gen_data_PO(n = n, te.mean = 0, te.sd = 0, p = 0.5, type = \"normal\")\n\n  # 2. Observed test statistic\n  Y1_i &lt;- data_i$Y[data_i$D == 1]\n  Y0_i &lt;- data_i$Y[data_i$D == 0]\n  Tn_i &lt;- abs(Tn_stat_variance(Y1_i, Y0_i))\n\n  # 3. Permutation distribution\n  perm_i  &lt;- group.action(data_i$D, B, type = \"permutations\")\n  Tn_perm &lt;- numeric(B)\n\n  for (j in seq_len(B)) {\n    Y1_j       &lt;- data_i$Y[perm_i[, j] == 1]\n    Y0_j       &lt;- data_i$Y[perm_i[, j] == 0]\n    Tn_perm[j] &lt;- abs(Tn_stat_variance(Y1_j, Y0_j))\n  }\n\n  # 4. Store results\n  output[i, 1] &lt;- perm_test(c(Tn_perm, Tn_i), alpha)   # permutation\n  output[i, 2] &lt;- as.numeric(Tn_i &gt; 1.96)               # asymptotic\n}",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Monte Carlo: Permutation vs Asymptotic Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_simulation.html#results",
+    "href": "part3_simulation.html#results",
+    "title": "4  Monte Carlo: Permutation vs Asymptotic Test",
+    "section": "5.4 Results",
+    "text": "5.4 Results\n\n\nTabulate empirical rejection rates\nrej_rates &lt;- colMeans(output)\nnames(rej_rates) &lt;- c(\"Permutation\", \"Asymptotic\")\n\nknitr::kable(\n  data.frame(\n    Test                 = names(rej_rates),\n    `Rejection Rate`     = round(rej_rates, 3),\n    `Nominal Level`      = alpha,\n    `Conservative?`      = ifelse(rej_rates &lt; alpha, \"Yes\", \"No\"),\n    check.names          = FALSE\n  ),\n  align = \"lccc\"\n)\n\n\n\n\nTable 5.1: Empirical rejection frequencies under \\(H_0\\) (\\(n = 100\\), \\(B = 100\\), \\(S = 1{,}000\\) replications).\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTest\nRejection Rate\nNominal Level\nConservative?\n\n\n\n\nPermutation\nPermutation\n0.047\n0.05\nYes\n\n\nAsymptotic\nAsymptotic\n0.066\n0.05\nNo",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Monte Carlo: Permutation vs Asymptotic Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_simulation.html#visualisation",
+    "href": "part3_simulation.html#visualisation",
+    "title": "4  Monte Carlo: Permutation vs Asymptotic Test",
+    "section": "5.5 Visualisation",
+    "text": "5.5 Visualisation\n\n\nPlot empirical size of both tests\ndf_bar &lt;- data.frame(\n  Test = c(\"Permutation\", \"Asymptotic\"),\n  Rate = rej_rates\n)\n\nggplot(df_bar, aes(x = Test, y = Rate, fill = Test)) +\n  geom_col(width = 0.5, show.legend = FALSE) +\n  geom_hline(yintercept = alpha, linetype = \"dashed\", colour = \"black\", linewidth = 0.8) +\n  scale_fill_manual(values = c(\"Asymptotic\" = \"tomato\", \"Permutation\" = \"steelblue\")) +\n  scale_y_continuous(limits = c(0, 0.12), labels = scales::percent_format()) +\n  annotate(\"text\", x = 2.6, y = alpha + 0.004,\n           label = expression(alpha == 0.05), size = 3.5) +\n  labs(\n    x     = NULL,\n    y     = \"Empirical Rejection Rate\",\n    title = \"Size under the Sharp Null\"\n  ) +\n  theme_minimal(base_size = 13)\n\n\n\n\n\n\n\n\nFigure 5.1: Empirical rejection frequencies for the permutation test (blue) and the asymptotic test (red). The dashed horizontal line marks the nominal level \\(\\alpha = 0.05\\).",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Monte Carlo: Permutation vs Asymptotic Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_simulation.html#interpretation",
+    "href": "part3_simulation.html#interpretation",
+    "title": "4  Monte Carlo: Permutation vs Asymptotic Test",
+    "section": "5.6 Interpretation",
+    "text": "5.6 Interpretation\nUnder the sharp null, the permutation test should yield an empirical rejection frequency at or below \\(\\alpha = 0.05\\) by the exactness theorem (Section 4.8). The asymptotic test, by contrast, relies on the normal approximation to the distribution of \\(T_n\\), which may not be accurate in finite samples.\n\n\n\n\n\n\nNote\n\n\n\nIncreasing \\(B\\) (the number of Monte Carlo permutations) reduces the approximation error in \\(\\hat{c}_n(1-\\alpha)\\) and brings the empirical size of the permutation test closer to the nominal level.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Monte Carlo: Permutation vs Asymptotic Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_simulation.html#summary-of-the-computational-procedure",
+    "href": "part3_simulation.html#summary-of-the-computational-procedure",
+    "title": "4  Monte Carlo: Permutation vs Asymptotic Test",
+    "section": "5.7 Summary of the Computational Procedure",
+    "text": "5.7 Summary of the Computational Procedure\nThe table below summarises the full permutation test algorithm as implemented above.\n\n\n\n\n\n\n\n\nStep\nOperation\nOutput\n\n\n\n\n1\nObserve \\(W^{(n)}\\); compute \\(T_n(W^{(n)})\\)\n\\(T_n\\)\n\n\n2\nDraw \\(g_1, \\ldots, g_B \\sim \\text{Uniform}(\\mathcal{G}_n)\\)\n\\(B\\) permutations\n\n\n3\nRecompute \\(T_n(g_b W^{(n)})\\) for \\(b = 1, \\ldots, B\\)\n\\(\\{T_n^{(b)}\\}_{b=1}^B\\)\n\n\n4\nSort: \\(T_n^{(1)} \\leq \\cdots \\leq T_n^{(B+1)}\\) (include \\(T_n\\) as \\(g_1 = \\text{id}\\))\nOrder statistics\n\n\n5\nSet \\(k = (B+1) - \\lfloor (B+1)\\alpha \\rfloor\\); \\(\\hat{c}_n = T_n^{(k)}\\)\nCritical value\n\n\n6\nReject \\(H_0\\) if \\(T_n &gt; \\hat{c}_n\\)\n\\(\\phi_n^{\\text{perm}} \\in \\{0,1\\}\\)",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Monte Carlo: Permutation vs Asymptotic Test</span>"
+    ]
+  }
+]
