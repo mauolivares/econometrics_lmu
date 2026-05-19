@@ -68,6 +68,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./part4_visual.html" rel="next">
 <link href="./part2_permtest.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -195,6 +196,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="./part3_simulation.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Monte Carlo: Permutation vs Asymptotic Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part4_visual.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Permutation Test: A Visual Walk-Through</span></span></a>
   </div>
 </li>
     </ul>
@@ -460,7 +467,7 @@ Note
 </tr>
 <tr class="even">
 <td>2</td>
-<td>Draw <span class="math inline">\(g_1, \ldots, g_B \sim \text{Uniform}(\mathcal{G}_n)\)</span></td>
+<td>Draw <span class="math inline">\(g_1, \ldots, g_B \sim \text{Uniform}(\mathbf{G}_n)\)</span></td>
 <td><span class="math inline">\(B\)</span> permutations</td>
 </tr>
 <tr class="odd">
@@ -952,6 +959,9 @@ Note
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./part4_visual.html" class="pagination-link" aria-label="Permutation Test: A Visual Walk-Through">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Permutation Test: A Visual Walk-Through</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
@@ -1108,7 +1118,7 @@ Note
 <span id="cb5-162"><a href="#cb5-162" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Step <span class="pp">|</span> Operation <span class="pp">|</span> Output <span class="pp">|</span></span>
 <span id="cb5-163"><a href="#cb5-163" aria-hidden="true" tabindex="-1"></a><span class="pp">|------|-----------|--------|</span></span>
 <span id="cb5-164"><a href="#cb5-164" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 1 <span class="pp">|</span> Observe $W^{(n)}$; compute $T_n(W^{(n)})$ <span class="pp">|</span> $T_n$ <span class="pp">|</span></span>
-<span id="cb5-165"><a href="#cb5-165" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2 <span class="pp">|</span> Draw $g_1, \ldots, g_B \sim \text{Uniform}(\mathcal{G}_n)$ <span class="pp">|</span> $B$ permutations <span class="pp">|</span></span>
+<span id="cb5-165"><a href="#cb5-165" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2 <span class="pp">|</span> Draw $g_1, \ldots, g_B \sim \text{Uniform}(\mathbf{G}_n)$ <span class="pp">|</span> $B$ permutations <span class="pp">|</span></span>
 <span id="cb5-166"><a href="#cb5-166" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 3 <span class="pp">|</span> Recompute $T_n(g_b W^{(n)})$ for $b = 1, \ldots, B$ <span class="pp">|</span> $<span class="sc">\{</span>T_n^{(b)}<span class="sc">\}</span>_{b=1}^B$ <span class="pp">|</span></span>
 <span id="cb5-167"><a href="#cb5-167" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 4 <span class="pp">|</span> Sort: $T_n^{(1)} \leq \cdots \leq T_n^{(B+1)}$ (include $T_n$ as $g_1 = \text{id}$) <span class="pp">|</span> Order statistics <span class="pp">|</span></span>
 <span id="cb5-168"><a href="#cb5-168" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 5 <span class="pp">|</span> Set $k = (B+1) - \lfloor (B+1)\alpha \rfloor$; $\hat{c}_n = T_n^{(k)}$ <span class="pp">|</span> Critical value <span class="pp">|</span></span>

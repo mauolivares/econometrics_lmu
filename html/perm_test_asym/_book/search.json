@@ -1,0 +1,242 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Applied Causal Analysis",
+    "section": "",
+    "text": "Overview\nIn this note we investigate the asymptotic behavior of the permutation test in the one-sample inference problem when we want to carry out inference for the mean of a random variable. We will consider sign changes as the group transformation and study the behavior of the permutation test and its relationship to the normal approximation when the sample size grows to infinity. We will pay particular attention to what happens when the randomization hypothesis fails.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#the-central-question",
+    "href": "index.html#the-central-question",
+    "title": "Applied Causal Analysis",
+    "section": "0.1 The Central Question",
+    "text": "0.1 The Central Question\nIn Chapter 4 we construct a permutation test for the one-sample hypothesis\n\\[H_0 : \\mathbb{E}[W] = 0\\]\nusing sign changes as the group of transformations. Recall that the randomization hypothesis is the key condition that guarantees finite-sample exactness of the permutation test. It will require that the distribution of \\(W\\) to be symmetric about zero. When the DGP is skewed, this condition fails, and the permutation test is no longer exact. It remains, however, asymptotically valid if we modify the test statistic as we showed in class.\nThis raises a natural question: if both the sign-change permutation test and the standard normal approximation are only asymptotically valid under a skewed DGP, how do their finite-sample null distributions compare? Chapter 5 answers this question by simulating both distributions under a re-centred exponential DGP, which satisfies \\(\\mathbb{E}[W] = 0\\) but is right-skewed.\n\n\n\n\n\n\nImportantKey Message\n\n\n\nThe sign-change permutation test is exact if and only if the distribution of \\(W\\) is symmetric about zero. Under a skewed DGP, both the permutation test and the normal approximation are only asymptotically valid. The permutation test is not a free lunch: its finite-sample guarantees rest on the randomization hypothesis, which is a substantive assumption about the DGP.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#notation",
+    "href": "index.html#notation",
+    "title": "Applied Causal Analysis",
+    "section": "0.2 Notation",
+    "text": "0.2 Notation\n\n\n\n\n\n\n\nSymbol\nMeaning\n\n\n\n\n\\(W^{(n)} = (W_1, \\ldots, W_n)\\)\nObserved data\n\n\n\\(P_n\\)\nUnknown DGP generating \\(W^{(n)}\\)\n\n\n\\(\\Omega_0 \\subset \\Omega\\)\nNull family of distributions\n\n\n\\(\\mathbf{G}_n\\)\nGroup of sign-change transformations\n\n\n\\(M = \\#\\mathbf{G}_n = 2^n\\)\nCardinality of the sign-change group\n\n\n\\(T_n\\)\nStudentised test statistic\n\n\n\\(T_n^{(k)}(w)\\)\n\\(k\\)-th order statistic of the randomization distribution\n\n\n\\(\\alpha\\)\nNominal significance level\n\n\n\\(B\\)\nNumber of Monte Carlo draws\n\n\n\\(\\hat{c}_n(1-\\alpha)\\)\nPermutation critical value\n\n\n\\(z_{1-\\alpha}\\)\n\\((1-\\alpha)\\)-quantile of \\(\\mathcal{N}(0,1)\\)",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#structure-of-these-notes",
+    "href": "index.html#structure-of-these-notes",
+    "title": "Applied Causal Analysis",
+    "section": "0.3 Structure of These Notes",
+    "text": "0.3 Structure of These Notes\n\n\n\n\n\n\n\nChapter\nContent\n\n\n\n\nChapter 3\nEnvironment setup; the one-sample testing problem\n\n\nChapter 4\nThe sign-change group; the randomization hypothesis and the symmetry condition; implementation\n\n\nChapter 5\nFinite-sample comparison of the randomization and normal null distributions under a skewed DGP",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Overview</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html",
+    "href": "part1_setup.html",
+    "title": "2  Setup",
+    "section": "",
+    "text": "3 Setup",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html#environment",
+    "href": "part1_setup.html#environment",
+    "title": "2  Setup",
+    "section": "3.1 Environment",
+    "text": "3.1 Environment\n\n\nLoad libraries and function library\nrm(list = ls())\n\nlibrary(ggplot2)\n\nsource(\"../../programs/ACA_Function_Library.r\")\n\nset.seed(42, kind = \"L'Ecuyer-CMRG\")\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe seed is fixed with the L’Ecuyer-CMRG generator, which is safe for parallel execution and ensures reproducibility across sessions.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html#the-one-sample-testing-problem",
+    "href": "part1_setup.html#the-one-sample-testing-problem",
+    "title": "2  Setup",
+    "section": "3.2 The One-Sample Testing Problem",
+    "text": "3.2 The One-Sample Testing Problem\nLet \\(W^{(n)} = (W_1, \\ldots, W_n)\\) be an i.i.d. sample drawn from an unknown distribution \\(P\\) on \\(\\mathbb{R}\\). We wish to test\n\\[H_0 : \\mathbb{E}[W] = 0 \\quad \\text{vs} \\quad H_1 : \\mathbb{E}[W] \\neq 0.\\]\nThis is a one-sample location problem: under \\(H_0\\) the distribution of \\(W\\) is centred at zero, but we make no further parametric assumption about its shape.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html#the-studentised-test-statistic",
+    "href": "part1_setup.html#the-studentised-test-statistic",
+    "title": "2  Setup",
+    "section": "3.3 The Studentised Test Statistic",
+    "text": "3.3 The Studentised Test Statistic\nA natural test statistic is the studentised mean\n\\[T_n = T_n\\!\\left(W^{(n)}\\right)\n      = \\frac{\\bar{W}_n}{\\hat{\\sigma}_n / \\sqrt{n}},\n\\qquad\n\\bar{W}_n = \\frac{1}{n}\\sum_{i=1}^n W_i,\n\\quad\n\\hat{\\sigma}_n^2 = \\frac{1}{n-1}\\sum_{i=1}^n (W_i - \\bar{W}_n)^2.\\]\nStudentising removes the dependence on the unknown variance and ensures that \\(T_n \\xrightarrow{d} \\mathcal{N}(0,1)\\) under \\(H_0\\) by the central limit theorem, regardless of the shape of \\(P\\), provided \\(\\mathbb{E}[W^2]\n&lt; \\infty\\).\n\n\nDefine the studentised test statistic\nTn &lt;- function(data, sample_size, studentized = FALSE) {\n  if (studentized) return(mean(data) / sqrt(var(data) / sample_size))\n  return(sqrt(sample_size) * mean(data))\n}\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe function Tn() accepts a logical argument studentized. When studentized = TRUE it returns \\(\\bar{W}_n / (\\hat{\\sigma}_n/\\sqrt{n})\\); when FALSE it returns the non-studentised version \\(\\sqrt{n}\\,\\bar{W}_n\\). All subsequent analyses use the studentised form.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup</span>"
+    ]
+  },
+  {
+    "objectID": "part1_setup.html#the-data-generating-process",
+    "href": "part1_setup.html#the-data-generating-process",
+    "title": "2  Setup",
+    "section": "3.4 The Data-Generating Process",
+    "text": "3.4 The Data-Generating Process\nWe generate \\(n = 1000\\) observations from the re-centred exponential distribution:\n\\[W_i = \\text{Exp}(1) - 1, \\qquad i = 1, \\ldots, n.\\]\nThis DGP satisfies \\(\\mathbb{E}[W_i] = 0\\), so \\(H_0\\) is true by construction. However, \\(W_i\\) has skewness \\(+2\\), which means it is not symmetric about zero. The asymmetry will be important when we discuss the randomization hypothesis in Chapter 4.\n\n\nGenerate data from the re-centred exponential\nn   &lt;- 1000\nB   &lt;- 499\nalpha &lt;- 0.05\n\nW_n     &lt;- rexp(n, rate = 1) - 1\nTn_obs  &lt;- Tn(W_n, n, studentized = TRUE)\n\ncat(\"Sample size n       :\", n,     \"\\n\")\n\n\nSample size n       : 1000 \n\n\nGenerate data from the re-centred exponential\ncat(\"Monte Carlo draws B :\", B,     \"\\n\")\n\n\nMonte Carlo draws B : 499 \n\n\nGenerate data from the re-centred exponential\ncat(\"Significance level  :\", alpha, \"\\n\")\n\n\nSignificance level  : 0.05 \n\n\nGenerate data from the re-centred exponential\ncat(\"Observed T_n        :\", round(Tn_obs, 4), \"\\n\")\n\n\nObserved T_n        : 0.254 \n\n\n\n\nPlot the sample distribution\ndf_w &lt;- data.frame(W = W_n)\n\nggplot(df_w, aes(x = W)) +\n  geom_histogram(aes(y = after_stat(density)),\n                 bins = 50, fill = \"steelblue\", colour = \"white\", alpha = 0.8) +\n  geom_vline(xintercept = 0, colour = \"red\", linetype = \"dashed\", linewidth = 0.8) +\n  labs(\n    x     = expression(W[i]),\n    y     = \"Density\",\n    title = expression(\"Re-centred exponential: \" * W[i] == Exp(1) - 1)\n  ) +\n  theme_minimal(base_size = 13)\n\n\n\n\n\n\n\n\nFigure 3.1: Histogram of the re-centred exponential sample \\(W_i = \\text{Exp}(1) - 1\\). The distribution is right-skewed; its mean is zero but it is not symmetric about zero.\n\n\n\n\n\nThe red dashed line marks zero. The distribution is clearly right-skewed: most mass lies close to zero but there is a long right tail, so the distribution is not symmetric about its mean.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Setup</span>"
+    ]
+  },
+  {
+    "objectID": "part2_signtest.html",
+    "href": "part2_signtest.html",
+    "title": "3  The Sign-Change Permutation Test",
+    "section": "",
+    "text": "4 The Sign-Change Permutation Test",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Sign-Change Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_signtest.html#the-sign-change-group",
+    "href": "part2_signtest.html#the-sign-change-group",
+    "title": "3  The Sign-Change Permutation Test",
+    "section": "4.1 The Sign-Change Group",
+    "text": "4.1 The Sign-Change Group\nIn the two-sample problem of the previous notes, the group \\(\\mathbf{G}_n\\) consisted of all permutations of the treatment vector. For the one-sample problem, the natural group is instead the set of all sign changes.\n\n\n\n\n\n\nImportantDefinition: Sign-Change Group\n\n\n\nLet \\(\\boldsymbol{\\epsilon} = (\\epsilon_1, \\ldots, \\epsilon_n) \\in\n\\{-1, +1\\}^n\\). The sign-change group is\n\\[\\mathbf{G}_n = \\left\\{ g_{\\boldsymbol{\\epsilon}} : g_{\\boldsymbol{\\epsilon}}\nW^{(n)} = (\\epsilon_1 W_1, \\ldots, \\epsilon_n W_n) \\right\\},\\]\nwith cardinality \\(M = \\#\\mathbf{G}_n = 2^n\\).\n\n\nEach element of \\(\\mathbf{G}_n\\) flips the sign of a subset of observations while leaving their absolute values unchanged. Since \\(M = 2^n\\) grows exponentially in \\(n\\), exact enumeration is infeasible even for moderate sample sizes; we therefore draw \\(B\\) elements of \\(\\mathbf{G}_n\\) uniformly at random.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Sign-Change Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_signtest.html#the-randomization-hypothesis",
+    "href": "part2_signtest.html#the-randomization-hypothesis",
+    "title": "3  The Sign-Change Permutation Test",
+    "section": "4.2 The Randomization Hypothesis",
+    "text": "4.2 The Randomization Hypothesis\nRecall the general framework from the previous notes. The permutation test is finite-sample exact at level \\(\\alpha\\) if the law \\(P_n\\) satisfies the randomization hypothesis with respect to \\(\\mathbf{G}_n\\):\n\\[W^{(n)} \\stackrel{d}{=} g_{\\boldsymbol{\\epsilon}}\\, W^{(n)}\n\\quad \\forall\\, g_{\\boldsymbol{\\epsilon}} \\in \\mathbf{G}_n,\n\\quad \\text{whenever } P_n \\in \\Omega_0.\\]\nFor the sign-change group, this condition requires that the joint distribution of \\((W_1, \\ldots, W_n)\\) is invariant under arbitrary sign flips of its coordinates. Under i.i.d. sampling, this reduces to the requirement that the marginal distribution of each \\(W_i\\) be symmetric about zero:\n\\[W_i \\stackrel{d}{=} -W_i.\\]\n\n\n\n\n\n\nWarningThe Randomization Hypothesis Fails Here\n\n\n\nThe re-centred exponential \\(W_i = \\text{Exp}(1) - 1\\) has \\(\\mathbb{E}[W_i] = 0\\) but is right-skewed (skewness \\(= +2\\)). It is not symmetric about zero, so\n\\[W_i \\stackrel{d}{\\neq} -W_i,\\]\nand the randomization hypothesis does not hold. The sign-change permutation test is therefore not exact for this DGP. Both the permutation test and the normal approximation are only asymptotically valid. Their finite-sample behaviour is compared in Chapter 5.\n\n\nThe precise relationship between the null hypothesis and the randomization hypothesis is worth stating explicitly:\n\n\n\n\n\n\n\n\nCondition\nRandomization hyp. holds?\nTest is exact?\n\n\n\n\n\\(P\\) symmetric about 0\nYes\nYes\n\n\n\\(P\\) satisfies \\(\\mathbb{E}[W]=0\\), asymmetric\nNo\nNo (asymptotic only)",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Sign-Change Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_signtest.html#applying-the-sign-change-group",
+    "href": "part2_signtest.html#applying-the-sign-change-group",
+    "title": "3  The Sign-Change Permutation Test",
+    "section": "4.3 Applying the Sign-Change Group",
+    "text": "4.3 Applying the Sign-Change Group\nThe function group.action() from the function library implements the Monte Carlo approximation: it draws \\(B\\) elements of \\(\\mathbf{G}_n\\) uniformly at random and returns an \\(n \\times B\\) matrix whose \\(b\\)-th column is \\(g_{\\boldsymbol{\\epsilon}^{(b)}} W^{(n)}\\).\n\n\nApply B random sign changes to W_n\nW_n_perm &lt;- group.action(W_n, B, type = \"sign.changes\")\n\n# W_n_perm is an n x B matrix; column b is the b-th sign-changed sample\ndim(W_n_perm)\n\n\n[1] 1000  499",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Sign-Change Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_signtest.html#recomputing-t_n-over-sign-changes",
+    "href": "part2_signtest.html#recomputing-t_n-over-sign-changes",
+    "title": "3  The Sign-Change Permutation Test",
+    "section": "4.4 Recomputing \\(T_n\\) Over Sign Changes",
+    "text": "4.4 Recomputing \\(T_n\\) Over Sign Changes\nFor each column \\(b = 1, \\ldots, B\\) we recompute the studentised statistic on the sign-changed data:\n\n\nCompute permuted test statistics\nTn_perm &lt;- apply(W_n_perm, 2, function(x) Tn(x, n, studentized = TRUE))\n\n\nThe collection \\(\\{T_n(g_{\\boldsymbol{\\epsilon}^{(b)}} W^{(n)})\\}_{b=1}^{B}\\) approximates the randomization distribution of \\(T_n\\) under \\(\\mathbf{G}_n\\).",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Sign-Change Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_signtest.html#the-permutation-critical-value",
+    "href": "part2_signtest.html#the-permutation-critical-value",
+    "title": "3  The Sign-Change Permutation Test",
+    "section": "4.5 The Permutation Critical Value",
+    "text": "4.5 The Permutation Critical Value\nFix \\(\\alpha \\in (0,1)\\). Stack the \\(B\\) permuted statistics with the observed statistic and sort them:\n\\[T_n^{(1)}(w) \\leq T_n^{(2)}(w) \\leq \\cdots \\leq T_n^{(B+1)}(w).\\]\nDefine \\(k = (B+1) - \\lfloor (B+1)\\alpha \\rfloor\\). The permutation critical value is\n\\[\\hat{c}_n(1-\\alpha) = T_n^{(k)}(w).\\]\n\n\nCompute the permutation critical value\nTn_all &lt;- c(Tn_perm, Tn_obs)\nk      &lt;- length(Tn_all) - floor(length(Tn_all) * alpha)\ncv_perm &lt;- sort(Tn_all)[k]\n\ncat(\"Permutation critical value:\", round(cv_perm, 4), \"\\n\")\n\n\nPermutation critical value: 1.7509 \n\n\nCompute the permutation critical value\ncat(\"Normal critical value z_{1-alpha}:\", round(qnorm(1 - alpha), 4), \"\\n\")\n\n\nNormal critical value z_{1-alpha}: 1.6449",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Sign-Change Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_signtest.html#the-permutation-test-decision",
+    "href": "part2_signtest.html#the-permutation-test-decision",
+    "title": "3  The Sign-Change Permutation Test",
+    "section": "4.6 The Permutation Test Decision",
+    "text": "4.6 The Permutation Test Decision\nThe one-sided permutation test rejects \\(H_0\\) whenever the observed statistic exceeds the permutation critical value:\n\\[\\phi_n^{\\text{perm}} = \\mathbf{1}\\left\\{ T_n &gt; \\hat{c}_n(1-\\alpha) \\right\\}.\\]\n\n\nApply the permutation test\nresult &lt;- perm_test(Tn_all, alpha)\ncat(\"Reject H0 (1 = yes, 0 = no):\", result, \"\\n\")\n\n\nReject H0 (1 = yes, 0 = no): 0",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Sign-Change Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part2_signtest.html#the-permutation-p-value",
+    "href": "part2_signtest.html#the-permutation-p-value",
+    "title": "3  The Sign-Change Permutation Test",
+    "section": "4.7 The Permutation P-Value",
+    "text": "4.7 The Permutation P-Value\nAn equivalent summary is the permutation p-value\n\\[\\hat{p} = \\frac{1}{B+1} \\sum_{b=1}^{B+1}\n\\mathbf{1}\\!\\left\\{ T_n^{(b)}(w) \\geq T_n(w) \\right\\},\\]\nwhere the sum includes the observed statistic itself as the \\((B+1)\\)-th element.\n\n\nCompute the permutation p-value\np_perm &lt;- mean(Tn_all &gt;= Tn_obs)\ncat(\"Permutation p-value:\", round(p_perm, 4), \"\\n\")\n\n\nPermutation p-value: 0.422",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>The Sign-Change Permutation Test</span>"
+    ]
+  },
+  {
+    "objectID": "part3_comparison.html",
+    "href": "part3_comparison.html",
+    "title": "4  Finite-Sample Comparison",
+    "section": "",
+    "text": "5 Finite-Sample Comparison",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Finite-Sample Comparison</span>"
+    ]
+  },
+  {
+    "objectID": "part3_comparison.html#two-asymptotically-valid-procedures",
+    "href": "part3_comparison.html#two-asymptotically-valid-procedures",
+    "title": "4  Finite-Sample Comparison",
+    "section": "5.1 Two Asymptotically Valid Procedures",
+    "text": "5.1 Two Asymptotically Valid Procedures\nAs established in Chapter 4, neither the sign-change permutation test nor the normal approximation is exact for the re-centred exponential DGP, because the randomization hypothesis fails. Both procedures are, however, asymptotically valid under \\(H_0 : \\mathbb{E}[W] = 0\\), in the sense that\n\\[\\lim_{n \\to \\infty} \\mathbb{P}_{H_0}\\!\\left[\\phi_n^{\\text{perm}} = 1\\right] = \\alpha,\n\\qquad\n\\lim_{n \\to \\infty} \\mathbb{P}_{H_0}\\!\\left[\\phi_n^{\\text{asy}} = 1\\right] = \\alpha,\\]\nwhere \\(\\phi_n^{\\text{asy}} = \\mathbf{1}\\{T_n &gt; z_{1-\\alpha}\\}\\) and \\(z_{1-\\alpha} = \\Phi^{-1}(1-\\alpha)\\) is the \\((1-\\alpha)\\)-quantile of \\(\\mathcal{N}(0,1)\\).\nThe question is: how do the two procedures compare in finite samples? We answer this by simulating the randomization distribution (via sign changes applied to the observed \\(W^{(n)}\\)) and the asymptotic null distribution (by drawing fresh samples from \\(\\mathcal{N}(0,1)\\), which is what \\(T_n\\) converges to under \\(H_0\\)), and comparing both to the \\(\\mathcal{N}(0,1)\\) reference.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Finite-Sample Comparison</span>"
+    ]
+  },
+  {
+    "objectID": "part3_comparison.html#simulating-the-asymptotic-null-distribution",
+    "href": "part3_comparison.html#simulating-the-asymptotic-null-distribution",
+    "title": "4  Finite-Sample Comparison",
+    "section": "5.2 Simulating the Asymptotic Null Distribution",
+    "text": "5.2 Simulating the Asymptotic Null Distribution\nUnder \\(H_0\\), the CLT guarantees \\(T_n \\xrightarrow{d} \\mathcal{N}(0,1)\\). We approximate this limiting distribution by drawing \\(B\\) independent samples of size \\(n\\) from \\(\\mathcal{N}(0,1)\\) directly and computing \\(T_n\\) on each:\n\n\nSimulate the asymptotic null distribution\nsimulated_asymtest &lt;- numeric(B)\n\nfor (i in seq_len(B)) {\n  W_asym             &lt;- rnorm(n, mean = 0, sd = 1)\n  simulated_asymtest[i] &lt;- Tn(W_asym, n, studentized = TRUE)\n}\n\nTn_all_asym &lt;- c(simulated_asymtest, Tn_obs)\n\n\n\n\n\n\n\n\nNote\n\n\n\nDrawing from \\(\\mathcal{N}(0,1)\\) rather than from the true DGP (the re-centred exponential) is deliberate: the \\(\\mathcal{N}(0,1)\\) samples represent the limiting distribution that \\(T_n\\) converges to, i.e. the distribution the normal approximation implicitly assumes. Comparing the randomization distribution against this reference directly shows how well the normal approximation characterises the finite-sample behaviour of \\(T_n\\).",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Finite-Sample Comparison</span>"
+    ]
+  },
+  {
+    "objectID": "part3_comparison.html#critical-values",
+    "href": "part3_comparison.html#critical-values",
+    "title": "4  Finite-Sample Comparison",
+    "section": "5.3 Critical Values",
+    "text": "5.3 Critical Values\n\n\nCollect the two critical values\ncat(\"Permutation critical value  cv_perm :\", round(cv_perm, 4), \"\\n\")\n\n\nPermutation critical value  cv_perm : 1.7509 \n\n\nCollect the two critical values\ncat(\"Normal critical value  z_{1-alpha}  :\", round(cv_asym, 4), \"\\n\")\n\n\nNormal critical value  z_{1-alpha}  : 1.6449 \n\n\nCollect the two critical values\ncat(\"Difference (cv_perm - cv_asym)      :\", round(cv_perm - cv_asym, 4), \"\\n\")\n\n\nDifference (cv_perm - cv_asym)      : 0.106 \n\n\nA positive difference indicates that the permutation test uses a more conservative critical value than the normal approximation; a negative difference indicates the opposite.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Finite-Sample Comparison</span>"
+    ]
+  },
+  {
+    "objectID": "part3_comparison.html#visualising-the-two-null-distributions",
+    "href": "part3_comparison.html#visualising-the-two-null-distributions",
+    "title": "4  Finite-Sample Comparison",
+    "section": "5.4 Visualising the Two Null Distributions",
+    "text": "5.4 Visualising the Two Null Distributions\n\n\nPlot the two null distributions\n# Combine into a tidy data frame for ggplot\ndf_perm &lt;- data.frame(Tn = Tn_perm,          dist = \"Randomization\")\ndf_asym &lt;- data.frame(Tn = simulated_asymtest, dist = \"Asymptotic (N(0,1))\")\ndf_all  &lt;- rbind(df_perm, df_asym)\n\nggplot(df_all, aes(x = Tn, fill = dist)) +\n  geom_histogram(aes(y = after_stat(density)),\n                 bins = 50, alpha = 0.45,\n                 position = \"identity\", colour = \"white\") +\n  stat_function(fun  = dnorm,\n                args = list(mean = 0, sd = 1),\n                colour = \"black\", linewidth = 0.8) +\n  geom_vline(xintercept = cv_perm, colour = \"steelblue\",\n             linetype = \"dashed\", linewidth = 0.9) +\n  geom_vline(xintercept = cv_asym, colour = \"red\",\n             linetype = \"dashed\", linewidth = 0.9) +\n  scale_fill_manual(\n    values = c(\"Randomization\" = \"steelblue\", \"Asymptotic (N(0,1))\" = \"grey60\")\n  ) +\n  annotate(\"text\", x = cv_perm + 0.06, y = Inf, vjust = 2,\n           label = paste0(\"Perm. c.v. = \", round(cv_perm, 3)),\n           colour = \"steelblue\", size = 3.2, hjust = 0) +\n  annotate(\"text\", x = cv_asym + 0.06, y = Inf, vjust = 4,\n           label = paste0(\"z_{1-a} = \", round(cv_asym, 3)),\n           colour = \"red\", size = 3.2, hjust = 0) +\n  labs(\n    x    = expression(T[n]),\n    y    = \"Density\",\n    fill = NULL,\n    title = \"Randomization vs. Asymptotic Null Distribution\"\n  ) +\n  theme_minimal(base_size = 13) +\n  theme(legend.position = \"bottom\")\n\n\nWarning: Multiple drawing groups in `geom_function()`\nℹ Did you use the correct group, colour, or fill aesthetics?\n\n\n\n\n\n\n\n\nFigure 5.1: Randomization distribution (blue) and simulated asymptotic distribution (grey) of the studentised statistic \\(T_n\\), together with the \\(\\mathcal{N}(0,1)\\) reference density (black curve). The blue dashed line marks the permutation critical value \\(\\hat{c}_n(1-\\alpha)\\) and the red dashed line marks the normal critical value \\(z_{1-\\alpha}\\).",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Finite-Sample Comparison</span>"
+    ]
+  },
+  {
+    "objectID": "part3_comparison.html#interpreting-the-comparison",
+    "href": "part3_comparison.html#interpreting-the-comparison",
+    "title": "4  Finite-Sample Comparison",
+    "section": "5.5 Interpreting the Comparison",
+    "text": "5.5 Interpreting the Comparison\nSeveral features of the plot deserve attention.\nShape of the randomization distribution. The randomization distribution is obtained by applying sign changes to the observed sample \\(W^{(n)}\\). Because the re-centred exponential is right-skewed, the observed sample itself is skewed, and this skewness is inherited by the randomization distribution. The distribution therefore does not centre exactly on zero and may deviate from the \\(\\mathcal{N}(0,1)\\) reference in the tails.\nShape of the asymptotic distribution. The simulated asymptotic distribution is generated by drawing fresh \\(\\mathcal{N}(0,1)\\) samples and computing \\(T_n\\) on each. Because these samples are symmetric, the resulting distribution of \\(T_n\\) closely tracks the \\(\\mathcal{N}(0,1)\\) reference, as expected.\nDiscrepancy between the critical values. When the two critical values differ, the two tests will reach different rejection decisions for the same observed \\(T_n\\). This discrepancy reflects the finite-sample cost of using the sign-change permutation test under a DGP for which the randomization hypothesis fails.\n\n\n\n\n\n\nTipTakeaway\n\n\n\nWhen the randomization hypothesis holds (symmetric DGP), the sign-change permutation test is exact and the normal approximation is only asymptotically valid — the permutation test strictly dominates. When the randomization hypothesis fails (skewed DGP), both tests are asymptotically valid, and the comparison reduces to a finite-sample question about which critical value is closer to the true \\((1-\\alpha)\\) quantile of the null distribution of \\(T_n\\). There is no theoretical guarantee that the permutation test is better in this case.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Finite-Sample Comparison</span>"
+    ]
+  },
+  {
+    "objectID": "part3_comparison.html#sec-exactness",
+    "href": "part3_comparison.html#sec-exactness",
+    "title": "4  Finite-Sample Comparison",
+    "section": "5.6 Exactness Under the Randomization Hypothesis",
+    "text": "5.6 Exactness Under the Randomization Hypothesis\nFor completeness, we restate the exactness theorem from the previous notes in the current context.\n\n\n\n\n\n\nTipTheorem (Finite-Sample Exactness)\n\n\n\nIf \\(P_n \\in \\Omega_0\\) satisfies the randomization hypothesis with respect to \\(\\mathbf{G}_n\\), then\n\\[\\mathbb{E}\\!\\left[\\phi_n^{\\text{perm}}\\!\\left(W^{(n)}\\right)\\right] = \\alpha\n\\quad \\text{for all } P_n \\in \\Omega_0.\\]\n\n\nUnder the re-centred exponential, the precondition of this theorem — the randomization hypothesis — does not hold. Exactness is therefore not guaranteed, and the result above does not apply.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Finite-Sample Comparison</span>"
+    ]
+  }
+]

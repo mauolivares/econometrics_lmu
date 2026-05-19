@@ -1,0 +1,2014 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Permutation Test: A Visual Walk-Through – Applied Causal Analysis</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./part3_simulation.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-acf12a64177840b8d86f2d4f01b2e9fb.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-abfa4615eba2ed0d4bb7fb949ed9c296.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./part4_visual.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Permutation Test: A Visual Walk-Through</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Applied Causal Analysis</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Overview</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part1_setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Setup and Data Generation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part2_permtest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Permutation Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part3_simulation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Monte Carlo: Permutation vs Asymptotic Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part4_visual.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Permutation Test: A Visual Walk-Through</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-visual" id="toc-sec-visual" class="nav-link active" data-scroll-target="#sec-visual"><span class="header-section-number">6</span> Permutation Test: A Visual Walk-Through</a>
+  <ul class="collapse">
+  <li><a href="#setup-and-notation" id="toc-setup-and-notation" class="nav-link" data-scroll-target="#setup-and-notation"><span class="header-section-number">6.1</span> Setup and Notation</a></li>
+  <li><a href="#interactive-illustration" id="toc-interactive-illustration" class="nav-link" data-scroll-target="#interactive-illustration"><span class="header-section-number">6.2</span> Interactive Illustration</a></li>
+  <li><a href="#what-the-widget-illustrates" id="toc-what-the-widget-illustrates" class="nav-link" data-scroll-target="#what-the-widget-illustrates"><span class="header-section-number">6.3</span> What the Widget Illustrates</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Permutation Test: A Visual Walk-Through</span></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="sec-visual" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Permutation Test: A Visual Walk-Through</h1>
+<section id="setup-and-notation" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="setup-and-notation"><span class="header-section-number">6.1</span> Setup and Notation</h2>
+<p>Throughout this chapter we work with the <strong>two-sample problem</strong> introduced in <a href="part2_permtest.html" class="quarto-xref"><span>Chapter 4</span></a>. For clarity, we use the <strong>difference-in-means</strong> as the test statistic, not the difference-in-variance. As we argue during lecture, the construction of the permutation test does not depend on the choice of the test statistic. We only do it because it makes the visual the easiest to digest. Indeed, the same construction applies verbatim to any real-valued <span class="math inline">\(T_n\)</span>, including the variance-ratio statistic <code>Tn_stat_variance()</code> used in earlier chapters.</p>
+<p>Concretely, let</p>
+<p><span class="math display">\[W^{(N)} = (X_1, \ldots, X_m,\, Y_1, \ldots, Y_n)\]</span></p>
+<p>be two independent samples with <span class="math inline">\(m = 10\)</span>, <span class="math inline">\(n = 12\)</span>, and <span class="math inline">\(N = m + n = 22\)</span>. Recall we seek to test</p>
+<p><span class="math display">\[H_0 : P_X = P_Y \quad \text{vs} \quad H_1 : P_X \neq P_Y,\]</span></p>
+<p>but this time using the test statistic</p>
+<p><span class="math display">\[T_n\!\left(W^{(N)}\right) = \bar{X} - \bar{Y},
+\qquad \bar{X} = \frac{1}{m}\sum_{i=1}^{m} X_i, \quad
+\bar{Y} = \frac{1}{n}\sum_{j=1}^{n} Y_j.\]</span></p>
+<p>Under the <strong>randomization hypothesis</strong>, if <span class="math inline">\(H_0\)</span> holds then <span class="math inline">\(W^{(N)}\)</span> and <span class="math inline">\(g W^{(N)}\)</span> share the same distribution for every <span class="math inline">\(g \in \mathbf{G}_n\)</span>, where <span class="math inline">\(\mathbf{G}_n\)</span> is the group of all permutations of <span class="math inline">\(\{1, \ldots, N\}\)</span>. This means we can generate <strong>auxiliary realizations</strong> <span class="math inline">\(T_n(g_b W^{(N)})\)</span>, <span class="math inline">\(b = 1, \ldots, B\)</span>, and use their empirical distribution as an approximation to the null distribution of <span class="math inline">\(T_n\)</span>.</p>
+</section>
+<section id="interactive-illustration" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="interactive-illustration"><span class="header-section-number">6.2</span> Interactive Illustration</h2>
+<p>The widget below walks through the permutation test step by step.</p>
+<ul>
+<li><strong>Blue dots</strong> are observations originally from the <span class="math inline">\(X\)</span>-sample (<span class="math inline">\(m = 10\)</span>).</li>
+<li><strong>Red dots</strong> are observations originally from the <span class="math inline">\(Y\)</span>-sample (<span class="math inline">\(n = 12\)</span>).</li>
+<li>Each dot carries its observed value as a label inside.</li>
+<li>After permutation, dots <strong>keep their original color</strong>. This way you can see that both boxes contain a mixture of blue and red after reshuffling, which is exactly what happens when we randomly reassign labels under <span class="math inline">\(H_0\)</span>.</li>
+</ul>
+<p>Use the buttons to advance through the steps.</p>
+
+
+
+<meta charset="UTF-8">
+<style>
+  :root {
+    --blue:   #2a6496;
+    --red:    #c0392b;
+    --bg:     #f8f9fa;
+    --card:   #ffffff;
+    --border: #dee2e6;
+    --text:   #212529;
+    --muted:  #6c757d;
+    --accent: #2a6496;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,.08);
+    --font-body: 'Georgia', serif;
+    --font-mono: 'Courier New', monospace;
+  }
+
+  #perm-widget {
+    font-family: var(--font-body);
+    color: var(--text);
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .pw-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 26px;
+    margin-bottom: 18px;
+  }
+
+  .pw-step-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+
+  .pw-step-title {
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .pw-description {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.65;
+  }
+
+  .pw-canvas-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .pw-cloud-wrap {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px 8px;
+  }
+
+  .pw-cloud-label {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: .05em;
+  }
+
+  .pw-cloud-svg {
+    display: block;
+    width: 100%;
+  }
+
+  .pw-stat-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .pw-stat-box {
+    flex: 1;
+    min-width: 140px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+
+  .pw-stat-box .label {
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    color: var(--muted);
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .pw-stat-box .value {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: var(--accent);
+  }
+
+  #pw-dist-area { display: none; margin-top: 12px; }
+  #pw-dist-area.visible { display: block; }
+  #pw-dist-svg { width: 100%; height: 110px; display: block; }
+
+  .pw-btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 6px;
+  }
+
+  .pw-btn {
+    font-family: var(--font-mono);
+    font-size: 0.77rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 8px 22px;
+    border: 1.5px solid var(--accent);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--accent);
+    cursor: pointer;
+    transition: background .16s, color .16s;
+  }
+
+  .pw-btn:hover { background: var(--accent); color: #fff; }
+  .pw-btn:disabled { opacity: .32; cursor: default; }
+  .pw-btn:disabled:hover { background: var(--card); color: var(--accent); }
+  .pw-btn.primary { background: var(--accent); color: #fff; }
+  .pw-btn.primary:hover { background: #1a4a70; }
+
+  .pw-progress {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .pw-pip {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background .22s;
+  }
+  .pw-pip.active { background: var(--accent); }
+
+  .pw-banner {
+    font-size: 0.84rem;
+    background: #eaf3fb;
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 9px 14px;
+    color: #1a3a5c;
+    margin-top: 12px;
+    line-height: 1.6;
+    display: none;
+  }
+  .pw-banner.visible { display: block; }
+</style>
+
+
+
+<div id="perm-widget">
+
+  <div class="pw-progress" id="pw-pips"></div>
+
+  <div class="pw-card">
+    <div class="pw-step-label" id="pw-step-label"></div>
+    <div class="pw-step-title" id="pw-step-title"></div>
+    <div class="pw-description" id="pw-step-desc"></div>
+
+    <div class="pw-canvas-row">
+      <div class="pw-cloud-wrap">
+        <div class="pw-cloud-label" id="pw-label-x">X-sample (m = 10)</div>
+        <svg class="pw-cloud-svg" id="pw-svg-x" viewbox="0 0 260 190"></svg>
+      </div>
+      <div class="pw-cloud-wrap">
+        <div class="pw-cloud-label" id="pw-label-y">Y-sample (n = 12)</div>
+        <svg class="pw-cloud-svg" id="pw-svg-y" viewbox="0 0 260 190"></svg>
+      </div>
+    </div>
+
+    <div class="pw-stat-row">
+      <div class="pw-stat-box">
+        <div class="label">Observed T<sub>n</sub></div>
+        <div class="value" id="pw-val-obs">—</div>
+      </div>
+      <div class="pw-stat-box" id="pw-stat-perm" style="display:none">
+        <div class="label">Permuted T<sub>n</sub><sup>(b)</sup></div>
+        <div class="value" id="pw-val-perm">—</div>
+      </div>
+      <div class="pw-stat-box" id="pw-stat-pv" style="display:none">
+        <div class="label">Perm. p-value p̂</div>
+        <div class="value" id="pw-val-pv">—</div>
+      </div>
+    </div>
+
+    <div id="pw-dist-area">
+      <div class="pw-cloud-label" style="text-align:left; margin-top:14px; margin-bottom:4px;">
+        Randomization distribution — B = 4 permuted statistics
+      </div>
+      <svg id="pw-dist-svg" viewbox="0 0 800 110"></svg>
+    </div>
+
+    <div class="pw-banner" id="pw-banner"></div>
+  </div>
+
+  <div class="pw-btn-row">
+    <button class="pw-btn" id="btn-prev" onclick="pwPrev()">← Prev</button>
+    <button class="pw-btn primary" id="btn-next" onclick="pwNext()">Next →</button>
+    <button class="pw-btn" onclick="pwReset()">↻ Reset</button>
+  </div>
+
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   DATA  — fixed, self-contained (no R runtime needed)
+   X ~ N(0.5, 1),  Y ~ N(0, 1)
+───────────────────────────────────────────────────────── */
+const X = [1.37, 0.18, 1.16, 2.03, 0.72, -0.56, 0.91, 1.44, 0.08, 0.63];
+const Y = [-0.30, 0.83, -1.12, 0.27, -0.54, 1.05, -0.88, 0.41, -0.19, 0.66, -0.73, 0.34];
+
+const POOL    = [...X, ...Y];
+const ORI_COL = [
+  ...Array(10).fill("#2a6496"),
+  ...Array(12).fill("#c0392b")
+];
+
+// Each permutation is a length-22 array of indices into POOL.
+// First 10 entries → left box (group 1), last 12 → right box (group 2).
+const PERMS = [
+  [10,2,14,0,17,5,11,7,19,3,   1,4,6,8,9,12,13,15,16,18,20,21],
+  [3,11,0,18,6,13,2,20,9,15,   1,4,5,7,8,10,12,14,16,17,19,21],
+  [7,16,4,1,20,9,13,3,11,5,    0,2,6,8,10,12,14,15,17,18,19,21],
+  [5,0,12,19,2,8,15,6,1,17,    3,4,7,9,10,11,13,14,16,18,20,21]
+];
+
+function mean(a) { return a.reduce((s,v)=>s+v,0)/a.length; }
+function tn(a,b) { return mean(a) - mean(b); }
+
+const Tn_obs   = tn(X, Y);
+const Tn_perms = PERMS.map(p =>
+  tn(p.slice(0,10).map(i=>POOL[i]), p.slice(10).map(i=>POOL[i]))
+);
+
+/* ─────────────────────────────────────────────────────────
+   STABLE DOT POSITIONS  (deterministic LCG jitter)
+   Viewport: 260 × 190.  No enclosing ellipse — free scatter.
+───────────────────────────────────────────────────────── */
+const VW = 260, VH = 190, PAD = 22;
+
+function makeDotPositions(n) {
+  const cols  = Math.ceil(Math.sqrt(n * 1.5));
+  const rows  = Math.ceil(n / cols);
+  const cellW = (VW - 2*PAD) / cols;
+  const cellH = (VH - 2*PAD) / rows;
+  let lcg = 987654321;
+  const rand = () => {
+    lcg = (Math.imul(lcg, 1664525) + 1013904223) >>> 0;
+    return lcg / 0xffffffff;
+  };
+  return Array.from({length: n}, (_, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    return [
+      PAD + cellW * (col + 0.15 + 0.70 * rand()),
+      PAD + cellH * (row + 0.15 + 0.70 * rand())
+    ];
+  });
+}
+
+const POS_X = makeDotPositions(10);
+const POS_Y = makeDotPositions(12);
+
+/* ─────────────────────────────────────────────────────────
+   DRAW CLOUD
+   values    : number[]   — displayed inside each dot
+   colors    : string[]   — hex color per dot
+   positions : [x,y][]   — stable layout coordinates
+───────────────────────────────────────────────────────── */
+function drawCloud(svgId, values, colors, positions) {
+  const svg = document.getElementById(svgId);
+  svg.innerHTML = "";
+  const R = 15;   // radius — large enough to fit two-decimal label
+
+  // Shared drop-shadow filter
+  const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
+  defs.innerHTML =
+    `<filter id="sh_${svgId}">
+       <feDropShadow dx="0" dy="1" stdDeviation="1.8" flood-opacity="0.20"/>
+     </filter>`;
+  svg.appendChild(defs);
+
+  values.forEach((v, i) => {
+    const [cx, cy] = positions[i];
+    const col = colors[i];
+
+    const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx", cx);  c.setAttribute("cy", cy);  c.setAttribute("r", R);
+    c.setAttribute("fill", col);
+    c.setAttribute("filter", `url(#sh_${svgId})`);
+    c.setAttribute("opacity","0.90");
+    svg.appendChild(c);
+
+    const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("x", cx);  t.setAttribute("y", cy + 3.5);
+    t.setAttribute("text-anchor","middle");
+    t.setAttribute("dominant-baseline","middle");
+    t.setAttribute("font-family","'Courier New', monospace");
+    t.setAttribute("font-size","7.8");
+    t.setAttribute("font-weight","bold");
+    t.setAttribute("fill","#ffffff");
+    t.textContent = v.toFixed(2);
+    svg.appendChild(t);
+  });
+}
+
+/* ─────────────────────────────────────────────────────────
+   DISTRIBUTION STRIP  (step 5)
+   — Permuted stats as labelled circles on stems
+   — Observed Tn as dashed vertical line only
+   — NO axis tick labels (explained in banner instead)
+───────────────────────────────────────────────────────── */
+function drawDist(allTns, observed) {
+  const svg = document.getElementById("pw-dist-svg");
+  svg.innerHTML = "";
+  const W = 800, H = 110;
+  const pad = { l:40, r:40, t:38, b:28 };
+  const iW  = W - pad.l - pad.r;
+  const baseY = pad.t + H - pad.t - pad.b;
+
+  const all = [...allTns, observed];
+  const mn  = Math.min(...all) - 0.28;
+  const mx  = Math.max(...all) + 0.28;
+  const toX = v => pad.l + ((v - mn) / (mx - mn)) * iW;
+
+  // Axis line
+  const ax = document.createElementNS("http://www.w3.org/2000/svg","line");
+  ax.setAttribute("x1", pad.l); ax.setAttribute("x2", pad.l + iW);
+  ax.setAttribute("y1", baseY); ax.setAttribute("y2", baseY);
+  ax.setAttribute("stroke","#adb5bd"); ax.setAttribute("stroke-width","1");
+  svg.appendChild(ax);
+
+  // Permuted statistics
+  allTns.forEach((v, i) => {
+    const x   = toX(v);
+    const dotY = pad.t;
+
+    const stem = document.createElementNS("http://www.w3.org/2000/svg","line");
+    stem.setAttribute("x1",x); stem.setAttribute("x2",x);
+    stem.setAttribute("y1", dotY + 14); stem.setAttribute("y2", baseY);
+    stem.setAttribute("stroke","#adb5bd"); stem.setAttribute("stroke-width","1.2");
+    svg.appendChild(stem);
+
+    const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx",x); c.setAttribute("cy", dotY);
+    c.setAttribute("r","14");
+    c.setAttribute("fill","#7f9fbf"); c.setAttribute("opacity","0.88");
+    svg.appendChild(c);
+
+    const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+    lbl.setAttribute("x",x); lbl.setAttribute("y", dotY + 4);
+    lbl.setAttribute("text-anchor","middle");
+    lbl.setAttribute("font-family","'Courier New', monospace");
+    lbl.setAttribute("font-size","8"); lbl.setAttribute("font-weight","bold");
+    lbl.setAttribute("fill","#fff");
+    lbl.textContent = v.toFixed(2);
+    svg.appendChild(lbl);
+
+    // Index label below axis
+    const idx = document.createElementNS("http://www.w3.org/2000/svg","text");
+    idx.setAttribute("x",x); idx.setAttribute("y", baseY + 14);
+    idx.setAttribute("text-anchor","middle");
+    idx.setAttribute("font-family","'Courier New', monospace");
+    idx.setAttribute("font-size","8.5"); idx.setAttribute("fill","#6c757d");
+    idx.textContent = `T\u207F\u207D${i+1}\u207E`;   // Tⁿ⁽ᵇ⁾ approximation
+    svg.appendChild(idx);
+  });
+
+  // Observed Tn — dashed line only, no numeric label on axis
+  const ox = toX(observed);
+  const ol = document.createElementNS("http://www.w3.org/2000/svg","line");
+  ol.setAttribute("x1",ox); ol.setAttribute("x2",ox);
+  ol.setAttribute("y1", pad.t - 10); ol.setAttribute("y2", baseY);
+  ol.setAttribute("stroke","#2a6496"); ol.setAttribute("stroke-width","2.2");
+  ol.setAttribute("stroke-dasharray","6 3");
+  svg.appendChild(ol);
+
+  const ot = document.createElementNS("http://www.w3.org/2000/svg","text");
+  ot.setAttribute("x", ox + 6); ot.setAttribute("y", pad.t - 12);
+  ot.setAttribute("font-family","'Courier New', monospace");
+  ot.setAttribute("font-size","9"); ot.setAttribute("fill","#2a6496");
+  ot.setAttribute("font-weight","bold");
+  ot.textContent = "Tₙ (obs)";
+  svg.appendChild(ot);
+}
+
+/* ─────────────────────────────────────────────────────────
+   STEP DEFINITIONS
+───────────────────────────────────────────────────────── */
+const STEPS = [
+  {
+    label: "Step 1 of 5", title: "The Original Samples",
+    desc:  "We observe two independent samples: X (blue dots, m\u202F=\u202F10) and Y (red dots, n\u202F=\u202F12). Each dot is labelled with its observed value. The two boxes represent the two groups before any reshuffling.",
+    permIdx: null, showPermStat: false, showPV: false, showDist: false
+  },
+  {
+    label: "Step 2 of 5", title: "Compute the Observed T<sub>n</sub>",
+    desc:  "We compute T<sub>n</sub>(W<sup>(N)</sup>) = X\u0305 \u2212 Y\u0305 on the original data. This is the quantity we will compare against the data-driven critical value.",
+    permIdx: null, showPermStat: false, showPV: false, showDist: false
+  },
+  {
+    label: "Step 3 of 5", title: "First Permutation (b\u202F=\u202F1)",
+    desc:  "We apply a random permutation g<sub>1</sub> \u2208 \u{1D4A2}<sub>n</sub>: the 22 values are pooled and randomly reassigned to two new groups of size 10 and 12. Each dot <strong>keeps its original color</strong> \u2014 so you can see that both boxes now contain a mixture of blue and red. We then recompute T<sub>n</sub> on the reshuffled groups.",
+    permIdx: 0, showPermStat: true, showPV: false, showDist: false
+  },
+  {
+    label: "Step 4 of 5", title: "Second Permutation (b\u202F=\u202F2)",
+    desc:  "A second independent permutation g<sub>2</sub> produces yet another mixed configuration. Each such permutation is one draw from the null distribution of T<sub>n</sub>.",
+    permIdx: 1, showPermStat: true, showPV: false, showDist: false
+  },
+  {
+    label: "Step 5 of 5", title: "The Null Distribution and the p-value",
+    desc:  "After B\u202F=\u202F4 permutations we have four auxiliary statistics. The dashed blue line marks the observed T<sub>n</sub>. The p-value and its interpretation are given in the note below.",
+    permIdx: 3, showPermStat: true, showPV: true, showDist: true
+  }
+];
+
+const TOTAL_STEPS = STEPS.length;
+let step = 0;
+
+/* ─────────────────────────────────────────────────────────
+   RENDER
+───────────────────────────────────────────────────────── */
+function render() {
+  const s = STEPS[step];
+
+  document.getElementById("pw-step-label").textContent = s.label;
+  document.getElementById("pw-step-title").innerHTML   = s.title;
+  document.getElementById("pw-step-desc").innerHTML    = s.desc;
+
+  // Pips
+  const pipsEl = document.getElementById("pw-pips");
+  pipsEl.innerHTML = "";
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const d = document.createElement("div");
+    d.className = "pw-pip" + (i === step ? " active" : "");
+    pipsEl.appendChild(d);
+  }
+
+  // Clouds
+  if (s.permIdx === null) {
+    drawCloud("pw-svg-x", X, Array(10).fill("#2a6496"), POS_X);
+    drawCloud("pw-svg-y", Y, Array(12).fill("#c0392b"), POS_Y);
+    document.getElementById("pw-label-x").textContent = "X-sample  (m = 10)";
+    document.getElementById("pw-label-y").textContent = "Y-sample  (n = 12)";
+  } else {
+    const perm = PERMS[s.permIdx];
+    const xIdx = perm.slice(0,10);
+    const yIdx = perm.slice(10);
+    // Colors follow the ORIGINAL sample identity of each observation
+    drawCloud("pw-svg-x", xIdx.map(i=>POOL[i]), xIdx.map(i=>ORI_COL[i]), POS_X);
+    drawCloud("pw-svg-y", yIdx.map(i=>POOL[i]), yIdx.map(i=>ORI_COL[i]), POS_Y);
+    document.getElementById("pw-label-x").textContent =
+      `Permuted group 1  (m = 10),  b = ${s.permIdx + 1}`;
+    document.getElementById("pw-label-y").textContent =
+      `Permuted group 2  (n = 12),  b = ${s.permIdx + 1}`;
+  }
+
+  // Stat boxes
+  document.getElementById("pw-val-obs").textContent = step >= 1 ? Tn_obs.toFixed(3) : "\u2014";
+  document.getElementById("pw-stat-perm").style.display = s.showPermStat ? "" : "none";
+  document.getElementById("pw-stat-pv").style.display   = s.showPV       ? "" : "none";
+
+  if (s.showPermStat && s.permIdx !== null)
+    document.getElementById("pw-val-perm").textContent = Tn_perms[s.permIdx].toFixed(3);
+
+  if (s.showPV) {
+    const nGeq = Tn_perms.filter(v => v >= Tn_obs).length;
+    document.getElementById("pw-val-pv").textContent =
+      ((nGeq + 1) / (Tn_perms.length + 1)).toFixed(3);
+  }
+
+  // Distribution strip
+  const distArea = document.getElementById("pw-dist-area");
+  if (s.showDist) { distArea.classList.add("visible"); drawDist(Tn_perms, Tn_obs); }
+  else              distArea.classList.remove("visible");
+
+  // Banner
+  const bannerEl = document.getElementById("pw-banner");
+  let html = "";
+
+  if (step === 1) {
+    html = `Observed statistic: <strong>T<sub>n</sub> = X\u0305 \u2212 Y\u0305 = ${Tn_obs.toFixed(3)}</strong>.
+            Under H<sub>0</sub>\u202F: P<sub>X</sub> = P<sub>Y</sub>, this value should not be
+            unusually large relative to what we would see if we simply reshuffled the labels.`;
+  } else if (step === 2) {
+    html = `After permutation b\u202F=\u202F1:
+            <strong>T<sub>n</sub><sup>(1)</sup> = ${Tn_perms[0].toFixed(3)}</strong>.
+            Notice that each box now contains both blue and red dots \u2014 the original group identity
+            of each observation is preserved by color, even though the group assignment has changed.`;
+  } else if (step === 3) {
+    html = `After permutation b\u202F=\u202F2:
+            <strong>T<sub>n</sub><sup>(2)</sup> = ${Tn_perms[1].toFixed(3)}</strong>.
+            Each independent permutation produces one value of
+            T<sub>n</sub>(g<sub>b</sub>W<sup>(N)</sup>), contributing one point to the
+            randomization distribution.`;
+  } else if (step === 4) {
+    const nGeq = Tn_perms.filter(v => v >= Tn_obs).length;
+    const pv   = (nGeq + 1) / (Tn_perms.length + 1);
+    html = `The dashed blue line marks the observed statistic
+            <strong>T<sub>n</sub> = ${Tn_obs.toFixed(3)}</strong>.
+            The permutation p-value counts how many auxiliary statistics are at least as extreme:
+            <strong>p\u0302 = (\u2060#{T<sub>n</sub><sup>(b)</sup> \u2265 T<sub>n</sub>} + 1\u2060)\u202F/\u202F(B + 1)
+            = (${nGeq}\u202F+\u202F1)\u202F/\u202F(4\u202F+\u202F1) = ${pv.toFixed(3)}</strong>.
+            The \u201C+1\u201D in numerator and denominator includes the observed statistic itself,
+            ensuring p\u0302 is never exactly zero. In practice B should be large (e.g.\u202FB\u202F=\u202F999)
+            so that this approximation is accurate.`;
+  }
+
+  if (html) { bannerEl.innerHTML = html; bannerEl.classList.add("visible"); }
+  else         bannerEl.classList.remove("visible");
+
+  // Buttons
+  document.getElementById("btn-prev").disabled = (step === 0);
+  document.getElementById("btn-next").disabled = (step === TOTAL_STEPS - 1);
+}
+
+function pwNext()  { if (step < TOTAL_STEPS-1) { step++; render(); } }
+function pwPrev()  { if (step > 0)             { step--; render(); } }
+function pwReset() { step = 0; render(); }
+
+render();
+</script>
+
+
+</section>
+<section id="what-the-widget-illustrates" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="what-the-widget-illustrates"><span class="header-section-number">6.3</span> What the Widget Illustrates</h2>
+<p>The five steps map directly onto the computational procedure summarised in <a href="part2_permtest.html" class="quarto-xref"><span>Chapter 4</span></a>:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 46%">
+<col style="width: 53%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Widget step</th>
+<th>Formal object</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Original samples</td>
+<td><span class="math inline">\(W^{(N)} = (X_1,\ldots,X_m,Y_1,\ldots,Y_n)\)</span></td>
+</tr>
+<tr class="even">
+<td>Observed <span class="math inline">\(T_n\)</span></td>
+<td><span class="math inline">\(T_n(W^{(N)}) = \bar{X} - \bar{Y}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Permutation <span class="math inline">\(b\)</span></td>
+<td><span class="math inline">\(g_b W^{(N)}\)</span>, new split into groups of size <span class="math inline">\(m\)</span> and <span class="math inline">\(n\)</span></td>
+</tr>
+<tr class="even">
+<td>Permuted statistic</td>
+<td><span class="math inline">\(T_n(g_b W^{(N)})\)</span></td>
+</tr>
+<tr class="odd">
+<td>Null distribution</td>
+<td><span class="math inline">\(\{T_n(g_b W^{(N)})\}_{b=1}^{B}\)</span>, with <span class="math inline">\(\hat{p}\)</span> reported</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Remark on the choice of <span class="math inline">\(T_n\)</span>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The widget uses <span class="math inline">\(T_n = \bar{X} - \bar{Y}\)</span> for expository clarity. The permutation procedure — pool, reshuffle, recompute, repeat — is <strong>identical</strong> regardless of the test statistic. In <a href="part2_permtest.html" class="quarto-xref"><span>Chapter 4</span></a> and <a href="part3_simulation.html" class="quarto-xref"><span>Chapter 5</span></a> we use the studentized variance-ratio statistic <code>Tn_stat_variance()</code>, which is better suited to testing <span class="math inline">\(H_0 : \mathrm{Var}[Y(1)] = \mathrm{Var}[Y(0)]\)</span>.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Key Takeaway
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Under <span class="math inline">\(H_0 : P_X = P_Y\)</span>, permuting the labels does not change the distribution of <span class="math inline">\(W^{(N)}\)</span>. Consequently, <span class="math inline">\(T_n(W^{(N)})\)</span> and <span class="math inline">\(T_n(g_b W^{(N)})\)</span> are identically distributed, and the empirical quantiles of <span class="math inline">\(\{T_n^{(b)}\}_{b=1}^{B}\)</span> provide a valid (finite-sample exact) null distribution.</p>
+</div>
+</div>
+
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./part3_simulation.html" class="pagination-link" aria-label="Monte Carlo: Permutation vs Asymptotic Test">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Monte Carlo: Permutation vs Asymptotic Test</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Permutation Test: A Visual Walk-Through"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Permutation Test: A Visual Walk-Through {#sec-visual}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## Setup and Notation</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>Throughout this chapter we work with the **two-sample problem** introduced</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>in @sec-permtest. For clarity, we use the **difference-in-means** as the</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>test statistic, not the difference-in-variance. As we argue during lecture, the</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>construction of the permutation test does not depend on the choice of the test</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>statistic. We only do it because it makes the visual the easiest to digest. Indeed, </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>the same construction applies verbatim to any real-valued $T_n$, including the</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>variance-ratio statistic <span class="in">`Tn_stat_variance()`</span> used in earlier chapters.</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>Concretely, let</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>$$W^{(N)} = (X_1, \ldots, X_m,\, Y_1, \ldots, Y_n)$$</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>be two independent samples with $m = 10$, $n = 12$, and $N = m + n = 22$.</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>Recall we seek to test</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>$$H_0 : P_X = P_Y \quad \text{vs} \quad H_1 : P_X \neq P_Y,$$</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>but this time using the test statistic</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>$$T_n<span class="sc">\!</span>\left(W^{(N)}\right) = \bar{X} - \bar{Y},</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>\qquad \bar{X} = \frac{1}{m}\sum_{i=1}^{m} X_i, \quad</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>\bar{Y} = \frac{1}{n}\sum_{j=1}^{n} Y_j.$$</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>Under the **randomization hypothesis**, if $H_0$ holds then $W^{(N)}$ and</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>$g W^{(N)}$ share the same distribution for every $g \in \mathbf{G}_n$,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>where $\mathbf{G}_n$ is the group of all permutations of</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>$<span class="sc">\{</span>1, \ldots, N<span class="sc">\}</span>$. This means we can generate **auxiliary realizations**</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>$T_n(g_b W^{(N)})$, $b = 1, \ldots, B$, and use their empirical</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>distribution as an approximation to the null distribution of $T_n$.</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## Interactive Illustration</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>The widget below walks through the permutation test step by step.</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Blue dots** are observations originally from the $X$-sample ($m = 10$).</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Red dots** are observations originally from the $Y$-sample ($n = 12$).</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Each dot carries its observed value as a label inside.</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>After permutation, dots **keep their original color**. This way you can</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  see that both boxes contain a mixture of blue and red after reshuffling,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  which is exactly what happens when we randomly reassign labels under $H_0$.</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>Use the buttons to advance through the steps.</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="in">```{=html}</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;!DOCTYPE html&gt;</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;html lang="en"&gt;</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;head&gt;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;meta charset="UTF-8"/&gt;</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;style&gt;</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="in">  :root {</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="in">    --blue:   #2a6496;</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="in">    --red:    #c0392b;</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="in">    --bg:     #f8f9fa;</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="in">    --card:   #ffffff;</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="in">    --border: #dee2e6;</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="in">    --text:   #212529;</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="in">    --muted:  #6c757d;</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="in">    --accent: #2a6496;</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="in">    --radius: 10px;</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="in">    --shadow: 0 2px 12px rgba(0,0,0,.08);</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="in">    --font-body: 'Georgia', serif;</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="in">    --font-mono: 'Courier New', monospace;</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="in">  #perm-widget {</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="in">    font-family: var(--font-body);</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="in">    color: var(--text);</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="in">    max-width: 860px;</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a><span class="in">    margin: 0 auto;</span></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-card {</span></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a><span class="in">    background: var(--card);</span></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a><span class="in">    border: 1px solid var(--border);</span></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a><span class="in">    border-radius: var(--radius);</span></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a><span class="in">    box-shadow: var(--shadow);</span></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a><span class="in">    padding: 22px 26px;</span></span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-bottom: 18px;</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-step-label {</span></span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a><span class="in">    font-family: var(--font-mono);</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a><span class="in">    font-size: 0.68rem;</span></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a><span class="in">    letter-spacing: .12em;</span></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a><span class="in">    text-transform: uppercase;</span></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a><span class="in">    color: var(--muted);</span></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-bottom: 5px;</span></span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-step-title {</span></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a><span class="in">    font-size: 1.05rem;</span></span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a><span class="in">    font-weight: bold;</span></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a><span class="in">    color: var(--accent);</span></span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-bottom: 12px;</span></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-description {</span></span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a><span class="in">    font-size: 0.88rem;</span></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a><span class="in">    color: var(--muted);</span></span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-bottom: 16px;</span></span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a><span class="in">    line-height: 1.65;</span></span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-canvas-row {</span></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a><span class="in">    display: flex;</span></span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a><span class="in">    gap: 20px;</span></span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a><span class="in">    align-items: flex-start;</span></span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-bottom: 14px;</span></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-cloud-wrap {</span></span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a><span class="in">    flex: 1;</span></span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a><span class="in">    background: var(--bg);</span></span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a><span class="in">    border: 1px solid var(--border);</span></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a><span class="in">    border-radius: 8px;</span></span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a><span class="in">    padding: 10px 8px 8px;</span></span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-cloud-label {</span></span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a><span class="in">    font-family: var(--font-mono);</span></span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a><span class="in">    font-size: 0.66rem;</span></span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a><span class="in">    color: var(--muted);</span></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a><span class="in">    text-align: center;</span></span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-bottom: 6px;</span></span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a><span class="in">    letter-spacing: .05em;</span></span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-cloud-svg {</span></span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a><span class="in">    display: block;</span></span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a><span class="in">    width: 100%;</span></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-stat-row {</span></span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a><span class="in">    display: flex;</span></span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a><span class="in">    gap: 14px;</span></span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a><span class="in">    flex-wrap: wrap;</span></span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-top: 8px;</span></span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-stat-box {</span></span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a><span class="in">    flex: 1;</span></span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a><span class="in">    min-width: 140px;</span></span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a><span class="in">    background: var(--bg);</span></span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a><span class="in">    border: 1px solid var(--border);</span></span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a><span class="in">    border-radius: 8px;</span></span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a><span class="in">    padding: 10px 14px;</span></span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a><span class="in">    text-align: center;</span></span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-stat-box .label {</span></span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a><span class="in">    font-family: var(--font-mono);</span></span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a><span class="in">    font-size: 0.63rem;</span></span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a><span class="in">    color: var(--muted);</span></span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a><span class="in">    letter-spacing: .07em;</span></span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a><span class="in">    text-transform: uppercase;</span></span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-bottom: 4px;</span></span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-stat-box .value {</span></span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a><span class="in">    font-family: var(--font-mono);</span></span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a><span class="in">    font-size: 1.15rem;</span></span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a><span class="in">    font-weight: bold;</span></span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a><span class="in">    color: var(--accent);</span></span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a><span class="in">  #pw-dist-area { display: none; margin-top: 12px; }</span></span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a><span class="in">  #pw-dist-area.visible { display: block; }</span></span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a><span class="in">  #pw-dist-svg { width: 100%; height: 110px; display: block; }</span></span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-btn-row {</span></span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a><span class="in">    display: flex;</span></span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a><span class="in">    gap: 10px;</span></span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a><span class="in">    flex-wrap: wrap;</span></span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a><span class="in">    justify-content: center;</span></span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-top: 6px;</span></span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-btn {</span></span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a><span class="in">    font-family: var(--font-mono);</span></span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a><span class="in">    font-size: 0.77rem;</span></span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a><span class="in">    letter-spacing: .06em;</span></span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a><span class="in">    text-transform: uppercase;</span></span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a><span class="in">    padding: 8px 22px;</span></span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a><span class="in">    border: 1.5px solid var(--accent);</span></span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a><span class="in">    border-radius: 6px;</span></span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a><span class="in">    background: var(--card);</span></span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a><span class="in">    color: var(--accent);</span></span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a><span class="in">    cursor: pointer;</span></span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a><span class="in">    transition: background .16s, color .16s;</span></span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-btn:hover { background: var(--accent); color: #fff; }</span></span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-btn:disabled { opacity: .32; cursor: default; }</span></span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-btn:disabled:hover { background: var(--card); color: var(--accent); }</span></span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-btn.primary { background: var(--accent); color: #fff; }</span></span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-btn.primary:hover { background: #1a4a70; }</span></span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-progress {</span></span>
+<span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a><span class="in">    display: flex;</span></span>
+<span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a><span class="in">    gap: 6px;</span></span>
+<span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a><span class="in">    justify-content: center;</span></span>
+<span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-bottom: 14px;</span></span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-pip {</span></span>
+<span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a><span class="in">    width: 8px; height: 8px;</span></span>
+<span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a><span class="in">    border-radius: 50%;</span></span>
+<span id="cb1-216"><a href="#cb1-216" aria-hidden="true" tabindex="-1"></a><span class="in">    background: var(--border);</span></span>
+<span id="cb1-217"><a href="#cb1-217" aria-hidden="true" tabindex="-1"></a><span class="in">    transition: background .22s;</span></span>
+<span id="cb1-218"><a href="#cb1-218" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-219"><a href="#cb1-219" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-pip.active { background: var(--accent); }</span></span>
+<span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-banner {</span></span>
+<span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a><span class="in">    font-size: 0.84rem;</span></span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a><span class="in">    background: #eaf3fb;</span></span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a><span class="in">    border-left: 3px solid var(--accent);</span></span>
+<span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a><span class="in">    border-radius: 4px;</span></span>
+<span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a><span class="in">    padding: 9px 14px;</span></span>
+<span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a><span class="in">    color: #1a3a5c;</span></span>
+<span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a><span class="in">    margin-top: 12px;</span></span>
+<span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a><span class="in">    line-height: 1.6;</span></span>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a><span class="in">    display: none;</span></span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a><span class="in">  .pw-banner.visible { display: block; }</span></span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/style&gt;</span></span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/head&gt;</span></span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;body&gt;</span></span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;div id="perm-widget"&gt;</span></span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="pw-progress" id="pw-pips"&gt;&lt;/div&gt;</span></span>
+<span id="cb1-240"><a href="#cb1-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-241"><a href="#cb1-241" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="pw-card"&gt;</span></span>
+<span id="cb1-242"><a href="#cb1-242" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="pw-step-label" id="pw-step-label"&gt;&lt;/div&gt;</span></span>
+<span id="cb1-243"><a href="#cb1-243" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="pw-step-title"  id="pw-step-title"&gt;&lt;/div&gt;</span></span>
+<span id="cb1-244"><a href="#cb1-244" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="pw-description" id="pw-step-desc"&gt;&lt;/div&gt;</span></span>
+<span id="cb1-245"><a href="#cb1-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-246"><a href="#cb1-246" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="pw-canvas-row"&gt;</span></span>
+<span id="cb1-247"><a href="#cb1-247" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;div class="pw-cloud-wrap"&gt;</span></span>
+<span id="cb1-248"><a href="#cb1-248" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;div class="pw-cloud-label" id="pw-label-x"&gt;X-sample (m = 10)&lt;/div&gt;</span></span>
+<span id="cb1-249"><a href="#cb1-249" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;svg class="pw-cloud-svg" id="pw-svg-x" viewBox="0 0 260 190"&gt;&lt;/svg&gt;</span></span>
+<span id="cb1-250"><a href="#cb1-250" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;/div&gt;</span></span>
+<span id="cb1-251"><a href="#cb1-251" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;div class="pw-cloud-wrap"&gt;</span></span>
+<span id="cb1-252"><a href="#cb1-252" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;div class="pw-cloud-label" id="pw-label-y"&gt;Y-sample (n = 12)&lt;/div&gt;</span></span>
+<span id="cb1-253"><a href="#cb1-253" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;svg class="pw-cloud-svg" id="pw-svg-y" viewBox="0 0 260 190"&gt;&lt;/svg&gt;</span></span>
+<span id="cb1-254"><a href="#cb1-254" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;/div&gt;</span></span>
+<span id="cb1-255"><a href="#cb1-255" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;/div&gt;</span></span>
+<span id="cb1-256"><a href="#cb1-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-257"><a href="#cb1-257" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="pw-stat-row"&gt;</span></span>
+<span id="cb1-258"><a href="#cb1-258" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;div class="pw-stat-box"&gt;</span></span>
+<span id="cb1-259"><a href="#cb1-259" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;div class="label"&gt;Observed T&lt;sub&gt;n&lt;/sub&gt;&lt;/div&gt;</span></span>
+<span id="cb1-260"><a href="#cb1-260" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;div class="value" id="pw-val-obs"&gt;—&lt;/div&gt;</span></span>
+<span id="cb1-261"><a href="#cb1-261" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;/div&gt;</span></span>
+<span id="cb1-262"><a href="#cb1-262" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;div class="pw-stat-box" id="pw-stat-perm" style="display:none"&gt;</span></span>
+<span id="cb1-263"><a href="#cb1-263" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;div class="label"&gt;Permuted T&lt;sub&gt;n&lt;/sub&gt;&lt;sup&gt;(b)&lt;/sup&gt;&lt;/div&gt;</span></span>
+<span id="cb1-264"><a href="#cb1-264" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;div class="value" id="pw-val-perm"&gt;—&lt;/div&gt;</span></span>
+<span id="cb1-265"><a href="#cb1-265" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;/div&gt;</span></span>
+<span id="cb1-266"><a href="#cb1-266" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;div class="pw-stat-box" id="pw-stat-pv" style="display:none"&gt;</span></span>
+<span id="cb1-267"><a href="#cb1-267" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;div class="label"&gt;Perm. p-value p̂&lt;/div&gt;</span></span>
+<span id="cb1-268"><a href="#cb1-268" aria-hidden="true" tabindex="-1"></a><span class="in">        &lt;div class="value" id="pw-val-pv"&gt;—&lt;/div&gt;</span></span>
+<span id="cb1-269"><a href="#cb1-269" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;/div&gt;</span></span>
+<span id="cb1-270"><a href="#cb1-270" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;/div&gt;</span></span>
+<span id="cb1-271"><a href="#cb1-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-272"><a href="#cb1-272" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div id="pw-dist-area"&gt;</span></span>
+<span id="cb1-273"><a href="#cb1-273" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;div class="pw-cloud-label" style="text-align:left; margin-top:14px; margin-bottom:4px;"&gt;</span></span>
+<span id="cb1-274"><a href="#cb1-274" aria-hidden="true" tabindex="-1"></a><span class="in">        Randomization distribution — B = 4 permuted statistics</span></span>
+<span id="cb1-275"><a href="#cb1-275" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;/div&gt;</span></span>
+<span id="cb1-276"><a href="#cb1-276" aria-hidden="true" tabindex="-1"></a><span class="in">      &lt;svg id="pw-dist-svg" viewBox="0 0 800 110"&gt;&lt;/svg&gt;</span></span>
+<span id="cb1-277"><a href="#cb1-277" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;/div&gt;</span></span>
+<span id="cb1-278"><a href="#cb1-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-279"><a href="#cb1-279" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;div class="pw-banner" id="pw-banner"&gt;&lt;/div&gt;</span></span>
+<span id="cb1-280"><a href="#cb1-280" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;/div&gt;</span></span>
+<span id="cb1-281"><a href="#cb1-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-282"><a href="#cb1-282" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;div class="pw-btn-row"&gt;</span></span>
+<span id="cb1-283"><a href="#cb1-283" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;button class="pw-btn"         id="btn-prev" onclick="pwPrev()"&gt;&amp;#8592; Prev&lt;/button&gt;</span></span>
+<span id="cb1-284"><a href="#cb1-284" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;button class="pw-btn primary" id="btn-next" onclick="pwNext()"&gt;Next &amp;#8594;&lt;/button&gt;</span></span>
+<span id="cb1-285"><a href="#cb1-285" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;button class="pw-btn"                        onclick="pwReset()"&gt;&amp;#8635; Reset&lt;/button&gt;</span></span>
+<span id="cb1-286"><a href="#cb1-286" aria-hidden="true" tabindex="-1"></a><span class="in">  &lt;/div&gt;</span></span>
+<span id="cb1-287"><a href="#cb1-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-288"><a href="#cb1-288" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/div&gt;</span></span>
+<span id="cb1-289"><a href="#cb1-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-290"><a href="#cb1-290" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;script&gt;</span></span>
+<span id="cb1-291"><a href="#cb1-291" aria-hidden="true" tabindex="-1"></a><span class="in">/* ─────────────────────────────────────────────────────────</span></span>
+<span id="cb1-292"><a href="#cb1-292" aria-hidden="true" tabindex="-1"></a><span class="in">   DATA  — fixed, self-contained (no R runtime needed)</span></span>
+<span id="cb1-293"><a href="#cb1-293" aria-hidden="true" tabindex="-1"></a><span class="in">   X ~ N(0.5, 1),  Y ~ N(0, 1)</span></span>
+<span id="cb1-294"><a href="#cb1-294" aria-hidden="true" tabindex="-1"></a><span class="in">───────────────────────────────────────────────────────── */</span></span>
+<span id="cb1-295"><a href="#cb1-295" aria-hidden="true" tabindex="-1"></a><span class="in">const X = [1.37, 0.18, 1.16, 2.03, 0.72, -0.56, 0.91, 1.44, 0.08, 0.63];</span></span>
+<span id="cb1-296"><a href="#cb1-296" aria-hidden="true" tabindex="-1"></a><span class="in">const Y = [-0.30, 0.83, -1.12, 0.27, -0.54, 1.05, -0.88, 0.41, -0.19, 0.66, -0.73, 0.34];</span></span>
+<span id="cb1-297"><a href="#cb1-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-298"><a href="#cb1-298" aria-hidden="true" tabindex="-1"></a><span class="in">const POOL    = [...X, ...Y];</span></span>
+<span id="cb1-299"><a href="#cb1-299" aria-hidden="true" tabindex="-1"></a><span class="in">const ORI_COL = [</span></span>
+<span id="cb1-300"><a href="#cb1-300" aria-hidden="true" tabindex="-1"></a><span class="in">  ...Array(10).fill("#2a6496"),</span></span>
+<span id="cb1-301"><a href="#cb1-301" aria-hidden="true" tabindex="-1"></a><span class="in">  ...Array(12).fill("#c0392b")</span></span>
+<span id="cb1-302"><a href="#cb1-302" aria-hidden="true" tabindex="-1"></a><span class="in">];</span></span>
+<span id="cb1-303"><a href="#cb1-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-304"><a href="#cb1-304" aria-hidden="true" tabindex="-1"></a><span class="in">// Each permutation is a length-22 array of indices into POOL.</span></span>
+<span id="cb1-305"><a href="#cb1-305" aria-hidden="true" tabindex="-1"></a><span class="in">// First 10 entries → left box (group 1), last 12 → right box (group 2).</span></span>
+<span id="cb1-306"><a href="#cb1-306" aria-hidden="true" tabindex="-1"></a><span class="in">const PERMS = [</span></span>
+<span id="cb1-307"><a href="#cb1-307" aria-hidden="true" tabindex="-1"></a><span class="in">  [10,2,14,0,17,5,11,7,19,3,   1,4,6,8,9,12,13,15,16,18,20,21],</span></span>
+<span id="cb1-308"><a href="#cb1-308" aria-hidden="true" tabindex="-1"></a><span class="in">  [3,11,0,18,6,13,2,20,9,15,   1,4,5,7,8,10,12,14,16,17,19,21],</span></span>
+<span id="cb1-309"><a href="#cb1-309" aria-hidden="true" tabindex="-1"></a><span class="in">  [7,16,4,1,20,9,13,3,11,5,    0,2,6,8,10,12,14,15,17,18,19,21],</span></span>
+<span id="cb1-310"><a href="#cb1-310" aria-hidden="true" tabindex="-1"></a><span class="in">  [5,0,12,19,2,8,15,6,1,17,    3,4,7,9,10,11,13,14,16,18,20,21]</span></span>
+<span id="cb1-311"><a href="#cb1-311" aria-hidden="true" tabindex="-1"></a><span class="in">];</span></span>
+<span id="cb1-312"><a href="#cb1-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-313"><a href="#cb1-313" aria-hidden="true" tabindex="-1"></a><span class="in">function mean(a) { return a.reduce((s,v)=&gt;s+v,0)/a.length; }</span></span>
+<span id="cb1-314"><a href="#cb1-314" aria-hidden="true" tabindex="-1"></a><span class="in">function tn(a,b) { return mean(a) - mean(b); }</span></span>
+<span id="cb1-315"><a href="#cb1-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-316"><a href="#cb1-316" aria-hidden="true" tabindex="-1"></a><span class="in">const Tn_obs   = tn(X, Y);</span></span>
+<span id="cb1-317"><a href="#cb1-317" aria-hidden="true" tabindex="-1"></a><span class="in">const Tn_perms = PERMS.map(p =&gt;</span></span>
+<span id="cb1-318"><a href="#cb1-318" aria-hidden="true" tabindex="-1"></a><span class="in">  tn(p.slice(0,10).map(i=&gt;POOL[i]), p.slice(10).map(i=&gt;POOL[i]))</span></span>
+<span id="cb1-319"><a href="#cb1-319" aria-hidden="true" tabindex="-1"></a><span class="in">);</span></span>
+<span id="cb1-320"><a href="#cb1-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-321"><a href="#cb1-321" aria-hidden="true" tabindex="-1"></a><span class="in">/* ─────────────────────────────────────────────────────────</span></span>
+<span id="cb1-322"><a href="#cb1-322" aria-hidden="true" tabindex="-1"></a><span class="in">   STABLE DOT POSITIONS  (deterministic LCG jitter)</span></span>
+<span id="cb1-323"><a href="#cb1-323" aria-hidden="true" tabindex="-1"></a><span class="in">   Viewport: 260 × 190.  No enclosing ellipse — free scatter.</span></span>
+<span id="cb1-324"><a href="#cb1-324" aria-hidden="true" tabindex="-1"></a><span class="in">───────────────────────────────────────────────────────── */</span></span>
+<span id="cb1-325"><a href="#cb1-325" aria-hidden="true" tabindex="-1"></a><span class="in">const VW = 260, VH = 190, PAD = 22;</span></span>
+<span id="cb1-326"><a href="#cb1-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-327"><a href="#cb1-327" aria-hidden="true" tabindex="-1"></a><span class="in">function makeDotPositions(n) {</span></span>
+<span id="cb1-328"><a href="#cb1-328" aria-hidden="true" tabindex="-1"></a><span class="in">  const cols  = Math.ceil(Math.sqrt(n * 1.5));</span></span>
+<span id="cb1-329"><a href="#cb1-329" aria-hidden="true" tabindex="-1"></a><span class="in">  const rows  = Math.ceil(n / cols);</span></span>
+<span id="cb1-330"><a href="#cb1-330" aria-hidden="true" tabindex="-1"></a><span class="in">  const cellW = (VW - 2*PAD) / cols;</span></span>
+<span id="cb1-331"><a href="#cb1-331" aria-hidden="true" tabindex="-1"></a><span class="in">  const cellH = (VH - 2*PAD) / rows;</span></span>
+<span id="cb1-332"><a href="#cb1-332" aria-hidden="true" tabindex="-1"></a><span class="in">  let lcg = 987654321;</span></span>
+<span id="cb1-333"><a href="#cb1-333" aria-hidden="true" tabindex="-1"></a><span class="in">  const rand = () =&gt; {</span></span>
+<span id="cb1-334"><a href="#cb1-334" aria-hidden="true" tabindex="-1"></a><span class="in">    lcg = (Math.imul(lcg, 1664525) + 1013904223) &gt;&gt;&gt; 0;</span></span>
+<span id="cb1-335"><a href="#cb1-335" aria-hidden="true" tabindex="-1"></a><span class="in">    return lcg / 0xffffffff;</span></span>
+<span id="cb1-336"><a href="#cb1-336" aria-hidden="true" tabindex="-1"></a><span class="in">  };</span></span>
+<span id="cb1-337"><a href="#cb1-337" aria-hidden="true" tabindex="-1"></a><span class="in">  return Array.from({length: n}, (_, i) =&gt; {</span></span>
+<span id="cb1-338"><a href="#cb1-338" aria-hidden="true" tabindex="-1"></a><span class="in">    const col = i % cols, row = Math.floor(i / cols);</span></span>
+<span id="cb1-339"><a href="#cb1-339" aria-hidden="true" tabindex="-1"></a><span class="in">    return [</span></span>
+<span id="cb1-340"><a href="#cb1-340" aria-hidden="true" tabindex="-1"></a><span class="in">      PAD + cellW * (col + 0.15 + 0.70 * rand()),</span></span>
+<span id="cb1-341"><a href="#cb1-341" aria-hidden="true" tabindex="-1"></a><span class="in">      PAD + cellH * (row + 0.15 + 0.70 * rand())</span></span>
+<span id="cb1-342"><a href="#cb1-342" aria-hidden="true" tabindex="-1"></a><span class="in">    ];</span></span>
+<span id="cb1-343"><a href="#cb1-343" aria-hidden="true" tabindex="-1"></a><span class="in">  });</span></span>
+<span id="cb1-344"><a href="#cb1-344" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb1-345"><a href="#cb1-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-346"><a href="#cb1-346" aria-hidden="true" tabindex="-1"></a><span class="in">const POS_X = makeDotPositions(10);</span></span>
+<span id="cb1-347"><a href="#cb1-347" aria-hidden="true" tabindex="-1"></a><span class="in">const POS_Y = makeDotPositions(12);</span></span>
+<span id="cb1-348"><a href="#cb1-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-349"><a href="#cb1-349" aria-hidden="true" tabindex="-1"></a><span class="in">/* ─────────────────────────────────────────────────────────</span></span>
+<span id="cb1-350"><a href="#cb1-350" aria-hidden="true" tabindex="-1"></a><span class="in">   DRAW CLOUD</span></span>
+<span id="cb1-351"><a href="#cb1-351" aria-hidden="true" tabindex="-1"></a><span class="in">   values    : number[]   — displayed inside each dot</span></span>
+<span id="cb1-352"><a href="#cb1-352" aria-hidden="true" tabindex="-1"></a><span class="in">   colors    : string[]   — hex color per dot</span></span>
+<span id="cb1-353"><a href="#cb1-353" aria-hidden="true" tabindex="-1"></a><span class="in">   positions : [x,y][]   — stable layout coordinates</span></span>
+<span id="cb1-354"><a href="#cb1-354" aria-hidden="true" tabindex="-1"></a><span class="in">───────────────────────────────────────────────────────── */</span></span>
+<span id="cb1-355"><a href="#cb1-355" aria-hidden="true" tabindex="-1"></a><span class="in">function drawCloud(svgId, values, colors, positions) {</span></span>
+<span id="cb1-356"><a href="#cb1-356" aria-hidden="true" tabindex="-1"></a><span class="in">  const svg = document.getElementById(svgId);</span></span>
+<span id="cb1-357"><a href="#cb1-357" aria-hidden="true" tabindex="-1"></a><span class="in">  svg.innerHTML = "";</span></span>
+<span id="cb1-358"><a href="#cb1-358" aria-hidden="true" tabindex="-1"></a><span class="in">  const R = 15;   // radius — large enough to fit two-decimal label</span></span>
+<span id="cb1-359"><a href="#cb1-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-360"><a href="#cb1-360" aria-hidden="true" tabindex="-1"></a><span class="in">  // Shared drop-shadow filter</span></span>
+<span id="cb1-361"><a href="#cb1-361" aria-hidden="true" tabindex="-1"></a><span class="in">  const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");</span></span>
+<span id="cb1-362"><a href="#cb1-362" aria-hidden="true" tabindex="-1"></a><span class="in">  defs.innerHTML =</span></span>
+<span id="cb1-363"><a href="#cb1-363" aria-hidden="true" tabindex="-1"></a><span class="in">    `&lt;filter id="sh_${svgId}"&gt;</span></span>
+<span id="cb1-364"><a href="#cb1-364" aria-hidden="true" tabindex="-1"></a><span class="in">       &lt;feDropShadow dx="0" dy="1" stdDeviation="1.8" flood-opacity="0.20"/&gt;</span></span>
+<span id="cb1-365"><a href="#cb1-365" aria-hidden="true" tabindex="-1"></a><span class="in">     &lt;/filter&gt;`;</span></span>
+<span id="cb1-366"><a href="#cb1-366" aria-hidden="true" tabindex="-1"></a><span class="in">  svg.appendChild(defs);</span></span>
+<span id="cb1-367"><a href="#cb1-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-368"><a href="#cb1-368" aria-hidden="true" tabindex="-1"></a><span class="in">  values.forEach((v, i) =&gt; {</span></span>
+<span id="cb1-369"><a href="#cb1-369" aria-hidden="true" tabindex="-1"></a><span class="in">    const [cx, cy] = positions[i];</span></span>
+<span id="cb1-370"><a href="#cb1-370" aria-hidden="true" tabindex="-1"></a><span class="in">    const col = colors[i];</span></span>
+<span id="cb1-371"><a href="#cb1-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-372"><a href="#cb1-372" aria-hidden="true" tabindex="-1"></a><span class="in">    const c = document.createElementNS("http://www.w3.org/2000/svg","circle");</span></span>
+<span id="cb1-373"><a href="#cb1-373" aria-hidden="true" tabindex="-1"></a><span class="in">    c.setAttribute("cx", cx);  c.setAttribute("cy", cy);  c.setAttribute("r", R);</span></span>
+<span id="cb1-374"><a href="#cb1-374" aria-hidden="true" tabindex="-1"></a><span class="in">    c.setAttribute("fill", col);</span></span>
+<span id="cb1-375"><a href="#cb1-375" aria-hidden="true" tabindex="-1"></a><span class="in">    c.setAttribute("filter", `url(#sh_${svgId})`);</span></span>
+<span id="cb1-376"><a href="#cb1-376" aria-hidden="true" tabindex="-1"></a><span class="in">    c.setAttribute("opacity","0.90");</span></span>
+<span id="cb1-377"><a href="#cb1-377" aria-hidden="true" tabindex="-1"></a><span class="in">    svg.appendChild(c);</span></span>
+<span id="cb1-378"><a href="#cb1-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-379"><a href="#cb1-379" aria-hidden="true" tabindex="-1"></a><span class="in">    const t = document.createElementNS("http://www.w3.org/2000/svg","text");</span></span>
+<span id="cb1-380"><a href="#cb1-380" aria-hidden="true" tabindex="-1"></a><span class="in">    t.setAttribute("x", cx);  t.setAttribute("y", cy + 3.5);</span></span>
+<span id="cb1-381"><a href="#cb1-381" aria-hidden="true" tabindex="-1"></a><span class="in">    t.setAttribute("text-anchor","middle");</span></span>
+<span id="cb1-382"><a href="#cb1-382" aria-hidden="true" tabindex="-1"></a><span class="in">    t.setAttribute("dominant-baseline","middle");</span></span>
+<span id="cb1-383"><a href="#cb1-383" aria-hidden="true" tabindex="-1"></a><span class="in">    t.setAttribute("font-family","'Courier New', monospace");</span></span>
+<span id="cb1-384"><a href="#cb1-384" aria-hidden="true" tabindex="-1"></a><span class="in">    t.setAttribute("font-size","7.8");</span></span>
+<span id="cb1-385"><a href="#cb1-385" aria-hidden="true" tabindex="-1"></a><span class="in">    t.setAttribute("font-weight","bold");</span></span>
+<span id="cb1-386"><a href="#cb1-386" aria-hidden="true" tabindex="-1"></a><span class="in">    t.setAttribute("fill","#ffffff");</span></span>
+<span id="cb1-387"><a href="#cb1-387" aria-hidden="true" tabindex="-1"></a><span class="in">    t.textContent = v.toFixed(2);</span></span>
+<span id="cb1-388"><a href="#cb1-388" aria-hidden="true" tabindex="-1"></a><span class="in">    svg.appendChild(t);</span></span>
+<span id="cb1-389"><a href="#cb1-389" aria-hidden="true" tabindex="-1"></a><span class="in">  });</span></span>
+<span id="cb1-390"><a href="#cb1-390" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb1-391"><a href="#cb1-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-392"><a href="#cb1-392" aria-hidden="true" tabindex="-1"></a><span class="in">/* ─────────────────────────────────────────────────────────</span></span>
+<span id="cb1-393"><a href="#cb1-393" aria-hidden="true" tabindex="-1"></a><span class="in">   DISTRIBUTION STRIP  (step 5)</span></span>
+<span id="cb1-394"><a href="#cb1-394" aria-hidden="true" tabindex="-1"></a><span class="in">   — Permuted stats as labelled circles on stems</span></span>
+<span id="cb1-395"><a href="#cb1-395" aria-hidden="true" tabindex="-1"></a><span class="in">   — Observed Tn as dashed vertical line only</span></span>
+<span id="cb1-396"><a href="#cb1-396" aria-hidden="true" tabindex="-1"></a><span class="in">   — NO axis tick labels (explained in banner instead)</span></span>
+<span id="cb1-397"><a href="#cb1-397" aria-hidden="true" tabindex="-1"></a><span class="in">───────────────────────────────────────────────────────── */</span></span>
+<span id="cb1-398"><a href="#cb1-398" aria-hidden="true" tabindex="-1"></a><span class="in">function drawDist(allTns, observed) {</span></span>
+<span id="cb1-399"><a href="#cb1-399" aria-hidden="true" tabindex="-1"></a><span class="in">  const svg = document.getElementById("pw-dist-svg");</span></span>
+<span id="cb1-400"><a href="#cb1-400" aria-hidden="true" tabindex="-1"></a><span class="in">  svg.innerHTML = "";</span></span>
+<span id="cb1-401"><a href="#cb1-401" aria-hidden="true" tabindex="-1"></a><span class="in">  const W = 800, H = 110;</span></span>
+<span id="cb1-402"><a href="#cb1-402" aria-hidden="true" tabindex="-1"></a><span class="in">  const pad = { l:40, r:40, t:38, b:28 };</span></span>
+<span id="cb1-403"><a href="#cb1-403" aria-hidden="true" tabindex="-1"></a><span class="in">  const iW  = W - pad.l - pad.r;</span></span>
+<span id="cb1-404"><a href="#cb1-404" aria-hidden="true" tabindex="-1"></a><span class="in">  const baseY = pad.t + H - pad.t - pad.b;</span></span>
+<span id="cb1-405"><a href="#cb1-405" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-406"><a href="#cb1-406" aria-hidden="true" tabindex="-1"></a><span class="in">  const all = [...allTns, observed];</span></span>
+<span id="cb1-407"><a href="#cb1-407" aria-hidden="true" tabindex="-1"></a><span class="in">  const mn  = Math.min(...all) - 0.28;</span></span>
+<span id="cb1-408"><a href="#cb1-408" aria-hidden="true" tabindex="-1"></a><span class="in">  const mx  = Math.max(...all) + 0.28;</span></span>
+<span id="cb1-409"><a href="#cb1-409" aria-hidden="true" tabindex="-1"></a><span class="in">  const toX = v =&gt; pad.l + ((v - mn) / (mx - mn)) * iW;</span></span>
+<span id="cb1-410"><a href="#cb1-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-411"><a href="#cb1-411" aria-hidden="true" tabindex="-1"></a><span class="in">  // Axis line</span></span>
+<span id="cb1-412"><a href="#cb1-412" aria-hidden="true" tabindex="-1"></a><span class="in">  const ax = document.createElementNS("http://www.w3.org/2000/svg","line");</span></span>
+<span id="cb1-413"><a href="#cb1-413" aria-hidden="true" tabindex="-1"></a><span class="in">  ax.setAttribute("x1", pad.l); ax.setAttribute("x2", pad.l + iW);</span></span>
+<span id="cb1-414"><a href="#cb1-414" aria-hidden="true" tabindex="-1"></a><span class="in">  ax.setAttribute("y1", baseY); ax.setAttribute("y2", baseY);</span></span>
+<span id="cb1-415"><a href="#cb1-415" aria-hidden="true" tabindex="-1"></a><span class="in">  ax.setAttribute("stroke","#adb5bd"); ax.setAttribute("stroke-width","1");</span></span>
+<span id="cb1-416"><a href="#cb1-416" aria-hidden="true" tabindex="-1"></a><span class="in">  svg.appendChild(ax);</span></span>
+<span id="cb1-417"><a href="#cb1-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-418"><a href="#cb1-418" aria-hidden="true" tabindex="-1"></a><span class="in">  // Permuted statistics</span></span>
+<span id="cb1-419"><a href="#cb1-419" aria-hidden="true" tabindex="-1"></a><span class="in">  allTns.forEach((v, i) =&gt; {</span></span>
+<span id="cb1-420"><a href="#cb1-420" aria-hidden="true" tabindex="-1"></a><span class="in">    const x   = toX(v);</span></span>
+<span id="cb1-421"><a href="#cb1-421" aria-hidden="true" tabindex="-1"></a><span class="in">    const dotY = pad.t;</span></span>
+<span id="cb1-422"><a href="#cb1-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-423"><a href="#cb1-423" aria-hidden="true" tabindex="-1"></a><span class="in">    const stem = document.createElementNS("http://www.w3.org/2000/svg","line");</span></span>
+<span id="cb1-424"><a href="#cb1-424" aria-hidden="true" tabindex="-1"></a><span class="in">    stem.setAttribute("x1",x); stem.setAttribute("x2",x);</span></span>
+<span id="cb1-425"><a href="#cb1-425" aria-hidden="true" tabindex="-1"></a><span class="in">    stem.setAttribute("y1", dotY + 14); stem.setAttribute("y2", baseY);</span></span>
+<span id="cb1-426"><a href="#cb1-426" aria-hidden="true" tabindex="-1"></a><span class="in">    stem.setAttribute("stroke","#adb5bd"); stem.setAttribute("stroke-width","1.2");</span></span>
+<span id="cb1-427"><a href="#cb1-427" aria-hidden="true" tabindex="-1"></a><span class="in">    svg.appendChild(stem);</span></span>
+<span id="cb1-428"><a href="#cb1-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-429"><a href="#cb1-429" aria-hidden="true" tabindex="-1"></a><span class="in">    const c = document.createElementNS("http://www.w3.org/2000/svg","circle");</span></span>
+<span id="cb1-430"><a href="#cb1-430" aria-hidden="true" tabindex="-1"></a><span class="in">    c.setAttribute("cx",x); c.setAttribute("cy", dotY);</span></span>
+<span id="cb1-431"><a href="#cb1-431" aria-hidden="true" tabindex="-1"></a><span class="in">    c.setAttribute("r","14");</span></span>
+<span id="cb1-432"><a href="#cb1-432" aria-hidden="true" tabindex="-1"></a><span class="in">    c.setAttribute("fill","#7f9fbf"); c.setAttribute("opacity","0.88");</span></span>
+<span id="cb1-433"><a href="#cb1-433" aria-hidden="true" tabindex="-1"></a><span class="in">    svg.appendChild(c);</span></span>
+<span id="cb1-434"><a href="#cb1-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-435"><a href="#cb1-435" aria-hidden="true" tabindex="-1"></a><span class="in">    const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");</span></span>
+<span id="cb1-436"><a href="#cb1-436" aria-hidden="true" tabindex="-1"></a><span class="in">    lbl.setAttribute("x",x); lbl.setAttribute("y", dotY + 4);</span></span>
+<span id="cb1-437"><a href="#cb1-437" aria-hidden="true" tabindex="-1"></a><span class="in">    lbl.setAttribute("text-anchor","middle");</span></span>
+<span id="cb1-438"><a href="#cb1-438" aria-hidden="true" tabindex="-1"></a><span class="in">    lbl.setAttribute("font-family","'Courier New', monospace");</span></span>
+<span id="cb1-439"><a href="#cb1-439" aria-hidden="true" tabindex="-1"></a><span class="in">    lbl.setAttribute("font-size","8"); lbl.setAttribute("font-weight","bold");</span></span>
+<span id="cb1-440"><a href="#cb1-440" aria-hidden="true" tabindex="-1"></a><span class="in">    lbl.setAttribute("fill","#fff");</span></span>
+<span id="cb1-441"><a href="#cb1-441" aria-hidden="true" tabindex="-1"></a><span class="in">    lbl.textContent = v.toFixed(2);</span></span>
+<span id="cb1-442"><a href="#cb1-442" aria-hidden="true" tabindex="-1"></a><span class="in">    svg.appendChild(lbl);</span></span>
+<span id="cb1-443"><a href="#cb1-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-444"><a href="#cb1-444" aria-hidden="true" tabindex="-1"></a><span class="in">    // Index label below axis</span></span>
+<span id="cb1-445"><a href="#cb1-445" aria-hidden="true" tabindex="-1"></a><span class="in">    const idx = document.createElementNS("http://www.w3.org/2000/svg","text");</span></span>
+<span id="cb1-446"><a href="#cb1-446" aria-hidden="true" tabindex="-1"></a><span class="in">    idx.setAttribute("x",x); idx.setAttribute("y", baseY + 14);</span></span>
+<span id="cb1-447"><a href="#cb1-447" aria-hidden="true" tabindex="-1"></a><span class="in">    idx.setAttribute("text-anchor","middle");</span></span>
+<span id="cb1-448"><a href="#cb1-448" aria-hidden="true" tabindex="-1"></a><span class="in">    idx.setAttribute("font-family","'Courier New', monospace");</span></span>
+<span id="cb1-449"><a href="#cb1-449" aria-hidden="true" tabindex="-1"></a><span class="in">    idx.setAttribute("font-size","8.5"); idx.setAttribute("fill","#6c757d");</span></span>
+<span id="cb1-450"><a href="#cb1-450" aria-hidden="true" tabindex="-1"></a><span class="in">    idx.textContent = `T\u207F\u207D${i+1}\u207E`;   // Tⁿ⁽ᵇ⁾ approximation</span></span>
+<span id="cb1-451"><a href="#cb1-451" aria-hidden="true" tabindex="-1"></a><span class="in">    svg.appendChild(idx);</span></span>
+<span id="cb1-452"><a href="#cb1-452" aria-hidden="true" tabindex="-1"></a><span class="in">  });</span></span>
+<span id="cb1-453"><a href="#cb1-453" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-454"><a href="#cb1-454" aria-hidden="true" tabindex="-1"></a><span class="in">  // Observed Tn — dashed line only, no numeric label on axis</span></span>
+<span id="cb1-455"><a href="#cb1-455" aria-hidden="true" tabindex="-1"></a><span class="in">  const ox = toX(observed);</span></span>
+<span id="cb1-456"><a href="#cb1-456" aria-hidden="true" tabindex="-1"></a><span class="in">  const ol = document.createElementNS("http://www.w3.org/2000/svg","line");</span></span>
+<span id="cb1-457"><a href="#cb1-457" aria-hidden="true" tabindex="-1"></a><span class="in">  ol.setAttribute("x1",ox); ol.setAttribute("x2",ox);</span></span>
+<span id="cb1-458"><a href="#cb1-458" aria-hidden="true" tabindex="-1"></a><span class="in">  ol.setAttribute("y1", pad.t - 10); ol.setAttribute("y2", baseY);</span></span>
+<span id="cb1-459"><a href="#cb1-459" aria-hidden="true" tabindex="-1"></a><span class="in">  ol.setAttribute("stroke","#2a6496"); ol.setAttribute("stroke-width","2.2");</span></span>
+<span id="cb1-460"><a href="#cb1-460" aria-hidden="true" tabindex="-1"></a><span class="in">  ol.setAttribute("stroke-dasharray","6 3");</span></span>
+<span id="cb1-461"><a href="#cb1-461" aria-hidden="true" tabindex="-1"></a><span class="in">  svg.appendChild(ol);</span></span>
+<span id="cb1-462"><a href="#cb1-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-463"><a href="#cb1-463" aria-hidden="true" tabindex="-1"></a><span class="in">  const ot = document.createElementNS("http://www.w3.org/2000/svg","text");</span></span>
+<span id="cb1-464"><a href="#cb1-464" aria-hidden="true" tabindex="-1"></a><span class="in">  ot.setAttribute("x", ox + 6); ot.setAttribute("y", pad.t - 12);</span></span>
+<span id="cb1-465"><a href="#cb1-465" aria-hidden="true" tabindex="-1"></a><span class="in">  ot.setAttribute("font-family","'Courier New', monospace");</span></span>
+<span id="cb1-466"><a href="#cb1-466" aria-hidden="true" tabindex="-1"></a><span class="in">  ot.setAttribute("font-size","9"); ot.setAttribute("fill","#2a6496");</span></span>
+<span id="cb1-467"><a href="#cb1-467" aria-hidden="true" tabindex="-1"></a><span class="in">  ot.setAttribute("font-weight","bold");</span></span>
+<span id="cb1-468"><a href="#cb1-468" aria-hidden="true" tabindex="-1"></a><span class="in">  ot.textContent = "Tₙ (obs)";</span></span>
+<span id="cb1-469"><a href="#cb1-469" aria-hidden="true" tabindex="-1"></a><span class="in">  svg.appendChild(ot);</span></span>
+<span id="cb1-470"><a href="#cb1-470" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb1-471"><a href="#cb1-471" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-472"><a href="#cb1-472" aria-hidden="true" tabindex="-1"></a><span class="in">/* ─────────────────────────────────────────────────────────</span></span>
+<span id="cb1-473"><a href="#cb1-473" aria-hidden="true" tabindex="-1"></a><span class="in">   STEP DEFINITIONS</span></span>
+<span id="cb1-474"><a href="#cb1-474" aria-hidden="true" tabindex="-1"></a><span class="in">───────────────────────────────────────────────────────── */</span></span>
+<span id="cb1-475"><a href="#cb1-475" aria-hidden="true" tabindex="-1"></a><span class="in">const STEPS = [</span></span>
+<span id="cb1-476"><a href="#cb1-476" aria-hidden="true" tabindex="-1"></a><span class="in">  {</span></span>
+<span id="cb1-477"><a href="#cb1-477" aria-hidden="true" tabindex="-1"></a><span class="in">    label: "Step 1 of 5", title: "The Original Samples",</span></span>
+<span id="cb1-478"><a href="#cb1-478" aria-hidden="true" tabindex="-1"></a><span class="in">    desc:  "We observe two independent samples: X (blue dots, m\u202F=\u202F10) and Y (red dots, n\u202F=\u202F12). Each dot is labelled with its observed value. The two boxes represent the two groups before any reshuffling.",</span></span>
+<span id="cb1-479"><a href="#cb1-479" aria-hidden="true" tabindex="-1"></a><span class="in">    permIdx: null, showPermStat: false, showPV: false, showDist: false</span></span>
+<span id="cb1-480"><a href="#cb1-480" aria-hidden="true" tabindex="-1"></a><span class="in">  },</span></span>
+<span id="cb1-481"><a href="#cb1-481" aria-hidden="true" tabindex="-1"></a><span class="in">  {</span></span>
+<span id="cb1-482"><a href="#cb1-482" aria-hidden="true" tabindex="-1"></a><span class="in">    label: "Step 2 of 5", title: "Compute the Observed T&lt;sub&gt;n&lt;/sub&gt;",</span></span>
+<span id="cb1-483"><a href="#cb1-483" aria-hidden="true" tabindex="-1"></a><span class="in">    desc:  "We compute T&lt;sub&gt;n&lt;/sub&gt;(W&lt;sup&gt;(N)&lt;/sup&gt;) = X\u0305 \u2212 Y\u0305 on the original data. This is the quantity we will compare against the data-driven critical value.",</span></span>
+<span id="cb1-484"><a href="#cb1-484" aria-hidden="true" tabindex="-1"></a><span class="in">    permIdx: null, showPermStat: false, showPV: false, showDist: false</span></span>
+<span id="cb1-485"><a href="#cb1-485" aria-hidden="true" tabindex="-1"></a><span class="in">  },</span></span>
+<span id="cb1-486"><a href="#cb1-486" aria-hidden="true" tabindex="-1"></a><span class="in">  {</span></span>
+<span id="cb1-487"><a href="#cb1-487" aria-hidden="true" tabindex="-1"></a><span class="in">    label: "Step 3 of 5", title: "First Permutation (b\u202F=\u202F1)",</span></span>
+<span id="cb1-488"><a href="#cb1-488" aria-hidden="true" tabindex="-1"></a><span class="in">    desc:  "We apply a random permutation g&lt;sub&gt;1&lt;/sub&gt; \u2208 \u{1D4A2}&lt;sub&gt;n&lt;/sub&gt;: the 22 values are pooled and randomly reassigned to two new groups of size 10 and 12. Each dot &lt;strong&gt;keeps its original color&lt;/strong&gt; \u2014 so you can see that both boxes now contain a mixture of blue and red. We then recompute T&lt;sub&gt;n&lt;/sub&gt; on the reshuffled groups.",</span></span>
+<span id="cb1-489"><a href="#cb1-489" aria-hidden="true" tabindex="-1"></a><span class="in">    permIdx: 0, showPermStat: true, showPV: false, showDist: false</span></span>
+<span id="cb1-490"><a href="#cb1-490" aria-hidden="true" tabindex="-1"></a><span class="in">  },</span></span>
+<span id="cb1-491"><a href="#cb1-491" aria-hidden="true" tabindex="-1"></a><span class="in">  {</span></span>
+<span id="cb1-492"><a href="#cb1-492" aria-hidden="true" tabindex="-1"></a><span class="in">    label: "Step 4 of 5", title: "Second Permutation (b\u202F=\u202F2)",</span></span>
+<span id="cb1-493"><a href="#cb1-493" aria-hidden="true" tabindex="-1"></a><span class="in">    desc:  "A second independent permutation g&lt;sub&gt;2&lt;/sub&gt; produces yet another mixed configuration. Each such permutation is one draw from the null distribution of T&lt;sub&gt;n&lt;/sub&gt;.",</span></span>
+<span id="cb1-494"><a href="#cb1-494" aria-hidden="true" tabindex="-1"></a><span class="in">    permIdx: 1, showPermStat: true, showPV: false, showDist: false</span></span>
+<span id="cb1-495"><a href="#cb1-495" aria-hidden="true" tabindex="-1"></a><span class="in">  },</span></span>
+<span id="cb1-496"><a href="#cb1-496" aria-hidden="true" tabindex="-1"></a><span class="in">  {</span></span>
+<span id="cb1-497"><a href="#cb1-497" aria-hidden="true" tabindex="-1"></a><span class="in">    label: "Step 5 of 5", title: "The Null Distribution and the p-value",</span></span>
+<span id="cb1-498"><a href="#cb1-498" aria-hidden="true" tabindex="-1"></a><span class="in">    desc:  "After B\u202F=\u202F4 permutations we have four auxiliary statistics. The dashed blue line marks the observed T&lt;sub&gt;n&lt;/sub&gt;. The p-value and its interpretation are given in the note below.",</span></span>
+<span id="cb1-499"><a href="#cb1-499" aria-hidden="true" tabindex="-1"></a><span class="in">    permIdx: 3, showPermStat: true, showPV: true, showDist: true</span></span>
+<span id="cb1-500"><a href="#cb1-500" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-501"><a href="#cb1-501" aria-hidden="true" tabindex="-1"></a><span class="in">];</span></span>
+<span id="cb1-502"><a href="#cb1-502" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-503"><a href="#cb1-503" aria-hidden="true" tabindex="-1"></a><span class="in">const TOTAL_STEPS = STEPS.length;</span></span>
+<span id="cb1-504"><a href="#cb1-504" aria-hidden="true" tabindex="-1"></a><span class="in">let step = 0;</span></span>
+<span id="cb1-505"><a href="#cb1-505" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-506"><a href="#cb1-506" aria-hidden="true" tabindex="-1"></a><span class="in">/* ─────────────────────────────────────────────────────────</span></span>
+<span id="cb1-507"><a href="#cb1-507" aria-hidden="true" tabindex="-1"></a><span class="in">   RENDER</span></span>
+<span id="cb1-508"><a href="#cb1-508" aria-hidden="true" tabindex="-1"></a><span class="in">───────────────────────────────────────────────────────── */</span></span>
+<span id="cb1-509"><a href="#cb1-509" aria-hidden="true" tabindex="-1"></a><span class="in">function render() {</span></span>
+<span id="cb1-510"><a href="#cb1-510" aria-hidden="true" tabindex="-1"></a><span class="in">  const s = STEPS[step];</span></span>
+<span id="cb1-511"><a href="#cb1-511" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-512"><a href="#cb1-512" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById("pw-step-label").textContent = s.label;</span></span>
+<span id="cb1-513"><a href="#cb1-513" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById("pw-step-title").innerHTML   = s.title;</span></span>
+<span id="cb1-514"><a href="#cb1-514" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById("pw-step-desc").innerHTML    = s.desc;</span></span>
+<span id="cb1-515"><a href="#cb1-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-516"><a href="#cb1-516" aria-hidden="true" tabindex="-1"></a><span class="in">  // Pips</span></span>
+<span id="cb1-517"><a href="#cb1-517" aria-hidden="true" tabindex="-1"></a><span class="in">  const pipsEl = document.getElementById("pw-pips");</span></span>
+<span id="cb1-518"><a href="#cb1-518" aria-hidden="true" tabindex="-1"></a><span class="in">  pipsEl.innerHTML = "";</span></span>
+<span id="cb1-519"><a href="#cb1-519" aria-hidden="true" tabindex="-1"></a><span class="in">  for (let i = 0; i &lt; TOTAL_STEPS; i++) {</span></span>
+<span id="cb1-520"><a href="#cb1-520" aria-hidden="true" tabindex="-1"></a><span class="in">    const d = document.createElement("div");</span></span>
+<span id="cb1-521"><a href="#cb1-521" aria-hidden="true" tabindex="-1"></a><span class="in">    d.className = "pw-pip" + (i === step ? " active" : "");</span></span>
+<span id="cb1-522"><a href="#cb1-522" aria-hidden="true" tabindex="-1"></a><span class="in">    pipsEl.appendChild(d);</span></span>
+<span id="cb1-523"><a href="#cb1-523" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-524"><a href="#cb1-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-525"><a href="#cb1-525" aria-hidden="true" tabindex="-1"></a><span class="in">  // Clouds</span></span>
+<span id="cb1-526"><a href="#cb1-526" aria-hidden="true" tabindex="-1"></a><span class="in">  if (s.permIdx === null) {</span></span>
+<span id="cb1-527"><a href="#cb1-527" aria-hidden="true" tabindex="-1"></a><span class="in">    drawCloud("pw-svg-x", X, Array(10).fill("#2a6496"), POS_X);</span></span>
+<span id="cb1-528"><a href="#cb1-528" aria-hidden="true" tabindex="-1"></a><span class="in">    drawCloud("pw-svg-y", Y, Array(12).fill("#c0392b"), POS_Y);</span></span>
+<span id="cb1-529"><a href="#cb1-529" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById("pw-label-x").textContent = "X-sample  (m = 10)";</span></span>
+<span id="cb1-530"><a href="#cb1-530" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById("pw-label-y").textContent = "Y-sample  (n = 12)";</span></span>
+<span id="cb1-531"><a href="#cb1-531" aria-hidden="true" tabindex="-1"></a><span class="in">  } else {</span></span>
+<span id="cb1-532"><a href="#cb1-532" aria-hidden="true" tabindex="-1"></a><span class="in">    const perm = PERMS[s.permIdx];</span></span>
+<span id="cb1-533"><a href="#cb1-533" aria-hidden="true" tabindex="-1"></a><span class="in">    const xIdx = perm.slice(0,10);</span></span>
+<span id="cb1-534"><a href="#cb1-534" aria-hidden="true" tabindex="-1"></a><span class="in">    const yIdx = perm.slice(10);</span></span>
+<span id="cb1-535"><a href="#cb1-535" aria-hidden="true" tabindex="-1"></a><span class="in">    // Colors follow the ORIGINAL sample identity of each observation</span></span>
+<span id="cb1-536"><a href="#cb1-536" aria-hidden="true" tabindex="-1"></a><span class="in">    drawCloud("pw-svg-x", xIdx.map(i=&gt;POOL[i]), xIdx.map(i=&gt;ORI_COL[i]), POS_X);</span></span>
+<span id="cb1-537"><a href="#cb1-537" aria-hidden="true" tabindex="-1"></a><span class="in">    drawCloud("pw-svg-y", yIdx.map(i=&gt;POOL[i]), yIdx.map(i=&gt;ORI_COL[i]), POS_Y);</span></span>
+<span id="cb1-538"><a href="#cb1-538" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById("pw-label-x").textContent =</span></span>
+<span id="cb1-539"><a href="#cb1-539" aria-hidden="true" tabindex="-1"></a><span class="in">      `Permuted group 1  (m = 10),  b = ${s.permIdx + 1}`;</span></span>
+<span id="cb1-540"><a href="#cb1-540" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById("pw-label-y").textContent =</span></span>
+<span id="cb1-541"><a href="#cb1-541" aria-hidden="true" tabindex="-1"></a><span class="in">      `Permuted group 2  (n = 12),  b = ${s.permIdx + 1}`;</span></span>
+<span id="cb1-542"><a href="#cb1-542" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-543"><a href="#cb1-543" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-544"><a href="#cb1-544" aria-hidden="true" tabindex="-1"></a><span class="in">  // Stat boxes</span></span>
+<span id="cb1-545"><a href="#cb1-545" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById("pw-val-obs").textContent = step &gt;= 1 ? Tn_obs.toFixed(3) : "\u2014";</span></span>
+<span id="cb1-546"><a href="#cb1-546" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById("pw-stat-perm").style.display = s.showPermStat ? "" : "none";</span></span>
+<span id="cb1-547"><a href="#cb1-547" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById("pw-stat-pv").style.display   = s.showPV       ? "" : "none";</span></span>
+<span id="cb1-548"><a href="#cb1-548" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-549"><a href="#cb1-549" aria-hidden="true" tabindex="-1"></a><span class="in">  if (s.showPermStat &amp;&amp; s.permIdx !== null)</span></span>
+<span id="cb1-550"><a href="#cb1-550" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById("pw-val-perm").textContent = Tn_perms[s.permIdx].toFixed(3);</span></span>
+<span id="cb1-551"><a href="#cb1-551" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-552"><a href="#cb1-552" aria-hidden="true" tabindex="-1"></a><span class="in">  if (s.showPV) {</span></span>
+<span id="cb1-553"><a href="#cb1-553" aria-hidden="true" tabindex="-1"></a><span class="in">    const nGeq = Tn_perms.filter(v =&gt; v &gt;= Tn_obs).length;</span></span>
+<span id="cb1-554"><a href="#cb1-554" aria-hidden="true" tabindex="-1"></a><span class="in">    document.getElementById("pw-val-pv").textContent =</span></span>
+<span id="cb1-555"><a href="#cb1-555" aria-hidden="true" tabindex="-1"></a><span class="in">      ((nGeq + 1) / (Tn_perms.length + 1)).toFixed(3);</span></span>
+<span id="cb1-556"><a href="#cb1-556" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-557"><a href="#cb1-557" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-558"><a href="#cb1-558" aria-hidden="true" tabindex="-1"></a><span class="in">  // Distribution strip</span></span>
+<span id="cb1-559"><a href="#cb1-559" aria-hidden="true" tabindex="-1"></a><span class="in">  const distArea = document.getElementById("pw-dist-area");</span></span>
+<span id="cb1-560"><a href="#cb1-560" aria-hidden="true" tabindex="-1"></a><span class="in">  if (s.showDist) { distArea.classList.add("visible"); drawDist(Tn_perms, Tn_obs); }</span></span>
+<span id="cb1-561"><a href="#cb1-561" aria-hidden="true" tabindex="-1"></a><span class="in">  else              distArea.classList.remove("visible");</span></span>
+<span id="cb1-562"><a href="#cb1-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-563"><a href="#cb1-563" aria-hidden="true" tabindex="-1"></a><span class="in">  // Banner</span></span>
+<span id="cb1-564"><a href="#cb1-564" aria-hidden="true" tabindex="-1"></a><span class="in">  const bannerEl = document.getElementById("pw-banner");</span></span>
+<span id="cb1-565"><a href="#cb1-565" aria-hidden="true" tabindex="-1"></a><span class="in">  let html = "";</span></span>
+<span id="cb1-566"><a href="#cb1-566" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-567"><a href="#cb1-567" aria-hidden="true" tabindex="-1"></a><span class="in">  if (step === 1) {</span></span>
+<span id="cb1-568"><a href="#cb1-568" aria-hidden="true" tabindex="-1"></a><span class="in">    html = `Observed statistic: &lt;strong&gt;T&lt;sub&gt;n&lt;/sub&gt; = X\u0305 \u2212 Y\u0305 = ${Tn_obs.toFixed(3)}&lt;/strong&gt;.</span></span>
+<span id="cb1-569"><a href="#cb1-569" aria-hidden="true" tabindex="-1"></a><span class="in">            Under H&lt;sub&gt;0&lt;/sub&gt;\u202F: P&lt;sub&gt;X&lt;/sub&gt; = P&lt;sub&gt;Y&lt;/sub&gt;, this value should not be</span></span>
+<span id="cb1-570"><a href="#cb1-570" aria-hidden="true" tabindex="-1"></a><span class="in">            unusually large relative to what we would see if we simply reshuffled the labels.`;</span></span>
+<span id="cb1-571"><a href="#cb1-571" aria-hidden="true" tabindex="-1"></a><span class="in">  } else if (step === 2) {</span></span>
+<span id="cb1-572"><a href="#cb1-572" aria-hidden="true" tabindex="-1"></a><span class="in">    html = `After permutation b\u202F=\u202F1:</span></span>
+<span id="cb1-573"><a href="#cb1-573" aria-hidden="true" tabindex="-1"></a><span class="in">            &lt;strong&gt;T&lt;sub&gt;n&lt;/sub&gt;&lt;sup&gt;(1)&lt;/sup&gt; = ${Tn_perms[0].toFixed(3)}&lt;/strong&gt;.</span></span>
+<span id="cb1-574"><a href="#cb1-574" aria-hidden="true" tabindex="-1"></a><span class="in">            Notice that each box now contains both blue and red dots \u2014 the original group identity</span></span>
+<span id="cb1-575"><a href="#cb1-575" aria-hidden="true" tabindex="-1"></a><span class="in">            of each observation is preserved by color, even though the group assignment has changed.`;</span></span>
+<span id="cb1-576"><a href="#cb1-576" aria-hidden="true" tabindex="-1"></a><span class="in">  } else if (step === 3) {</span></span>
+<span id="cb1-577"><a href="#cb1-577" aria-hidden="true" tabindex="-1"></a><span class="in">    html = `After permutation b\u202F=\u202F2:</span></span>
+<span id="cb1-578"><a href="#cb1-578" aria-hidden="true" tabindex="-1"></a><span class="in">            &lt;strong&gt;T&lt;sub&gt;n&lt;/sub&gt;&lt;sup&gt;(2)&lt;/sup&gt; = ${Tn_perms[1].toFixed(3)}&lt;/strong&gt;.</span></span>
+<span id="cb1-579"><a href="#cb1-579" aria-hidden="true" tabindex="-1"></a><span class="in">            Each independent permutation produces one value of</span></span>
+<span id="cb1-580"><a href="#cb1-580" aria-hidden="true" tabindex="-1"></a><span class="in">            T&lt;sub&gt;n&lt;/sub&gt;(g&lt;sub&gt;b&lt;/sub&gt;W&lt;sup&gt;(N)&lt;/sup&gt;), contributing one point to the</span></span>
+<span id="cb1-581"><a href="#cb1-581" aria-hidden="true" tabindex="-1"></a><span class="in">            randomization distribution.`;</span></span>
+<span id="cb1-582"><a href="#cb1-582" aria-hidden="true" tabindex="-1"></a><span class="in">  } else if (step === 4) {</span></span>
+<span id="cb1-583"><a href="#cb1-583" aria-hidden="true" tabindex="-1"></a><span class="in">    const nGeq = Tn_perms.filter(v =&gt; v &gt;= Tn_obs).length;</span></span>
+<span id="cb1-584"><a href="#cb1-584" aria-hidden="true" tabindex="-1"></a><span class="in">    const pv   = (nGeq + 1) / (Tn_perms.length + 1);</span></span>
+<span id="cb1-585"><a href="#cb1-585" aria-hidden="true" tabindex="-1"></a><span class="in">    html = `The dashed blue line marks the observed statistic</span></span>
+<span id="cb1-586"><a href="#cb1-586" aria-hidden="true" tabindex="-1"></a><span class="in">            &lt;strong&gt;T&lt;sub&gt;n&lt;/sub&gt; = ${Tn_obs.toFixed(3)}&lt;/strong&gt;.</span></span>
+<span id="cb1-587"><a href="#cb1-587" aria-hidden="true" tabindex="-1"></a><span class="in">            The permutation p-value counts how many auxiliary statistics are at least as extreme:</span></span>
+<span id="cb1-588"><a href="#cb1-588" aria-hidden="true" tabindex="-1"></a><span class="in">            &lt;strong&gt;p\u0302 = (\u2060#{T&lt;sub&gt;n&lt;/sub&gt;&lt;sup&gt;(b)&lt;/sup&gt; \u2265 T&lt;sub&gt;n&lt;/sub&gt;} + 1\u2060)\u202F/\u202F(B + 1)</span></span>
+<span id="cb1-589"><a href="#cb1-589" aria-hidden="true" tabindex="-1"></a><span class="in">            = (${nGeq}\u202F+\u202F1)\u202F/\u202F(4\u202F+\u202F1) = ${pv.toFixed(3)}&lt;/strong&gt;.</span></span>
+<span id="cb1-590"><a href="#cb1-590" aria-hidden="true" tabindex="-1"></a><span class="in">            The \u201C+1\u201D in numerator and denominator includes the observed statistic itself,</span></span>
+<span id="cb1-591"><a href="#cb1-591" aria-hidden="true" tabindex="-1"></a><span class="in">            ensuring p\u0302 is never exactly zero. In practice B should be large (e.g.\u202FB\u202F=\u202F999)</span></span>
+<span id="cb1-592"><a href="#cb1-592" aria-hidden="true" tabindex="-1"></a><span class="in">            so that this approximation is accurate.`;</span></span>
+<span id="cb1-593"><a href="#cb1-593" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb1-594"><a href="#cb1-594" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-595"><a href="#cb1-595" aria-hidden="true" tabindex="-1"></a><span class="in">  if (html) { bannerEl.innerHTML = html; bannerEl.classList.add("visible"); }</span></span>
+<span id="cb1-596"><a href="#cb1-596" aria-hidden="true" tabindex="-1"></a><span class="in">  else         bannerEl.classList.remove("visible");</span></span>
+<span id="cb1-597"><a href="#cb1-597" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-598"><a href="#cb1-598" aria-hidden="true" tabindex="-1"></a><span class="in">  // Buttons</span></span>
+<span id="cb1-599"><a href="#cb1-599" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById("btn-prev").disabled = (step === 0);</span></span>
+<span id="cb1-600"><a href="#cb1-600" aria-hidden="true" tabindex="-1"></a><span class="in">  document.getElementById("btn-next").disabled = (step === TOTAL_STEPS - 1);</span></span>
+<span id="cb1-601"><a href="#cb1-601" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb1-602"><a href="#cb1-602" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-603"><a href="#cb1-603" aria-hidden="true" tabindex="-1"></a><span class="in">function pwNext()  { if (step &lt; TOTAL_STEPS-1) { step++; render(); } }</span></span>
+<span id="cb1-604"><a href="#cb1-604" aria-hidden="true" tabindex="-1"></a><span class="in">function pwPrev()  { if (step &gt; 0)             { step--; render(); } }</span></span>
+<span id="cb1-605"><a href="#cb1-605" aria-hidden="true" tabindex="-1"></a><span class="in">function pwReset() { step = 0; render(); }</span></span>
+<span id="cb1-606"><a href="#cb1-606" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-607"><a href="#cb1-607" aria-hidden="true" tabindex="-1"></a><span class="in">render();</span></span>
+<span id="cb1-608"><a href="#cb1-608" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/script&gt;</span></span>
+<span id="cb1-609"><a href="#cb1-609" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/body&gt;</span></span>
+<span id="cb1-610"><a href="#cb1-610" aria-hidden="true" tabindex="-1"></a><span class="in">&lt;/html&gt;</span></span>
+<span id="cb1-611"><a href="#cb1-611" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb1-612"><a href="#cb1-612" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-613"><a href="#cb1-613" aria-hidden="true" tabindex="-1"></a><span class="fu">## What the Widget Illustrates</span></span>
+<span id="cb1-614"><a href="#cb1-614" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-615"><a href="#cb1-615" aria-hidden="true" tabindex="-1"></a>The five steps map directly onto the computational procedure summarised</span>
+<span id="cb1-616"><a href="#cb1-616" aria-hidden="true" tabindex="-1"></a>in @sec-permtest:</span>
+<span id="cb1-617"><a href="#cb1-617" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-618"><a href="#cb1-618" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Widget step <span class="pp">|</span> Formal object <span class="pp">|</span></span>
+<span id="cb1-619"><a href="#cb1-619" aria-hidden="true" tabindex="-1"></a><span class="pp">|-------------|---------------|</span></span>
+<span id="cb1-620"><a href="#cb1-620" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Original samples <span class="pp">|</span> $W^{(N)} = (X_1,\ldots,X_m,Y_1,\ldots,Y_n)$ <span class="pp">|</span></span>
+<span id="cb1-621"><a href="#cb1-621" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Observed $T_n$ <span class="pp">|</span> $T_n(W^{(N)}) = \bar{X} - \bar{Y}$ <span class="pp">|</span></span>
+<span id="cb1-622"><a href="#cb1-622" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Permutation $b$ <span class="pp">|</span> $g_b W^{(N)}$, new split into groups of size $m$ and $n$ <span class="pp">|</span></span>
+<span id="cb1-623"><a href="#cb1-623" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Permuted statistic <span class="pp">|</span> $T_n(g_b W^{(N)})$ <span class="pp">|</span></span>
+<span id="cb1-624"><a href="#cb1-624" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Null distribution <span class="pp">|</span> $<span class="sc">\{</span>T_n(g_b W^{(N)})<span class="sc">\}</span>_{b=1}^{B}$, with $\hat{p}$ reported <span class="pp">|</span></span>
+<span id="cb1-625"><a href="#cb1-625" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-626"><a href="#cb1-626" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb1-627"><a href="#cb1-627" aria-hidden="true" tabindex="-1"></a><span class="fu">## Remark on the choice of $T_n$</span></span>
+<span id="cb1-628"><a href="#cb1-628" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-629"><a href="#cb1-629" aria-hidden="true" tabindex="-1"></a>The widget uses $T_n = \bar{X} - \bar{Y}$ for expository clarity.</span>
+<span id="cb1-630"><a href="#cb1-630" aria-hidden="true" tabindex="-1"></a>The permutation procedure — pool, reshuffle, recompute, repeat — is</span>
+<span id="cb1-631"><a href="#cb1-631" aria-hidden="true" tabindex="-1"></a>**identical** regardless of the test statistic. In @sec-permtest and</span>
+<span id="cb1-632"><a href="#cb1-632" aria-hidden="true" tabindex="-1"></a>@sec-simulation we use the studentized variance-ratio statistic</span>
+<span id="cb1-633"><a href="#cb1-633" aria-hidden="true" tabindex="-1"></a><span class="in">`Tn_stat_variance()`</span>, which is better suited to testing</span>
+<span id="cb1-634"><a href="#cb1-634" aria-hidden="true" tabindex="-1"></a>$H_0 : \mathrm{Var}<span class="co">[</span><span class="ot">Y(1)</span><span class="co">]</span> = \mathrm{Var}<span class="co">[</span><span class="ot">Y(0)</span><span class="co">]</span>$.</span>
+<span id="cb1-635"><a href="#cb1-635" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-636"><a href="#cb1-636" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-637"><a href="#cb1-637" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb1-638"><a href="#cb1-638" aria-hidden="true" tabindex="-1"></a><span class="fu">## Key Takeaway</span></span>
+<span id="cb1-639"><a href="#cb1-639" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-640"><a href="#cb1-640" aria-hidden="true" tabindex="-1"></a>Under $H_0 : P_X = P_Y$, permuting the labels does not change the</span>
+<span id="cb1-641"><a href="#cb1-641" aria-hidden="true" tabindex="-1"></a>distribution of $W^{(N)}$. Consequently, $T_n(W^{(N)})$ and</span>
+<span id="cb1-642"><a href="#cb1-642" aria-hidden="true" tabindex="-1"></a>$T_n(g_b W^{(N)})$ are identically distributed, and the empirical</span>
+<span id="cb1-643"><a href="#cb1-643" aria-hidden="true" tabindex="-1"></a>quantiles of $<span class="sc">\{</span>T_n^{(b)}<span class="sc">\}</span>_{b=1}^{B}$ provide a valid</span>
+<span id="cb1-644"><a href="#cb1-644" aria-hidden="true" tabindex="-1"></a>(finite-sample exact) null distribution.</span>
+<span id="cb1-645"><a href="#cb1-645" aria-hidden="true" tabindex="-1"></a>:::</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

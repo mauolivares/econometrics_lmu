@@ -184,25 +184,19 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part1_setup.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Setup and Data Generation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Setup</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./part2_permtest.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Permutation Test</span></span></a>
+  <a href="./part2_signtest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Sign-Change Permutation Test</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./part3_simulation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Monte Carlo: Permutation vs Asymptotic Test</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./part4_visual.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Permutation Test: A Visual Walk-Through</span></span></a>
+  <a href="./part3_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Finite-Sample Comparison</span></span></a>
   </div>
 </li>
     </ul>
@@ -217,10 +211,9 @@ window.Quarto = {
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
   <ul class="collapse">
-  <li><a href="#birds-eye-view" id="toc-birds-eye-view" class="nav-link" data-scroll-target="#birds-eye-view"><span class="header-section-number">0.1</span> Bird’s Eye View</a></li>
-  <li><a href="#advantages-of-permutation-tests" id="toc-advantages-of-permutation-tests" class="nav-link" data-scroll-target="#advantages-of-permutation-tests"><span class="header-section-number">0.2</span> Advantages of Permutation Tests</a></li>
-  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation"><span class="header-section-number">0.3</span> Notation</a></li>
-  <li><a href="#structure-of-these-notes" id="toc-structure-of-these-notes" class="nav-link" data-scroll-target="#structure-of-these-notes"><span class="header-section-number">0.4</span> Structure of These Notes</a></li>
+  <li><a href="#the-central-question" id="toc-the-central-question" class="nav-link" data-scroll-target="#the-central-question"><span class="header-section-number">0.1</span> The Central Question</a></li>
+  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation"><span class="header-section-number">0.2</span> Notation</a></li>
+  <li><a href="#structure-of-these-notes" id="toc-structure-of-these-notes" class="nav-link" data-scroll-target="#structure-of-these-notes"><span class="header-section-number">0.3</span> Structure of These Notes</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -231,7 +224,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">Applied Causal Analysis</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
-<p class="subtitle lead">Intro to Permutation Tests</p>
+<p class="subtitle lead">Asymptotic vs.&nbsp;Permutation Inference</p>
 </div>
 
 
@@ -262,29 +255,29 @@ window.Quarto = {
 
 <section id="overview" class="level1 unnumbered">
 <h1 class="unnumbered">Overview</h1>
-<p>These notes accompany the <strong>Applied Causal Analysis</strong> course at LMU Munich (Chair of Statistics and Econometrics). They introduce permutation tests from first principles, with a focus on their role in causal inference.</p>
-<section id="birds-eye-view" class="level2" data-number="0.1">
-<h2 data-number="0.1" class="anchored" data-anchor-id="birds-eye-view"><span class="header-section-number">0.1</span> Bird’s Eye View</h2>
-<p>A classical hypothesis test requires four ingredients:</p>
-<ol type="1">
-<li><p>A <strong>hypothesis</strong> — a population statement. For example, <span class="math display">\[H_0 : \beta = 0 \quad \text{vs} \quad H_1 : \beta \neq 0.\]</span></p></li>
-<li><p>A <strong>test statistic</strong> to evaluate <span class="math inline">\(H_0\)</span>, denoted <span class="math inline">\(T_n\)</span>.</p></li>
-<li><p>An <strong>approximation to the sampling distribution</strong> of <span class="math inline">\(T_n\)</span> (e.g., the standard normal distribution).</p></li>
-<li><p>A <strong>decision rule</strong> at a significance level <span class="math inline">\(\alpha \in (0,1)\)</span>. For example, the asymptotic test rejects whenever <span class="math display">\[\phi_n^{\text{asy}} = \mathbf{1}\{|T_n| &gt; z_{1 - \alpha/2}\}.\]</span></p></li>
-</ol>
-<p>In these notes we replace step 3 with a data-driven critical value <span class="math inline">\(\hat{c}_n(1 - \alpha/2)\)</span>, and use the decision rule <span class="math display">\[\phi_n^{\text{perm}} = \mathbf{1}\left\{|T_n| &gt; \hat{c}_n\!\left(1 - \tfrac{\alpha}{2}\right)\right\},\]</span> which enjoys additional finite-sample guarantees relative to the asymptotic test under some additional assumptions.</p>
+<p>In this note we investigate the asymptotic behavior of the permutation test in the one-sample inference problem when we want to carry out inference for the mean of a random variable. We will consider sign changes as the group transformation and study the behavior of the permutation test and its relationship to the normal approximation when the sample size grows to infinity. We will pay particular attention to what happens when the <strong>randomization hypothesis fails</strong>.</p>
+<section id="the-central-question" class="level2" data-number="0.1">
+<h2 data-number="0.1" class="anchored" data-anchor-id="the-central-question"><span class="header-section-number">0.1</span> The Central Question</h2>
+<p>In <a href="part2_signtest.html" class="quarto-xref"><span>Chapter 4</span></a> we construct a permutation test for the one-sample hypothesis</p>
+<p><span class="math display">\[H_0 : \mathbb{E}[W] = 0\]</span></p>
+<p>using <strong>sign changes</strong> as the group of transformations. Recall that the randomization hypothesis is the key condition that guarantees finite-sample exactness of the permutation test. It will require that the distribution of <span class="math inline">\(W\)</span> to be <strong>symmetric about zero</strong>. When the DGP is skewed, this condition fails, and the permutation test is no longer exact. It remains, however, asymptotically valid if we modify the test statistic as we showed in class.</p>
+<p>This raises a natural question: if both the sign-change permutation test and the standard normal approximation are only asymptotically valid under a skewed DGP, <strong>how do their finite-sample null distributions compare?</strong> <a href="part3_comparison.html" class="quarto-xref"><span>Chapter 5</span></a> answers this question by simulating both distributions under a re-centred exponential DGP, which satisfies <span class="math inline">\(\mathbb{E}[W] = 0\)</span> but is right-skewed.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Key Message
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The sign-change permutation test is <strong>exact</strong> if and only if the distribution of <span class="math inline">\(W\)</span> is symmetric about zero. Under a skewed DGP, both the permutation test and the normal approximation are only <strong>asymptotically</strong> valid. The permutation test is not a free lunch: its finite-sample guarantees rest on the randomization hypothesis, which is a substantive assumption about the DGP.</p>
+</div>
+</div>
 </section>
-<section id="advantages-of-permutation-tests" class="level2" data-number="0.2">
-<h2 data-number="0.2" class="anchored" data-anchor-id="advantages-of-permutation-tests"><span class="header-section-number">0.2</span> Advantages of Permutation Tests</h2>
-<p>Permutation tests have a long history dating back to Fisher (1935). From a modern causal inference perspective they offer three key advantages:</p>
-<ol type="1">
-<li><p>They remain <strong>agnostic about the data-generating process</strong> (DGP).</p></li>
-<li><p>Their <strong>construction is the same regardless of the choice</strong> of <span class="math inline">\(T_n\)</span>.</p></li>
-<li><p>They yield <strong>exact finite-sample Type I error control</strong> under the randomization hypothesis (see <a href="part2_permtest.html#sec-exactness" class="quarto-xref"><span>Section 4.8</span></a>).</p></li>
-</ol>
-</section>
-<section id="notation" class="level2" data-number="0.3">
-<h2 data-number="0.3" class="anchored" data-anchor-id="notation"><span class="header-section-number">0.3</span> Notation</h2>
+<section id="notation" class="level2" data-number="0.2">
+<h2 data-number="0.2" class="anchored" data-anchor-id="notation"><span class="header-section-number">0.2</span> Notation</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 47%">
@@ -310,20 +303,20 @@ window.Quarto = {
 <td>Null family of distributions</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(\mathcal{G}_n\)</span></td>
-<td>Group of transformations</td>
+<td><span class="math inline">\(\mathbf{G}_n\)</span></td>
+<td>Group of sign-change transformations</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(M = \#\mathcal{G}_n\)</span></td>
-<td>Cardinality of the group</td>
+<td><span class="math inline">\(M = \#\mathbf{G}_n = 2^n\)</span></td>
+<td>Cardinality of the sign-change group</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(T_n\)</span></td>
-<td>Test statistic</td>
+<td>Studentised test statistic</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(T_n^{(k)}(w)\)</span></td>
-<td><span class="math inline">\(k\)</span>-th order statistic of the permutation distribution</td>
+<td><span class="math inline">\(k\)</span>-th order statistic of the randomization distribution</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\alpha\)</span></td>
@@ -331,13 +324,21 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(B\)</span></td>
-<td>Number of Monte Carlo draws (when <span class="math inline">\(M\)</span> is large)</td>
+<td>Number of Monte Carlo draws</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{c}_n(1-\alpha)\)</span></td>
+<td>Permutation critical value</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(z_{1-\alpha}\)</span></td>
+<td><span class="math inline">\((1-\alpha)\)</span>-quantile of <span class="math inline">\(\mathcal{N}(0,1)\)</span></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="structure-of-these-notes" class="level2" data-number="0.4">
-<h2 data-number="0.4" class="anchored" data-anchor-id="structure-of-these-notes"><span class="header-section-number">0.4</span> Structure of These Notes</h2>
+<section id="structure-of-these-notes" class="level2" data-number="0.3">
+<h2 data-number="0.3" class="anchored" data-anchor-id="structure-of-these-notes"><span class="header-section-number">0.3</span> Structure of These Notes</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -352,15 +353,15 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><a href="part1_setup.html" class="quarto-xref"><span>Chapter 3</span></a></td>
-<td>Environment setup and data generation</td>
+<td>Environment setup; the one-sample testing problem</td>
 </tr>
 <tr class="even">
-<td><a href="part2_permtest.html" class="quarto-xref"><span>Chapter 4</span></a></td>
-<td>The permutation test: theory and implementation</td>
+<td><a href="part2_signtest.html" class="quarto-xref"><span>Chapter 4</span></a></td>
+<td>The sign-change group; the randomization hypothesis and the symmetry condition; implementation</td>
 </tr>
 <tr class="odd">
-<td><a href="part3_simulation.html" class="quarto-xref"><span>Chapter 5</span></a></td>
-<td>Monte Carlo comparison: permutation vs asymptotic test</td>
+<td><a href="part3_comparison.html" class="quarto-xref"><span>Chapter 5</span></a></td>
+<td>Finite-sample comparison of the randomization and normal null distributions under a skewed DGP</td>
 </tr>
 </tbody>
 </table>
@@ -828,8 +829,8 @@ window.Quarto = {
   <div class="nav-page nav-page-previous">
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./part1_setup.html" class="pagination-link" aria-label="Setup and Data Generation">
-        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Setup and Data Generation</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./part1_setup.html" class="pagination-link" aria-label="Setup">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Setup</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
@@ -839,65 +840,68 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Overview {.unnumbered}</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>These notes accompany the **Applied Causal Analysis** course at LMU Munich</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>(Chair of Statistics and Econometrics). They introduce permutation tests</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>from first principles, with a focus on their role in causal inference.</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">## Bird's Eye View</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>A classical hypothesis test requires four ingredients:</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>A **hypothesis** — a population statement. For example,</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>   $$H_0 : \beta = 0 \quad \text{vs} \quad H_1 : \beta \neq 0.$$</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>A **test statistic** to evaluate $H_0$, denoted $T_n$.</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>An **approximation to the sampling distribution** of $T_n$ (e.g., the</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>   standard normal distribution).</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>A **decision rule** at a significance level $\alpha \in (0,1)$. For</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>   example, the asymptotic test rejects whenever</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>   $$\phi_n^{\text{asy}} = \mathbf{1}\{|T_n| &gt; z_{1 - \alpha/2}<span class="sc">\}</span>.$$</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>In these notes we replace step 3 with a data-driven critical value</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>$\hat{c}_n(1 - \alpha/2)$, and use the decision rule</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>$$\phi_n^{\text{perm}} = \mathbf{1}\left<span class="sc">\{</span>|T_n| &gt; \hat{c}_n<span class="sc">\!</span>\left(1 - \tfrac{\alpha}{2}\right)\right<span class="sc">\}</span>,$$</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>which enjoys additional finite-sample guarantees relative to the asymptotic</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>test under some additional assumptions.</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Advantages of Permutation Tests</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>In this note we investigate the asymptotic behavior of the permutation</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>test in the one-sample inference problem when we want to carry out inference</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>for the mean of a random variable. We will consider sign changes as the group</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>transformation and study the behavior of the permutation test and its relationship </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>to the normal approximation when the sample size grows to infinity. We will pay</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>particular attention to what happens when the **randomization hypothesis fails**.</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Central Question</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>In @sec-signtest we construct a permutation test for the one-sample</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>hypothesis</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>$$H_0 : \mathbb{E}<span class="co">[</span><span class="ot">W</span><span class="co">]</span> = 0$$</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>using **sign changes** as the group of transformations. Recall that the </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>randomization hypothesis is the key condition that guarantees finite-sample exactness</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>of the permutation test. It will require that the distribution of $W$ to be</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a> **symmetric about zero**. When the DGP is skewed, this condition fails, and the permutation </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>test is no longer exact. It remains, however, asymptotically valid if we modify the test statistic </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>as we showed in class.</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>This raises a natural question: if both the sign-change permutation test</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>and the standard normal approximation are only asymptotically valid under a</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>skewed DGP, **how do their finite-sample null distributions compare?**</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>@sec-comparison answers this question by simulating both distributions</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>under a re-centred exponential DGP, which satisfies $\mathbb{E}<span class="co">[</span><span class="ot">W</span><span class="co">]</span> = 0$</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>but is right-skewed.</span>
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>Permutation tests have a long history dating back to Fisher (1935). From a</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>modern causal inference perspective they offer three key advantages:</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="fu">## Key Message</span></span>
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>They remain **agnostic about the data-generating process** (DGP).</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Their **construction is the same regardless of the choice** of $T_n$.</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>They yield **exact finite-sample Type I error control** under the</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>   randomization hypothesis (see @sec-exactness).</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notation</span></span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Symbol <span class="pp">|</span> Meaning <span class="pp">|</span></span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="pp">|--------|---------|</span></span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $W^{(n)} = (W_1, \ldots, W_n)$ <span class="pp">|</span> Observed data <span class="pp">|</span></span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $P_n$ <span class="pp">|</span> Unknown DGP generating $W^{(n)}$ <span class="pp">|</span></span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\Omega_0 \subset \Omega$ <span class="pp">|</span> Null family of distributions <span class="pp">|</span></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\mathcal{G}_n$ <span class="pp">|</span> Group of transformations <span class="pp">|</span></span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $M = <span class="sc">\#</span>\mathcal{G}_n$ <span class="pp">|</span> Cardinality of the group <span class="pp">|</span></span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $T_n$ <span class="pp">|</span> Test statistic <span class="pp">|</span></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $T_n^{(k)}(w)$ <span class="pp">|</span> $k$-th order statistic of the permutation distribution <span class="pp">|</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\alpha$ <span class="pp">|</span> Nominal significance level <span class="pp">|</span></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $B$ <span class="pp">|</span> Number of Monte Carlo draws (when $M$ is large) <span class="pp">|</span></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## Structure of These Notes</span></span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Chapter <span class="pp">|</span> Content <span class="pp">|</span></span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------|---------|</span></span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> @sec-setup <span class="pp">|</span> Environment setup and data generation <span class="pp">|</span></span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> @sec-permtest <span class="pp">|</span> The permutation test: theory and implementation <span class="pp">|</span></span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> @sec-simulation <span class="pp">|</span> Monte Carlo comparison: permutation vs asymptotic test <span class="pp">|</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>The sign-change permutation test is **exact** if and only if the</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>distribution of $W$ is symmetric about zero. Under a skewed DGP, both</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>the permutation test and the normal approximation are only</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>**asymptotically** valid. The permutation test is not a free lunch:</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>its finite-sample guarantees rest on the randomization hypothesis, which</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>is a substantive assumption about the DGP.</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## Notation</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Symbol <span class="pp">|</span> Meaning <span class="pp">|</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="pp">|--------|---------|</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $W^{(n)} = (W_1, \ldots, W_n)$ <span class="pp">|</span> Observed data <span class="pp">|</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $P_n$ <span class="pp">|</span> Unknown DGP generating $W^{(n)}$ <span class="pp">|</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\Omega_0 \subset \Omega$ <span class="pp">|</span> Null family of distributions <span class="pp">|</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\mathbf{G}_n$ <span class="pp">|</span> Group of sign-change transformations <span class="pp">|</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $M = <span class="sc">\#</span>\mathbf{G}_n = 2^n$ <span class="pp">|</span> Cardinality of the sign-change group <span class="pp">|</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $T_n$ <span class="pp">|</span> Studentised test statistic <span class="pp">|</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $T_n^{(k)}(w)$ <span class="pp">|</span> $k$-th order statistic of the randomization distribution <span class="pp">|</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\alpha$ <span class="pp">|</span> Nominal significance level <span class="pp">|</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $B$ <span class="pp">|</span> Number of Monte Carlo draws <span class="pp">|</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $\hat{c}_n(1-\alpha)$ <span class="pp">|</span> Permutation critical value <span class="pp">|</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> $z_{1-\alpha}$ <span class="pp">|</span> $(1-\alpha)$-quantile of $\mathcal{N}(0,1)$ <span class="pp">|</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">## Structure of These Notes</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Chapter <span class="pp">|</span> Content <span class="pp">|</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------|---------|</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> @sec-setup <span class="pp">|</span> Environment setup; the one-sample testing problem <span class="pp">|</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> @sec-signtest <span class="pp">|</span> The sign-change group; the randomization hypothesis and the symmetry condition; implementation <span class="pp">|</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> @sec-comparison <span class="pp">|</span> Finite-sample comparison of the randomization and normal null distributions under a skewed DGP <span class="pp">|</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
