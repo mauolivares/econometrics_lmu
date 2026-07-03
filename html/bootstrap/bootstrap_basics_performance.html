@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mauricio Olivares">
+<meta name="dcterms.date" content="2026-06-30">
+
+<title>Additional Resource: The Mechanics of Efron’s Bootstrap</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="bootstrap_basics_performance_files/libs/clipboard/clipboard.min.js"></script>
+<script src="bootstrap_basics_performance_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="bootstrap_basics_performance_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="bootstrap_basics_performance_files/libs/quarto-html/popper.min.js"></script>
+<script src="bootstrap_basics_performance_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="bootstrap_basics_performance_files/libs/quarto-html/anchor.min.js"></script>
+<link href="bootstrap_basics_performance_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="bootstrap_basics_performance_files/libs/quarto-html/quarto-syntax-highlighting-acf12a64177840b8d86f2d4f01b2e9fb.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="bootstrap_basics_performance_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="bootstrap_basics_performance_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="bootstrap_basics_performance_files/libs/bootstrap/bootstrap-f93d581b41f20e53031fef139986cb6a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#purpose-of-this-note" id="toc-purpose-of-this-note" class="nav-link active" data-scroll-target="#purpose-of-this-note"><span class="header-section-number">0.1</span> Purpose of This Note</a></li>
+  <li><a href="#part-1-the-mechanics-of-efrons-nonparametric-bootstrap" id="toc-part-1-the-mechanics-of-efrons-nonparametric-bootstrap" class="nav-link" data-scroll-target="#part-1-the-mechanics-of-efrons-nonparametric-bootstrap"><span class="header-section-number">1</span> Part 1 — The Mechanics of Efron’s (Nonparametric) Bootstrap</a>
+  <ul class="collapse">
+  <li><a href="#step-zero-what-is-hat-p_n" id="toc-step-zero-what-is-hat-p_n" class="nav-link" data-scroll-target="#step-zero-what-is-hat-p_n"><span class="header-section-number">1.1</span> Step Zero: What Is <span class="math inline">\(\hat P_n\)</span>?</a></li>
+  <li><a href="#exact-enumeration-for-n2-slides-1213" id="toc-exact-enumeration-for-n2-slides-1213" class="nav-link" data-scroll-target="#exact-enumeration-for-n2-slides-1213"><span class="header-section-number">1.2</span> Exact Enumeration for <span class="math inline">\(n=2\)</span> (Slides 12–13)</a></li>
+  <li><a href="#the-monte-carlo-approximation-slowly-slides-1519" id="toc-the-monte-carlo-approximation-slowly-slides-1519" class="nav-link" data-scroll-target="#the-monte-carlo-approximation-slowly-slides-1519"><span class="header-section-number">1.3</span> The Monte Carlo Approximation, Slowly (Slides 15–19)</a>
+  <ul class="collapse">
+  <li><a href="#visualizing-j_nbthat-p_n" id="toc-visualizing-j_nbthat-p_n" class="nav-link" data-scroll-target="#visualizing-j_nbthat-p_n"><span class="header-section-number">1.3.1</span> Visualizing <span class="math inline">\(J_{n,B}^*(t,\hat P_n)\)</span></a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#part-2-a-simplified-parametric-bootstrap" id="toc-part-2-a-simplified-parametric-bootstrap" class="nav-link" data-scroll-target="#part-2-a-simplified-parametric-bootstrap"><span class="header-section-number">2</span> Part 2 — A Simplified Parametric Bootstrap</a></li>
+  <li><a href="#part-3-measures-of-performance-slide-29" id="toc-part-3-measures-of-performance-slide-29" class="nav-link" data-scroll-target="#part-3-measures-of-performance-slide-29"><span class="header-section-number">3</span> Part 3 — Measures of Performance (Slide 29)</a>
+  <ul class="collapse">
+  <li><a href="#bootstrapping-the-bias-slides-3032" id="toc-bootstrapping-the-bias-slides-3032" class="nav-link" data-scroll-target="#bootstrapping-the-bias-slides-3032"><span class="header-section-number">3.1</span> Bootstrapping the Bias (Slides 30–32)</a></li>
+  <li><a href="#bootstrapping-the-variance-slides-3334" id="toc-bootstrapping-the-variance-slides-3334" class="nav-link" data-scroll-target="#bootstrapping-the-variance-slides-3334"><span class="header-section-number">3.2</span> Bootstrapping the Variance (Slides 33–34)</a></li>
+  <li><a href="#connecting-mean-bias-and-variance-to-the-moments-of-j_nthat-p_n" id="toc-connecting-mean-bias-and-variance-to-the-moments-of-j_nthat-p_n" class="nav-link" data-scroll-target="#connecting-mean-bias-and-variance-to-the-moments-of-j_nthat-p_n"><span class="header-section-number">3.3</span> Connecting Mean, Bias, and Variance to the Moments of <span class="math inline">\(J_n^*(t,\hat P_n)\)</span></a></li>
+  </ul></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">4</span> Exercises</a></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap"><span class="header-section-number">5</span> Recap</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Additional Resource: The Mechanics of Efron’s Bootstrap</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+<p class="subtitle lead">From Exact Enumeration to Monte Carlo, Parametric Bootstrap, and Measures of Performance</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Mauricio Olivares </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 30, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="purpose-of-this-note" class="level2" data-number="0.1">
+<h2 data-number="0.1" class="anchored" data-anchor-id="purpose-of-this-note"><span class="header-section-number">0.1</span> Purpose of This Note</h2>
+<p>This note walks through the bootstrap <em>mechanically</em>, step by step, using the same notation as Lecture 13. We start as slowly as possible: with exact enumeration for <span class="math inline">\(n=2\)</span>, exactly as on <strong>Slides 12–13</strong>. We then build up to the Monte Carlo approximation (<strong>Slides 15–19</strong>), move to a simplified parametric bootstrap example (<strong>Slides 21–22</strong>), and close with an entire section on measures of performance — bias and variance as moments of the bootstrap distribution (<strong>Slides 29–35</strong>).</p>
+<p>Throughout, <span class="math inline">\(W^{(n)} = \{X_1,\dots,X_n\}\)</span> is an i.i.d. sample from <span class="math inline">\(P\)</span>, <span class="math inline">\(\hat P_n\)</span> is the empirical distribution of the data, <span class="math inline">\(\theta(P)\)</span> is the parameter of interest, <span class="math inline">\(\hat\theta_n = \theta(\hat P_n)\)</span> is its plug-in estimator, and <span class="math display">\[
+J_n(t,P) = \mathbb{P}_P\big[\sqrt n\{\hat\theta_n - \theta(P)\} \le t\big]
+\]</span> is the sampling distribution we ultimately want to approximate.</p>
+</section>
+<section id="part-1-the-mechanics-of-efrons-nonparametric-bootstrap" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Part 1 — The Mechanics of Efron’s (Nonparametric) Bootstrap</h1>
+<section id="step-zero-what-is-hat-p_n" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="step-zero-what-is-hat-p_n"><span class="header-section-number">1.1</span> Step Zero: What Is <span class="math inline">\(\hat P_n\)</span>?</h2>
+<p>Recall from <strong>Slide 6</strong> that the empirical bootstrap estimates <span class="math inline">\(P\)</span> by the empirical CDF, <span class="math display">\[
+\hat P_n(t) = \frac{1}{n}\sum_{i=1}^n \mathbb 1\{X_i \le t\}.
+\]</span> Concretely, <span class="math inline">\(\hat P_n\)</span> places probability <span class="math inline">\(1/n\)</span> on each observed value <span class="math inline">\(x_1,\dots,x_n\)</span> (<strong>Slide 10</strong>). Let’s see this directly with a tiny data set.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>x_tiny <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">9</span>)   <span class="co"># a toy sample, n = 3</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n_tiny <span class="ot">&lt;-</span> <span class="fu">length</span>(x_tiny)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># P_hat_n puts mass 1/n on each observed value</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">value =</span> x_tiny, <span class="at">prob =</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> n_tiny, n_tiny))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  value      prob
+1     2 0.3333333
+2     5 0.3333333
+3     9 0.3333333</code></pre>
+</div>
+</div>
+<p>A hypothetical sample <span class="math inline">\(X_1^*,\dots,X_n^*\)</span> from <span class="math inline">\(\hat P_n\)</span> is therefore nothing more than drawing, independently and <strong>with replacement</strong>, from these <span class="math inline">\(n\)</span> equally-likely values.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One single bootstrap sample from P_hat_n</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(x_tiny, <span class="at">size =</span> n_tiny, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 9 9 9</code></pre>
+</div>
+</div>
+<p>Run the chunk above a few times in your console: each call gives a different hypothetical sample <span class="math inline">\((X_1^*,\dots,X_n^*)\)</span>, exactly as described on <strong>Slide 10</strong>.</p>
+</section>
+<section id="exact-enumeration-for-n2-slides-1213" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="exact-enumeration-for-n2-slides-1213"><span class="header-section-number">1.2</span> Exact Enumeration for <span class="math inline">\(n=2\)</span> (Slides 12–13)</h2>
+<p>Before resorting to Monte Carlo, let’s reproduce the <strong>exact</strong> calculation from lecture by hand, for <span class="math inline">\(\theta(P) = \mathbb E[X]\)</span> and <span class="math inline">\(n=2\)</span>. Let the ordered values be <span class="math inline">\(X_{(1)} = a &lt; b = X_{(2)}\)</span>. There are exactly <span class="math inline">\(2^2 = 4\)</span> equally likely bootstrap samples <span class="math inline">\((X_1^*,X_2^*)\)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="dv">2</span>; b <span class="ot">&lt;-</span> <span class="dv">9</span>   <span class="co"># our two ordered observations</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>theta_hat_n2 <span class="ot">&lt;-</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># All 2^2 = 4 equally likely bootstrap samples (Slide 12)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>boot_samples_n2 <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">X1_star =</span> <span class="fu">c</span>(a, b), <span class="at">X2_star =</span> <span class="fu">c</span>(a, b))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>boot_samples_n2<span class="sc">$</span>theta_star  <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(boot_samples_n2)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>boot_samples_n2<span class="sc">$</span>T_star      <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">2</span>) <span class="sc">*</span> (boot_samples_n2<span class="sc">$</span>theta_star <span class="sc">-</span> theta_hat_n2)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>boot_samples_n2<span class="sc">$</span>probability <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">4</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>boot_samples_n2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  X1_star X2_star theta_star    T_star probability
+1       2       2        2.0 -4.949747        0.25
+2       9       2        5.5  0.000000        0.25
+3       2       9        5.5  0.000000        0.25
+4       9       9        9.0  4.949747        0.25</code></pre>
+</div>
+</div>
+<p>This matches the exact distribution on <strong>Slide 13</strong>: <span class="math inline">\(T_n^*\)</span> takes the value <span class="math inline">\(\sqrt 2 (a-b)/2\)</span> with probability <span class="math inline">\(1/4\)</span>, <span class="math inline">\(0\)</span> with probability <span class="math inline">\(1/2\)</span>, and <span class="math inline">\(\sqrt 2(b-a)/2\)</span> with probability <span class="math inline">\(1/4\)</span>. For <span class="math inline">\(n=2\)</span> this is feasible by hand. As noted on <strong>Slide 14</strong>, once <span class="math inline">\(n\)</span> grows even moderately, exact enumeration requires examining <span class="math inline">\(n^n\)</span> samples — completely infeasible. This is exactly the gap the Monte Carlo approximation is designed to fill.</p>
+</section>
+<section id="the-monte-carlo-approximation-slowly-slides-1519" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="the-monte-carlo-approximation-slowly-slides-1519"><span class="header-section-number">1.3</span> The Monte Carlo Approximation, Slowly (Slides 15–19)</h2>
+<p>The idea (<strong>Slide 15</strong>): instead of enumerating <em>all</em> <span class="math inline">\(n^n\)</span> bootstrap samples, draw <span class="math inline">\(B\)</span> of them at random and use the empirical frequencies of <span class="math inline">\(T_{n,j}^*\)</span> across <span class="math inline">\(j=1,\dots,B\)</span> to approximate <span class="math inline">\(J_n(t,\hat P_n)\)</span>.</p>
+<p>We now implement the three-step algorithm from <strong>Slide 16</strong> explicitly, without hiding any of the bookkeeping, for <span class="math inline">\(\theta(P) = \mathbb E[X]\)</span> and a more realistic sample size.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">30</span>                       <span class="co"># sample size</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">2000</span>                     <span class="co"># number of bootstrap replications</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">rexp</span>(n, <span class="at">rate =</span> <span class="dv">1</span>)        <span class="co"># any distribution P works; here Exponential(1)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="ot">&lt;-</span> <span class="fu">mean</span>(X)          <span class="co"># theta(P_hat_n) = sample mean</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: draw B bootstrap samples from P_hat_n</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">#         (resample the n original observations, with replacement)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>T_star <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B) {</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  X_star <span class="ot">&lt;-</span> <span class="fu">sample</span>(X, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>)   <span class="co"># one hypothetical sample from P_hat_n</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># STEP 2: compute T*_{n,j} = sqrt(n) * { theta*_{n,j} - theta(P_hat_n) }</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  theta_star_j <span class="ot">&lt;-</span> <span class="fu">mean</span>(X_star)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  T_star[j]    <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n) <span class="sc">*</span> (theta_star_j <span class="sc">-</span> theta_hat)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: approximate J_n(t, P_hat_n) by the empirical CDF of T*_{n,1},...,T*_{n,B}</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>J_star_n_B <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="fu">mean</span>(T_star <span class="sc">&lt;=</span> t)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co"># e.g. approximate J_n(0, P_hat_n)</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a><span class="fu">J_star_n_B</span>(<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.541</code></pre>
+</div>
+</div>
+<p>Each <code>T_star[j]</code> above is precisely the quantity <span class="math inline">\(T_{n,j}^*\)</span> defined on <strong>Slide 16</strong>: the bootstrap analogue of <span class="math inline">\(T_n = \sqrt n\{\hat\theta_n -
+\theta(P)\}\)</span>, but built from a bootstrap sample relative to <span class="math inline">\(\hat P_n\)</span> instead of the original sample relative to <span class="math inline">\(P\)</span>.</p>
+<section id="visualizing-j_nbthat-p_n" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="visualizing-j_nbthat-p_n"><span class="header-section-number">1.3.1</span> Visualizing <span class="math inline">\(J_{n,B}^*(t,\hat P_n)\)</span></h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(T_star, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.8</span>, <span class="fl">0.45</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">expression</span>(<span class="fu">paste</span>(<span class="st">"Bootstrap Distribution of  "</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                              T[n]<span class="sc">^</span><span class="st">"*"</span>, <span class="st">" = "</span>, <span class="fu">sqrt</span>(n), <span class="st">"("</span>, theta[n]<span class="sc">^</span><span class="st">"*"</span>, <span class="st">" - "</span>, <span class="fu">hat</span>(theta)[n], <span class="st">")"</span>)),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(T[n]<span class="sc">^</span><span class="st">"*"</span>))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-mc-hist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mc-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="bootstrap_basics_performance_files/figure-html/fig-mc-hist-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mc-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Monte Carlo approximation to the bootstrap sampling distribution <span class="math inline">\(J_n(t,\hat P_n)\)</span>, for the sample mean.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Why does <span class="math inline">\(J^*_{n,B}\)</span> improve as <span class="math inline">\(B\)</span> grows, but not as an estimator of <span class="math inline">\(J_n(t,P)\)</span>?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Reread <strong>Slide 19</strong>, point 1, carefully: <span class="math inline">\(J_n(t,\hat P_n)\)</span> is itself a fixed (if hard to compute) number, once the data are fixed. <span class="math inline">\(J_{n,B}^*(t,\hat
+P_n)\)</span> is a Monte Carlo <em>approximation</em> of that fixed number — increasing <span class="math inline">\(B\)</span> only reduces simulation noise around <span class="math inline">\(J_n(t,\hat P_n)\)</span>, it does <strong>not</strong> bring us closer to <span class="math inline">\(J_n(t,P)\)</span>. Try the experiment below to see this for yourself.</p>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>B_grid <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">500</span>, <span class="dv">1000</span>, <span class="dv">5000</span>, <span class="dv">10000</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>J_at_0 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(B_grid, <span class="cf">function</span>(Bv) {</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  Tv <span class="ot">&lt;-</span> <span class="fu">replicate</span>(Bv, <span class="fu">sqrt</span>(n) <span class="sc">*</span> (<span class="fu">mean</span>(<span class="fu">sample</span>(X, n, <span class="at">replace =</span> <span class="cn">TRUE</span>)) <span class="sc">-</span> theta_hat))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(Tv <span class="sc">&lt;=</span> <span class="dv">0</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(B_grid, J_at_0, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">log =</span> <span class="st">"x"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"B (number of bootstrap replications)"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="fu">expression</span>(J[<span class="st">"n,B"</span>]<span class="sc">^</span><span class="st">"*"</span> <span class="sc">*</span> <span class="fu">group</span>(<span class="st">"("</span>, <span class="fu">list</span>(<span class="dv">0</span>, <span class="fu">hat</span>(P)[n]), <span class="st">")"</span>)),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Monte Carlo Approximation Stabilizing as B Grows"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="bootstrap_basics_performance_files/figure-html/B-sensitivity-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>J*_{n,B}(0, P_hat_n) stabilizes as B grows – it is converging to the fixed number J_n(0, P_hat_n), not to J_n(0,P).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="part-2-a-simplified-parametric-bootstrap" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Part 2 — A Simplified Parametric Bootstrap</h1>
+<p><strong>Slides 21–22</strong> contrast the empirical (nonparametric) bootstrap with the parametric bootstrap: when we are willing to assume a parametric <em>shape</em> for <span class="math inline">\(P\)</span>, we can replace <span class="math inline">\(\hat P_n\)</span> with a fitted parametric distribution <span class="math inline">\(P_{\hat\eta}\)</span> instead of the empirical CDF, and resample from <span class="math inline">\(P_{\hat\eta}\)</span> directly.</p>
+<p>We use the simplest possible scenario: <span class="math inline">\(X_1,\dots,X_n \overset{iid}\sim
+\text{Exponential}(\lambda)\)</span>, and <span class="math inline">\(\theta(P) = \lambda\)</span>, estimated by maximum likelihood, <span class="math inline">\(\hat\lambda_n = 1/\bar X_n\)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>n        <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>lambda0  <span class="ot">&lt;-</span> <span class="dv">2</span>                       <span class="co"># true rate</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>X        <span class="ot">&lt;-</span> <span class="fu">rexp</span>(n, <span class="at">rate =</span> lambda0)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>lambda_hat <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">mean</span>(X)           <span class="co"># MLE of the rate</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>lambda_hat</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.266435</code></pre>
+</div>
+</div>
+<p>Compare the <strong>two</strong> competing bootstrap estimators of <span class="math inline">\(J_n(t,P)\)</span>:</p>
+<ul>
+<li><strong>Nonparametric</strong>: <span class="math inline">\(J_n(t,\hat P_n)\)</span>, resampling pairs <span class="math inline">\(X_i^*\)</span> from the empirical distribution (exactly as in Part 1).</li>
+<li><strong>Parametric</strong>: <span class="math inline">\(J_n(t; \text{Exponential})\)</span>, resampling <span class="math inline">\(X_i^{**} \overset{iid}\sim \text{Exponential}(\hat\lambda_n)\)</span> (<strong>Slide 22</strong>), i.e.&nbsp;simulating brand-new data from the <em>fitted parametric model</em> rather than reshuffling the observed data.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>T_star_nonpar <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>T_star_par    <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B) {</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Nonparametric bootstrap: resample the n observations</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  X_star  <span class="ot">&lt;-</span> <span class="fu">sample</span>(X, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  lambda_star_j <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">mean</span>(X_star)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  T_star_nonpar[j] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n) <span class="sc">*</span> (lambda_star_j <span class="sc">-</span> lambda_hat)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Parametric bootstrap: simulate from Exponential(lambda_hat)</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  X_starstar <span class="ot">&lt;-</span> <span class="fu">rexp</span>(n, <span class="at">rate =</span> lambda_hat)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  lambda_starstar_j <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">mean</span>(X_starstar)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  T_star_par[j] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n) <span class="sc">*</span> (lambda_starstar_j <span class="sc">-</span> lambda_hat)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>xr <span class="ot">&lt;-</span> <span class="fu">range</span>(<span class="fu">c</span>(T_star_nonpar, T_star_par))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>br <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">floor</span>(xr[<span class="dv">1</span>]), <span class="fu">ceiling</span>(xr[<span class="dv">2</span>]), <span class="at">length.out =</span> <span class="dv">40</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>h1 <span class="ot">&lt;-</span> <span class="fu">hist</span>(T_star_nonpar, <span class="at">breaks =</span> br, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>h2 <span class="ot">&lt;-</span> <span class="fu">hist</span>(T_star_par,    <span class="at">breaks =</span> br, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(h1, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Empirical vs. Parametric Bootstrap (Exponential rate)"</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(T[n]<span class="sc">^</span><span class="st">"*"</span>), <span class="at">freq =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">range</span>(<span class="dv">0</span>, h1<span class="sc">$</span>density, h2<span class="sc">$</span>density))</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(h2, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.85</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="fu">c</span>(<span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>), <span class="fu">rgb</span>(<span class="fl">0.85</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>)),</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Nonparametric (empirical) bootstrap"</span>, <span class="st">"Parametric bootstrap (Exponential)"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-par-nonpar" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-par-nonpar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="bootstrap_basics_performance_files/figure-html/fig-par-nonpar-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-par-nonpar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Nonparametric (empirical) vs.&nbsp;parametric bootstrap distributions for the MLE rate of an Exponential(lambda).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Discussion question for class
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The two distributions in the figure above are similar here because the Exponential model is, in fact, correctly specified. <em>What would happen to the parametric bootstrap distribution if the true <span class="math inline">\(P\)</span> were not Exponential, e.g.&nbsp;a Gamma<span class="math inline">\((2, \lambda)\)</span> with the same mean?</em> The empirical bootstrap remains valid (it never assumed a shape for <span class="math inline">\(P\)</span>); the parametric bootstrap, run under the (now wrong) Exponential model, would be approximating <span class="math inline">\(J_n(t,P_{\hat\eta})\)</span> for the wrong parametric family entirely. This is the central trade-off between Sections 1 and 2: the parametric bootstrap can be more efficient when the model is correct, at the cost of inconsistency when it is not.</p>
+</div>
+</div>
+</section>
+<section id="part-3-measures-of-performance-slide-29" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Part 3 — Measures of Performance (Slide 29)</h1>
+<p>We now turn to an entire section on <strong>measures of performance</strong>, following <strong>Slides 29–35</strong> essentially line by line. As stated on <strong>Slide 29</strong>, rather than estimating the <em>entire</em> sampling distribution <span class="math inline">\(J_n(t,P)\)</span>, we may only care about specific features of it:</p>
+<ol type="1">
+<li><strong>Mean</strong>: <span class="math inline">\(\mathbb E[\sqrt n \{\hat\theta_n - \theta(P)\}]\)</span>.</li>
+<li><strong>Bias</strong>: <span class="math inline">\(\text{Bias}_n(P) \equiv \mathbb E[\hat\theta_n - \theta(P)]\)</span>.</li>
+<li><strong>Variance</strong>: <span class="math inline">\(\mathbb V[\sqrt n \{\hat\theta_n - \theta(P)\}]\)</span>.</li>
+</ol>
+<p>The key conceptual point is this: <strong>the bootstrap principle estimates bias by looking at the first moment of <span class="math inline">\(J_n(t,\hat P_n)\)</span>, and variance by looking at its second moment</strong> (<strong>Slide 35</strong>). We did not need new machinery — bias and variance are already there, hiding inside the bootstrap distribution we built in Part 1.</p>
+<p>To make this concrete and to connect back to your own code, we use the <strong>sample variance</strong> as <span class="math inline">\(\hat\theta_n\)</span>, <span class="math display">\[
+\hat\theta_n = \frac{1}{n}\sum_{i=1}^n (X_i - \bar X_n)^2,
+\]</span> which is well known to be <strong>biased</strong> in finite samples (<span class="math inline">\(\mathbb E[\hat\theta_n] = \frac{n-1}{n}\sigma^2 \ne \sigma^2\)</span>), making it a much more interesting object than the sample mean for this section.</p>
+<section id="bootstrapping-the-bias-slides-3032" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="bootstrapping-the-bias-slides-3032"><span class="header-section-number">3.1</span> Bootstrapping the Bias (Slides 30–32)</h2>
+<p>Recall the plug-in logic from <strong>Slide 31</strong>: since <span class="math inline">\(\text{Bias}_n(P) = \mathbb E_P[\hat\theta_n - \theta(P)]\)</span>, the bootstrap analogue simply replaces <span class="math inline">\(P\)</span> by <span class="math inline">\(\hat P_n\)</span>, <span class="math display">\[
+\text{Bias}_n(\hat P_n) = \mathbb E_{\hat P_n}[\theta_n^* - \hat\theta_n].
+\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">25</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>sig2 <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>B   <span class="ot">&lt;-</span> <span class="dv">3000</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fu">sqrt</span>(sig2))</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>theta_hat_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">mean</span>((x <span class="sc">-</span> <span class="fu">mean</span>(x))<span class="sc">^</span><span class="dv">2</span>)   <span class="co"># the (biased) sample variance</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>theta_hat_n   <span class="ot">&lt;-</span> <span class="fu">theta_hat_fun</span>(X)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1-2 (Slide 32): draw B bootstrap samples, compute theta*_{n,j} - theta_hat_n</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>diffs_star <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B) {</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  X_star <span class="ot">&lt;-</span> <span class="fu">sample</span>(X, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  diffs_star[j] <span class="ot">&lt;-</span> <span class="fu">theta_hat_fun</span>(X_star) <span class="sc">-</span> theta_hat_n</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3 (Slide 32): Bias*_{n,B}(P_hat_n) = (1/B) * sum_j { theta*_{n,j} - theta_hat_n }</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>bias_boot <span class="ot">&lt;-</span> <span class="fu">mean</span>(diffs_star)</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Known finite-sample bias for this estimator: -sigma^2 / n</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>bias_true <span class="ot">&lt;-</span> <span class="sc">-</span>sig2 <span class="sc">/</span> n</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Bootstrap bias estimate :"</span>, <span class="fu">round</span>(bias_boot, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Bootstrap bias estimate : -0.0992 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Exact finite-sample bias:"</span>, <span class="fu">round</span>(bias_true, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Exact finite-sample bias: -0.16 </code></pre>
+</div>
+</div>
+<p>Notice exactly what we computed: <code>diffs_star</code> stores <span class="math inline">\(\theta_{n,j}^* - \hat\theta_n\)</span> for each bootstrap replication, and <code>bias_boot</code> is literally the <strong>sample mean of the bootstrap distribution</strong>, recentered at <span class="math inline">\(\hat\theta_n\)</span>. This <em>is</em> the first moment of <span class="math inline">\(J_n(t,\hat
+P_n)\)</span> referenced on <strong>Slide 35</strong>, item 1 — nothing more exotic than that.</p>
+</section>
+<section id="bootstrapping-the-variance-slides-3334" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="bootstrapping-the-variance-slides-3334"><span class="header-section-number">3.2</span> Bootstrapping the Variance (Slides 33–34)</h2>
+<p>Likewise, <strong>Slide 33</strong> defines the bootstrap variance estimator as <span class="math display">\[
+\mathbb E_{\hat P_n}\Big[\,n\,\big(\theta_n^* - \hat\theta_n\big)^2\,\Big],
+\]</span> i.e., the <strong>second moment</strong> of the (recentered, rescaled) bootstrap distribution.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Re-use diffs_star = theta*_{n,j} - theta_hat_n from above</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># n * diffs_star^2 corresponds to {T*_{n,j}}^2 with T*_{n,j} = sqrt(n)(theta*_{n,j} - theta_hat_n)</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>var_boot <span class="ot">&lt;-</span> <span class="fu">mean</span>(n <span class="sc">*</span> diffs_star<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare to a "plug-in" / method-of-moments estimate of the asymptotic variance</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># of the sample variance: Var = mu4 - sigma^4 (population fourth central moment minus sigma^4)</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>var_mom <span class="ot">&lt;-</span> <span class="fu">mean</span>((X <span class="sc">-</span> <span class="fu">mean</span>(X))<span class="sc">^</span><span class="dv">4</span>) <span class="sc">-</span> <span class="fu">mean</span>((X <span class="sc">-</span> <span class="fu">mean</span>(X))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co"># True asymptotic variance under normality: 2*sigma^4</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>var_true <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> sig2<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Bootstrap variance estimate     :"</span>, <span class="fu">round</span>(var_boot, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Bootstrap variance estimate     : 8.753 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Method-of-moments estimate      :"</span>, <span class="fu">round</span>(var_mom, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Method-of-moments estimate      : 8.5 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"True asymptotic variance (2s^4) :"</span>, <span class="fu">round</span>(var_true, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>True asymptotic variance (2s^4) : 32 </code></pre>
+</div>
+</div>
+</section>
+<section id="connecting-mean-bias-and-variance-to-the-moments-of-j_nthat-p_n" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="connecting-mean-bias-and-variance-to-the-moments-of-j_nthat-p_n"><span class="header-section-number">3.3</span> Connecting Mean, Bias, and Variance to the Moments of <span class="math inline">\(J_n^*(t,\hat P_n)\)</span></h2>
+<p>The figure below makes the connection from <strong>Slide 35</strong> completely visual: the same bootstrap histogram you have already built carries <em>both</em> pieces of information simultaneously: its center (relative to zero) is the bias, and its spread is the variance.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(diffs_star, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.3</span>, <span class="fl">0.6</span>, <span class="fl">0.3</span>, <span class="fl">0.45</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">expression</span>(<span class="fu">paste</span>(<span class="st">"Bootstrap Distribution of  "</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                              theta[n]<span class="sc">^</span><span class="st">"*"</span>, <span class="st">" - "</span>, <span class="fu">hat</span>(theta)[n])),</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(theta[n]<span class="sc">^</span><span class="st">"*"</span> <span class="sc">-</span> <span class="fu">hat</span>(theta)[n]))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> bias_boot, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"firebrick"</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>),</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey40"</span>, <span class="st">"firebrick"</span>),</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"zero"</span>, <span class="fu">expression</span>(<span class="fu">paste</span>(<span class="st">"Bias"</span>[<span class="st">"n,B"</span>]<span class="sc">^</span><span class="st">"*"</span>, <span class="st">"("</span>, <span class="fu">hat</span>(P)[n], <span class="st">") = mean of distribution"</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div id="fig-bias-variance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bias-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="bootstrap_basics_performance_files/figure-html/fig-bias-variance-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bias-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: The bootstrap distribution of theta*_n - theta_hat_n: its mean is the bootstrap bias estimate, its second moment (about zero) is the bootstrap variance estimate (after rescaling by n).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Takeaway (mirrors Slide 35 exactly)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Mean / Bias</strong>: look at the <strong>first moment</strong> of the bootstrap distribution of <span class="math inline">\(\theta_n^* - \hat\theta_n\)</span>.</li>
+<li><strong>Variance</strong>: look at the <strong>second moment</strong> of the (rescaled) bootstrap distribution, <span class="math inline">\(n(\theta_n^*-\hat\theta_n)^2\)</span>.</li>
+<li>Both quantities come from the <em>exact same</em> set of <span class="math inline">\(B\)</span> bootstrap replications computed once in Part 1, so there is no need to run a separate simulation for bias versus variance.</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="exercises" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Exercises</h1>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Exercise 1 — Exact Enumeration for <span class="math inline">\(n=3\)</span>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Extend the exact-enumeration code from Part 1 (currently for <span class="math inline">\(n=2\)</span>) to <span class="math inline">\(n=3\)</span>, using three toy values <span class="math inline">\(a&lt;b&lt;c\)</span>. How many bootstrap samples are there now? Tabulate <span class="math inline">\(\theta_n^*\)</span> and its probability for each one, and verify that the implied distribution of <span class="math inline">\(T_n^*\)</span> is symmetric around <span class="math inline">\(0\)</span> whenever <span class="math inline">\(\theta(P)\)</span> is the sample mean. (Hint: <code>expand.grid()</code> again, with three arguments.)</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Exercise 2 — How Many Bootstrap Replications Are “Enough”?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Reproduce the <code>B</code>-sensitivity plot from Part 1, but track the <strong>bootstrap variance estimate</strong> of the sample mean (not <span class="math inline">\(J_{n,B}^*(0,\hat P_n)\)</span>) as a function of <span class="math inline">\(B \in \{10, 50, 100, 500, 1000, 5000, 10000\}\)</span>. At what point does the curve visually stabilize? Repeat with a smaller sample size <span class="math inline">\(n=10\)</span> — does the required <span class="math inline">\(B\)</span> change?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Exercise 3 — Parametric Bootstrap Under Misspecification
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Modify the Part 2 code: keep simulating the <em>true</em> data from a <span class="math inline">\(\text{Gamma}(\text{shape}=2,\text{rate}=\lambda_0)\)</span> distribution (same mean as before, <span class="math inline">\(\mathbb E[X] = 2/\lambda_0\)</span>), but leave the <strong>parametric</strong> bootstrap step resampling from <span class="math inline">\(\text{Exponential}(\hat\lambda_n)\)</span> as before (i.e., a deliberately <em>wrong</em> parametric model). Compare the parametric and nonparametric bootstrap variance estimates of <span class="math inline">\(\hat\lambda_n
+= 1/\bar X_n\)</span> to a large-sample Monte Carlo “truth” (simulate many fresh data sets directly and compute the variance of <span class="math inline">\(\hat\lambda_n\)</span> across them). Which bootstrap remains close to the truth?</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Exercise 4 — Bias-Correction
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Using the <code>bias_boot</code> estimate from Part 3, construct the <strong>bias-corrected</strong> estimator <span class="math inline">\(\tilde\theta_n = \hat\theta_n - \text{Bias}_{n,B}^*(\hat P_n)\)</span> for the sample variance. Run a small simulation (a few hundred replications of generating fresh data, computing <span class="math inline">\(\hat\theta_n\)</span>, bootstrapping the bias, and bias-correcting) to check whether <span class="math inline">\(\tilde\theta_n\)</span> has, on average, smaller bias than <span class="math inline">\(\hat\theta_n\)</span> relative to the true <span class="math inline">\(\sigma^2\)</span>. Is there a cost in terms of variance?</p>
+</div>
+</div>
+</section>
+<section id="recap" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Recap</h1>
+<ul>
+<li>The bootstrap distribution is built by literally enumerating (or, for realistic <span class="math inline">\(n\)</span>, Monte Carlo approximating) all hypothetical samples from <span class="math inline">\(\hat P_n\)</span>, exactly as in <strong>Slides 10–19</strong>.</li>
+<li>The parametric bootstrap changes only <em>where we resample from</em> (<span class="math inline">\(P_{\hat\eta}\)</span> instead of <span class="math inline">\(\hat P_n\)</span>); the Monte Carlo machinery around it is unchanged (<strong>Slides 21–22</strong>).</li>
+<li>Bias and variance (the “measures of performance” of <strong>Slide 29</strong>) are nothing but the first and second moments of the very same bootstrap distribution we already use to approximate <span class="math inline">\(J_n(t,\hat P_n)\)</span> (<strong>Slides 30–35</strong>). No new simulation is required to obtain them once you have the bootstrap replicates in hand.</li>
+</ul>
+<!-- -->
+
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Additional Resource: The Mechanics of Efron's Bootstrap"</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "From Exact Enumeration to Monte Carlo, Parametric Bootstrap, and Measures of Performance"</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Mauricio Olivares"</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co">    theme: cosmo</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 3</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co">    number-sections: true</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: false</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co">    highlight-style: github</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="co">  warning: false</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co">  message: false</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="fu">## Purpose of This Note</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>This note walks through the bootstrap *mechanically*, step by step, using</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>the same notation as Lecture 13. We start as slowly as possible: with exact</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>enumeration for $n=2$, exactly as on **Slides 12–13**. We then build up to</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>the Monte Carlo approximation (**Slides 15–19**), move to a simplified</span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>parametric bootstrap example (**Slides 21–22**), and close with an entire</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>section on measures of performance — bias and variance as moments of the</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>bootstrap distribution (**Slides 29–35**).</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>Throughout, $W^{(n)} = <span class="sc">\{</span>X_1,\dots,X_n<span class="sc">\}</span>$ is an i.i.d. sample from $P$,</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>$\hat P_n$ is the empirical distribution of the data, $\theta(P)$ is the</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>parameter of interest, $\hat\theta_n = \theta(\hat P_n)$ is its plug-in</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>estimator, and</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>J_n(t,P) = \mathbb{P}_P\big<span class="co">[</span><span class="ot">\sqrt n\{\hat\theta_n - \theta(P)\} \le t\big</span><span class="co">]</span></span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>is the sampling distribution we ultimately want to approximate.</span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a><span class="fu"># Part 1 — The Mechanics of Efron's (Nonparametric) Bootstrap</span></span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## Step Zero: What Is $\hat P_n$?</span></span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>Recall from **Slide 6** that the empirical bootstrap estimates $P$ by the</span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>empirical CDF,</span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>\hat P_n(t) = \frac{1}{n}\sum_{i=1}^n \mathbb 1<span class="sc">\{</span>X_i \le t<span class="sc">\}</span>.</span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>Concretely, $\hat P_n$ places probability $1/n$ on each observed value</span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>$x_1,\dots,x_n$ (**Slide 10**). Let's see this directly with a tiny data</span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>set.</span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>x_tiny <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">9</span>)   <span class="co"># a toy sample, n = 3</span></span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>n_tiny <span class="ot">&lt;-</span> <span class="fu">length</span>(x_tiny)</span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a><span class="co"># P_hat_n puts mass 1/n on each observed value</span></span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">value =</span> x_tiny, <span class="at">prob =</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> n_tiny, n_tiny))</span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>A hypothetical sample $X_1^*,\dots,X_n^*$ from $\hat P_n$ is therefore</span>
+<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>nothing more than drawing, independently and **with replacement**, from</span>
+<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a>these $n$ equally-likely values.</span>
+<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: one-bootstrap-draw</span></span>
+<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a><span class="co"># One single bootstrap sample from P_hat_n</span></span>
+<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a><span class="fu">sample</span>(x_tiny, <span class="at">size =</span> n_tiny, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-78"><a href="#cb26-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-79"><a href="#cb26-79" aria-hidden="true" tabindex="-1"></a>Run the chunk above a few times in your console: each call gives a</span>
+<span id="cb26-80"><a href="#cb26-80" aria-hidden="true" tabindex="-1"></a>different hypothetical sample $(X_1^*,\dots,X_n^*)$, exactly as described on</span>
+<span id="cb26-81"><a href="#cb26-81" aria-hidden="true" tabindex="-1"></a>**Slide 10**.</span>
+<span id="cb26-82"><a href="#cb26-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-83"><a href="#cb26-83" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exact Enumeration for $n=2$ (Slides 12–13)</span></span>
+<span id="cb26-84"><a href="#cb26-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-85"><a href="#cb26-85" aria-hidden="true" tabindex="-1"></a>Before resorting to Monte Carlo, let's reproduce the **exact** calculation</span>
+<span id="cb26-86"><a href="#cb26-86" aria-hidden="true" tabindex="-1"></a>from lecture by hand, for $\theta(P) = \mathbb E<span class="co">[</span><span class="ot">X</span><span class="co">]</span>$ and $n=2$. Let the</span>
+<span id="cb26-87"><a href="#cb26-87" aria-hidden="true" tabindex="-1"></a>ordered values be $X_{(1)} = a &lt; b = X_{(2)}$. There are exactly $2^2 = 4$</span>
+<span id="cb26-88"><a href="#cb26-88" aria-hidden="true" tabindex="-1"></a>equally likely bootstrap samples $(X_1^*,X_2^*)$.</span>
+<span id="cb26-89"><a href="#cb26-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-92"><a href="#cb26-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-93"><a href="#cb26-93" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: exact-n2</span></span>
+<span id="cb26-94"><a href="#cb26-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-95"><a href="#cb26-95" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="dv">2</span>; b <span class="ot">&lt;-</span> <span class="dv">9</span>   <span class="co"># our two ordered observations</span></span>
+<span id="cb26-96"><a href="#cb26-96" aria-hidden="true" tabindex="-1"></a>theta_hat_n2 <span class="ot">&lt;-</span> (a <span class="sc">+</span> b) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb26-97"><a href="#cb26-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-98"><a href="#cb26-98" aria-hidden="true" tabindex="-1"></a><span class="co"># All 2^2 = 4 equally likely bootstrap samples (Slide 12)</span></span>
+<span id="cb26-99"><a href="#cb26-99" aria-hidden="true" tabindex="-1"></a>boot_samples_n2 <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">X1_star =</span> <span class="fu">c</span>(a, b), <span class="at">X2_star =</span> <span class="fu">c</span>(a, b))</span>
+<span id="cb26-100"><a href="#cb26-100" aria-hidden="true" tabindex="-1"></a>boot_samples_n2<span class="sc">$</span>theta_star  <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(boot_samples_n2)</span>
+<span id="cb26-101"><a href="#cb26-101" aria-hidden="true" tabindex="-1"></a>boot_samples_n2<span class="sc">$</span>T_star      <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="dv">2</span>) <span class="sc">*</span> (boot_samples_n2<span class="sc">$</span>theta_star <span class="sc">-</span> theta_hat_n2)</span>
+<span id="cb26-102"><a href="#cb26-102" aria-hidden="true" tabindex="-1"></a>boot_samples_n2<span class="sc">$</span>probability <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="dv">4</span></span>
+<span id="cb26-103"><a href="#cb26-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-104"><a href="#cb26-104" aria-hidden="true" tabindex="-1"></a>boot_samples_n2</span>
+<span id="cb26-105"><a href="#cb26-105" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-106"><a href="#cb26-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-107"><a href="#cb26-107" aria-hidden="true" tabindex="-1"></a>This matches the exact distribution on **Slide 13**: $T_n^*$ takes the</span>
+<span id="cb26-108"><a href="#cb26-108" aria-hidden="true" tabindex="-1"></a>value $\sqrt 2 (a-b)/2$ with probability $1/4$, $0$ with probability $1/2$,</span>
+<span id="cb26-109"><a href="#cb26-109" aria-hidden="true" tabindex="-1"></a>and $\sqrt 2(b-a)/2$ with probability $1/4$. For $n=2$ this is feasible by</span>
+<span id="cb26-110"><a href="#cb26-110" aria-hidden="true" tabindex="-1"></a>hand. As noted on **Slide 14**, once $n$ grows even moderately, exact</span>
+<span id="cb26-111"><a href="#cb26-111" aria-hidden="true" tabindex="-1"></a>enumeration requires examining $n^n$ samples — completely infeasible. This</span>
+<span id="cb26-112"><a href="#cb26-112" aria-hidden="true" tabindex="-1"></a>is exactly the gap the Monte Carlo approximation is designed to fill.</span>
+<span id="cb26-113"><a href="#cb26-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-114"><a href="#cb26-114" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Monte Carlo Approximation, Slowly (Slides 15–19)</span></span>
+<span id="cb26-115"><a href="#cb26-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-116"><a href="#cb26-116" aria-hidden="true" tabindex="-1"></a>The idea (**Slide 15**): instead of enumerating *all* $n^n$ bootstrap</span>
+<span id="cb26-117"><a href="#cb26-117" aria-hidden="true" tabindex="-1"></a>samples, draw $B$ of them at random and use the empirical frequencies of</span>
+<span id="cb26-118"><a href="#cb26-118" aria-hidden="true" tabindex="-1"></a>$T_{n,j}^*$ across $j=1,\dots,B$ to approximate $J_n(t,\hat P_n)$.</span>
+<span id="cb26-119"><a href="#cb26-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-120"><a href="#cb26-120" aria-hidden="true" tabindex="-1"></a>We now implement the three-step algorithm from **Slide 16** explicitly,</span>
+<span id="cb26-121"><a href="#cb26-121" aria-hidden="true" tabindex="-1"></a>without hiding any of the bookkeeping, for $\theta(P) = \mathbb E<span class="co">[</span><span class="ot">X</span><span class="co">]</span>$ and a</span>
+<span id="cb26-122"><a href="#cb26-122" aria-hidden="true" tabindex="-1"></a>more realistic sample size.</span>
+<span id="cb26-123"><a href="#cb26-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-126"><a href="#cb26-126" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-127"><a href="#cb26-127" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: mc-bootstrap-mean</span></span>
+<span id="cb26-128"><a href="#cb26-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-129"><a href="#cb26-129" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">30</span>                       <span class="co"># sample size</span></span>
+<span id="cb26-130"><a href="#cb26-130" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">2000</span>                     <span class="co"># number of bootstrap replications</span></span>
+<span id="cb26-131"><a href="#cb26-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-132"><a href="#cb26-132" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">rexp</span>(n, <span class="at">rate =</span> <span class="dv">1</span>)        <span class="co"># any distribution P works; here Exponential(1)</span></span>
+<span id="cb26-133"><a href="#cb26-133" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="ot">&lt;-</span> <span class="fu">mean</span>(X)          <span class="co"># theta(P_hat_n) = sample mean</span></span>
+<span id="cb26-134"><a href="#cb26-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-135"><a href="#cb26-135" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1: draw B bootstrap samples from P_hat_n</span></span>
+<span id="cb26-136"><a href="#cb26-136" aria-hidden="true" tabindex="-1"></a><span class="co">#         (resample the n original observations, with replacement)</span></span>
+<span id="cb26-137"><a href="#cb26-137" aria-hidden="true" tabindex="-1"></a>T_star <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb26-138"><a href="#cb26-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-139"><a href="#cb26-139" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B) {</span>
+<span id="cb26-140"><a href="#cb26-140" aria-hidden="true" tabindex="-1"></a>  X_star <span class="ot">&lt;-</span> <span class="fu">sample</span>(X, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>)   <span class="co"># one hypothetical sample from P_hat_n</span></span>
+<span id="cb26-141"><a href="#cb26-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-142"><a href="#cb26-142" aria-hidden="true" tabindex="-1"></a>  <span class="co"># STEP 2: compute T*_{n,j} = sqrt(n) * { theta*_{n,j} - theta(P_hat_n) }</span></span>
+<span id="cb26-143"><a href="#cb26-143" aria-hidden="true" tabindex="-1"></a>  theta_star_j <span class="ot">&lt;-</span> <span class="fu">mean</span>(X_star)</span>
+<span id="cb26-144"><a href="#cb26-144" aria-hidden="true" tabindex="-1"></a>  T_star[j]    <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n) <span class="sc">*</span> (theta_star_j <span class="sc">-</span> theta_hat)</span>
+<span id="cb26-145"><a href="#cb26-145" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-146"><a href="#cb26-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-147"><a href="#cb26-147" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3: approximate J_n(t, P_hat_n) by the empirical CDF of T*_{n,1},...,T*_{n,B}</span></span>
+<span id="cb26-148"><a href="#cb26-148" aria-hidden="true" tabindex="-1"></a>J_star_n_B <span class="ot">&lt;-</span> <span class="cf">function</span>(t) <span class="fu">mean</span>(T_star <span class="sc">&lt;=</span> t)</span>
+<span id="cb26-149"><a href="#cb26-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-150"><a href="#cb26-150" aria-hidden="true" tabindex="-1"></a><span class="co"># e.g. approximate J_n(0, P_hat_n)</span></span>
+<span id="cb26-151"><a href="#cb26-151" aria-hidden="true" tabindex="-1"></a><span class="fu">J_star_n_B</span>(<span class="dv">0</span>)</span>
+<span id="cb26-152"><a href="#cb26-152" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-153"><a href="#cb26-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-154"><a href="#cb26-154" aria-hidden="true" tabindex="-1"></a>Each <span class="in">`T_star[j]`</span> above is precisely the quantity $T_{n,j}^*$ defined on</span>
+<span id="cb26-155"><a href="#cb26-155" aria-hidden="true" tabindex="-1"></a>**Slide 16**: the bootstrap analogue of $T_n = \sqrt n<span class="sc">\{</span>\hat\theta_n -</span>
+<span id="cb26-156"><a href="#cb26-156" aria-hidden="true" tabindex="-1"></a>\theta(P)<span class="sc">\}</span>$, but built from a bootstrap sample relative to $\hat P_n$</span>
+<span id="cb26-157"><a href="#cb26-157" aria-hidden="true" tabindex="-1"></a>instead of the original sample relative to $P$.</span>
+<span id="cb26-158"><a href="#cb26-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-159"><a href="#cb26-159" aria-hidden="true" tabindex="-1"></a><span class="fu">### Visualizing $J_{n,B}^*(t,\hat P_n)$</span></span>
+<span id="cb26-160"><a href="#cb26-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-163"><a href="#cb26-163" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-164"><a href="#cb26-164" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-mc-hist</span></span>
+<span id="cb26-165"><a href="#cb26-165" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Monte Carlo approximation to the bootstrap sampling distribution $J_n(t,\\hat P_n)$, for the sample mean."</span></span>
+<span id="cb26-166"><a href="#cb26-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-167"><a href="#cb26-167" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(T_star, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb26-168"><a href="#cb26-168" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.8</span>, <span class="fl">0.45</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb26-169"><a href="#cb26-169" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">expression</span>(<span class="fu">paste</span>(<span class="st">"Bootstrap Distribution of  "</span>,</span>
+<span id="cb26-170"><a href="#cb26-170" aria-hidden="true" tabindex="-1"></a>                              T[n]<span class="sc">^</span><span class="st">"*"</span>, <span class="st">" = "</span>, <span class="fu">sqrt</span>(n), <span class="st">"("</span>, theta[n]<span class="sc">^</span><span class="st">"*"</span>, <span class="st">" - "</span>, <span class="fu">hat</span>(theta)[n], <span class="st">")"</span>)),</span>
+<span id="cb26-171"><a href="#cb26-171" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(T[n]<span class="sc">^</span><span class="st">"*"</span>))</span>
+<span id="cb26-172"><a href="#cb26-172" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb26-173"><a href="#cb26-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-174"><a href="#cb26-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-175"><a href="#cb26-175" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb26-176"><a href="#cb26-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why does $J^*_{n,B}$ improve as $B$ grows, but not as an estimator of $J_n(t,P)$?</span></span>
+<span id="cb26-177"><a href="#cb26-177" aria-hidden="true" tabindex="-1"></a>Reread **Slide 19**, point 1, carefully: $J_n(t,\hat P_n)$ is itself a fixed</span>
+<span id="cb26-178"><a href="#cb26-178" aria-hidden="true" tabindex="-1"></a>(if hard to compute) number, once the data are fixed. $J_{n,B}^*(t,\hat</span>
+<span id="cb26-179"><a href="#cb26-179" aria-hidden="true" tabindex="-1"></a>P_n)$ is a Monte Carlo *approximation* of that fixed number — increasing</span>
+<span id="cb26-180"><a href="#cb26-180" aria-hidden="true" tabindex="-1"></a>$B$ only reduces simulation noise around $J_n(t,\hat P_n)$, it does **not**</span>
+<span id="cb26-181"><a href="#cb26-181" aria-hidden="true" tabindex="-1"></a>bring us closer to $J_n(t,P)$. Try the experiment below to see this for</span>
+<span id="cb26-182"><a href="#cb26-182" aria-hidden="true" tabindex="-1"></a>yourself.</span>
+<span id="cb26-183"><a href="#cb26-183" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-184"><a href="#cb26-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-187"><a href="#cb26-187" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-188"><a href="#cb26-188" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: B-sensitivity</span></span>
+<span id="cb26-189"><a href="#cb26-189" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "J*_{n,B}(0, P_hat_n) stabilizes as B grows -- it is converging to the fixed number J_n(0, P_hat_n), not to J_n(0,P)."</span></span>
+<span id="cb26-190"><a href="#cb26-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-191"><a href="#cb26-191" aria-hidden="true" tabindex="-1"></a>B_grid <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">500</span>, <span class="dv">1000</span>, <span class="dv">5000</span>, <span class="dv">10000</span>)</span>
+<span id="cb26-192"><a href="#cb26-192" aria-hidden="true" tabindex="-1"></a>J_at_0 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(B_grid, <span class="cf">function</span>(Bv) {</span>
+<span id="cb26-193"><a href="#cb26-193" aria-hidden="true" tabindex="-1"></a>  Tv <span class="ot">&lt;-</span> <span class="fu">replicate</span>(Bv, <span class="fu">sqrt</span>(n) <span class="sc">*</span> (<span class="fu">mean</span>(<span class="fu">sample</span>(X, n, <span class="at">replace =</span> <span class="cn">TRUE</span>)) <span class="sc">-</span> theta_hat))</span>
+<span id="cb26-194"><a href="#cb26-194" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(Tv <span class="sc">&lt;=</span> <span class="dv">0</span>)</span>
+<span id="cb26-195"><a href="#cb26-195" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb26-196"><a href="#cb26-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-197"><a href="#cb26-197" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(B_grid, J_at_0, <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">log =</span> <span class="st">"x"</span>,</span>
+<span id="cb26-198"><a href="#cb26-198" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"B (number of bootstrap replications)"</span>,</span>
+<span id="cb26-199"><a href="#cb26-199" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="fu">expression</span>(J[<span class="st">"n,B"</span>]<span class="sc">^</span><span class="st">"*"</span> <span class="sc">*</span> <span class="fu">group</span>(<span class="st">"("</span>, <span class="fu">list</span>(<span class="dv">0</span>, <span class="fu">hat</span>(P)[n]), <span class="st">")"</span>)),</span>
+<span id="cb26-200"><a href="#cb26-200" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Monte Carlo Approximation Stabilizing as B Grows"</span>)</span>
+<span id="cb26-201"><a href="#cb26-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-202"><a href="#cb26-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-203"><a href="#cb26-203" aria-hidden="true" tabindex="-1"></a><span class="fu"># Part 2 — A Simplified Parametric Bootstrap</span></span>
+<span id="cb26-204"><a href="#cb26-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-205"><a href="#cb26-205" aria-hidden="true" tabindex="-1"></a>**Slides 21–22** contrast the empirical (nonparametric) bootstrap with the</span>
+<span id="cb26-206"><a href="#cb26-206" aria-hidden="true" tabindex="-1"></a>parametric bootstrap: when we are willing to assume a parametric *shape*</span>
+<span id="cb26-207"><a href="#cb26-207" aria-hidden="true" tabindex="-1"></a>for $P$, we can replace $\hat P_n$ with a fitted parametric distribution</span>
+<span id="cb26-208"><a href="#cb26-208" aria-hidden="true" tabindex="-1"></a>$P_{\hat\eta}$ instead of the empirical CDF, and resample from</span>
+<span id="cb26-209"><a href="#cb26-209" aria-hidden="true" tabindex="-1"></a>$P_{\hat\eta}$ directly.</span>
+<span id="cb26-210"><a href="#cb26-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-211"><a href="#cb26-211" aria-hidden="true" tabindex="-1"></a>We use the simplest possible scenario: $X_1,\dots,X_n \overset{iid}\sim</span>
+<span id="cb26-212"><a href="#cb26-212" aria-hidden="true" tabindex="-1"></a>\text{Exponential}(\lambda)$, and $\theta(P) = \lambda$, estimated by</span>
+<span id="cb26-213"><a href="#cb26-213" aria-hidden="true" tabindex="-1"></a>maximum likelihood, $\hat\lambda_n = 1/\bar X_n$.</span>
+<span id="cb26-214"><a href="#cb26-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-217"><a href="#cb26-217" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-218"><a href="#cb26-218" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: parametric-setup</span></span>
+<span id="cb26-219"><a href="#cb26-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-220"><a href="#cb26-220" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span>
+<span id="cb26-221"><a href="#cb26-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-222"><a href="#cb26-222" aria-hidden="true" tabindex="-1"></a>n        <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb26-223"><a href="#cb26-223" aria-hidden="true" tabindex="-1"></a>lambda0  <span class="ot">&lt;-</span> <span class="dv">2</span>                       <span class="co"># true rate</span></span>
+<span id="cb26-224"><a href="#cb26-224" aria-hidden="true" tabindex="-1"></a>X        <span class="ot">&lt;-</span> <span class="fu">rexp</span>(n, <span class="at">rate =</span> lambda0)</span>
+<span id="cb26-225"><a href="#cb26-225" aria-hidden="true" tabindex="-1"></a>lambda_hat <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">mean</span>(X)           <span class="co"># MLE of the rate</span></span>
+<span id="cb26-226"><a href="#cb26-226" aria-hidden="true" tabindex="-1"></a>lambda_hat</span>
+<span id="cb26-227"><a href="#cb26-227" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-228"><a href="#cb26-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-229"><a href="#cb26-229" aria-hidden="true" tabindex="-1"></a>Compare the **two** competing bootstrap estimators of $J_n(t,P)$:</span>
+<span id="cb26-230"><a href="#cb26-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-231"><a href="#cb26-231" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Nonparametric**: $J_n(t,\hat P_n)$, resampling pairs $X_i^*$ from the</span>
+<span id="cb26-232"><a href="#cb26-232" aria-hidden="true" tabindex="-1"></a>  empirical distribution (exactly as in Part 1).</span>
+<span id="cb26-233"><a href="#cb26-233" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Parametric**: $J_n(t; \text{Exponential})$, resampling</span>
+<span id="cb26-234"><a href="#cb26-234" aria-hidden="true" tabindex="-1"></a>  $X_i^{**} \overset{iid}\sim \text{Exponential}(\hat\lambda_n)$</span>
+<span id="cb26-235"><a href="#cb26-235" aria-hidden="true" tabindex="-1"></a>  (**Slide 22**), i.e. simulating brand-new data from the *fitted</span>
+<span id="cb26-236"><a href="#cb26-236" aria-hidden="true" tabindex="-1"></a>  parametric model* rather than reshuffling the observed data.</span>
+<span id="cb26-237"><a href="#cb26-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-240"><a href="#cb26-240" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-241"><a href="#cb26-241" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: parametric-vs-nonparametric</span></span>
+<span id="cb26-242"><a href="#cb26-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-243"><a href="#cb26-243" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb26-244"><a href="#cb26-244" aria-hidden="true" tabindex="-1"></a>T_star_nonpar <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb26-245"><a href="#cb26-245" aria-hidden="true" tabindex="-1"></a>T_star_par    <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb26-246"><a href="#cb26-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-247"><a href="#cb26-247" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B) {</span>
+<span id="cb26-248"><a href="#cb26-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-249"><a href="#cb26-249" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Nonparametric bootstrap: resample the n observations</span></span>
+<span id="cb26-250"><a href="#cb26-250" aria-hidden="true" tabindex="-1"></a>  X_star  <span class="ot">&lt;-</span> <span class="fu">sample</span>(X, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-251"><a href="#cb26-251" aria-hidden="true" tabindex="-1"></a>  lambda_star_j <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">mean</span>(X_star)</span>
+<span id="cb26-252"><a href="#cb26-252" aria-hidden="true" tabindex="-1"></a>  T_star_nonpar[j] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n) <span class="sc">*</span> (lambda_star_j <span class="sc">-</span> lambda_hat)</span>
+<span id="cb26-253"><a href="#cb26-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-254"><a href="#cb26-254" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Parametric bootstrap: simulate from Exponential(lambda_hat)</span></span>
+<span id="cb26-255"><a href="#cb26-255" aria-hidden="true" tabindex="-1"></a>  X_starstar <span class="ot">&lt;-</span> <span class="fu">rexp</span>(n, <span class="at">rate =</span> lambda_hat)</span>
+<span id="cb26-256"><a href="#cb26-256" aria-hidden="true" tabindex="-1"></a>  lambda_starstar_j <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">mean</span>(X_starstar)</span>
+<span id="cb26-257"><a href="#cb26-257" aria-hidden="true" tabindex="-1"></a>  T_star_par[j] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n) <span class="sc">*</span> (lambda_starstar_j <span class="sc">-</span> lambda_hat)</span>
+<span id="cb26-258"><a href="#cb26-258" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-259"><a href="#cb26-259" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-260"><a href="#cb26-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-263"><a href="#cb26-263" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-264"><a href="#cb26-264" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-par-nonpar</span></span>
+<span id="cb26-265"><a href="#cb26-265" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Nonparametric (empirical) vs. parametric bootstrap distributions for the MLE rate of an Exponential(lambda)."</span></span>
+<span id="cb26-266"><a href="#cb26-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-267"><a href="#cb26-267" aria-hidden="true" tabindex="-1"></a>xr <span class="ot">&lt;-</span> <span class="fu">range</span>(<span class="fu">c</span>(T_star_nonpar, T_star_par))</span>
+<span id="cb26-268"><a href="#cb26-268" aria-hidden="true" tabindex="-1"></a>br <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">floor</span>(xr[<span class="dv">1</span>]), <span class="fu">ceiling</span>(xr[<span class="dv">2</span>]), <span class="at">length.out =</span> <span class="dv">40</span>)</span>
+<span id="cb26-269"><a href="#cb26-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-270"><a href="#cb26-270" aria-hidden="true" tabindex="-1"></a>h1 <span class="ot">&lt;-</span> <span class="fu">hist</span>(T_star_nonpar, <span class="at">breaks =</span> br, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb26-271"><a href="#cb26-271" aria-hidden="true" tabindex="-1"></a>h2 <span class="ot">&lt;-</span> <span class="fu">hist</span>(T_star_par,    <span class="at">breaks =</span> br, <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb26-272"><a href="#cb26-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-273"><a href="#cb26-273" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(h1, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb26-274"><a href="#cb26-274" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Empirical vs. Parametric Bootstrap (Exponential rate)"</span>,</span>
+<span id="cb26-275"><a href="#cb26-275" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(T[n]<span class="sc">^</span><span class="st">"*"</span>), <span class="at">freq =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb26-276"><a href="#cb26-276" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylim =</span> <span class="fu">range</span>(<span class="dv">0</span>, h1<span class="sc">$</span>density, h2<span class="sc">$</span>density))</span>
+<span id="cb26-277"><a href="#cb26-277" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(h2, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.85</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>), <span class="at">border =</span> <span class="st">"white"</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-278"><a href="#cb26-278" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>,</span>
+<span id="cb26-279"><a href="#cb26-279" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="fu">c</span>(<span class="fu">rgb</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="fl">0.8</span>, <span class="fl">0.4</span>), <span class="fu">rgb</span>(<span class="fl">0.85</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.4</span>)),</span>
+<span id="cb26-280"><a href="#cb26-280" aria-hidden="true" tabindex="-1"></a>       <span class="at">border =</span> <span class="cn">NA</span>,</span>
+<span id="cb26-281"><a href="#cb26-281" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"Nonparametric (empirical) bootstrap"</span>, <span class="st">"Parametric bootstrap (Exponential)"</span>))</span>
+<span id="cb26-282"><a href="#cb26-282" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-283"><a href="#cb26-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-284"><a href="#cb26-284" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb26-285"><a href="#cb26-285" aria-hidden="true" tabindex="-1"></a><span class="fu">## Discussion question for class</span></span>
+<span id="cb26-286"><a href="#cb26-286" aria-hidden="true" tabindex="-1"></a>The two distributions in the figure above are similar here because the</span>
+<span id="cb26-287"><a href="#cb26-287" aria-hidden="true" tabindex="-1"></a>Exponential model is, in fact, correctly specified. *What</span>
+<span id="cb26-288"><a href="#cb26-288" aria-hidden="true" tabindex="-1"></a>would happen to the parametric bootstrap distribution if the true $P$ were</span>
+<span id="cb26-289"><a href="#cb26-289" aria-hidden="true" tabindex="-1"></a>not Exponential, e.g. a Gamma$(2, \lambda)$ with the same mean?* The</span>
+<span id="cb26-290"><a href="#cb26-290" aria-hidden="true" tabindex="-1"></a>empirical bootstrap remains valid (it never assumed a shape for $P$); the</span>
+<span id="cb26-291"><a href="#cb26-291" aria-hidden="true" tabindex="-1"></a>parametric bootstrap, run under the (now wrong) Exponential model, would be</span>
+<span id="cb26-292"><a href="#cb26-292" aria-hidden="true" tabindex="-1"></a>approximating $J_n(t,P_{\hat\eta})$ for the wrong parametric family</span>
+<span id="cb26-293"><a href="#cb26-293" aria-hidden="true" tabindex="-1"></a>entirely. This is the central trade-off between Sections 1 and 2: the</span>
+<span id="cb26-294"><a href="#cb26-294" aria-hidden="true" tabindex="-1"></a>parametric bootstrap can be more efficient when the model is correct, at</span>
+<span id="cb26-295"><a href="#cb26-295" aria-hidden="true" tabindex="-1"></a>the cost of inconsistency when it is not.</span>
+<span id="cb26-296"><a href="#cb26-296" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-297"><a href="#cb26-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-298"><a href="#cb26-298" aria-hidden="true" tabindex="-1"></a><span class="fu"># Part 3 — Measures of Performance (Slide 29)</span></span>
+<span id="cb26-299"><a href="#cb26-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-300"><a href="#cb26-300" aria-hidden="true" tabindex="-1"></a>We now turn to an entire section on **measures of performance**, following</span>
+<span id="cb26-301"><a href="#cb26-301" aria-hidden="true" tabindex="-1"></a>**Slides 29–35** essentially line by line. As stated on **Slide 29**, rather</span>
+<span id="cb26-302"><a href="#cb26-302" aria-hidden="true" tabindex="-1"></a>than estimating the *entire* sampling distribution $J_n(t,P)$, we may only</span>
+<span id="cb26-303"><a href="#cb26-303" aria-hidden="true" tabindex="-1"></a>care about specific features of it:</span>
+<span id="cb26-304"><a href="#cb26-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-305"><a href="#cb26-305" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Mean**: $\mathbb E<span class="co">[</span><span class="ot">\sqrt n \{\hat\theta_n - \theta(P)\}</span><span class="co">]</span>$.</span>
+<span id="cb26-306"><a href="#cb26-306" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Bias**: $\text{Bias}_n(P) \equiv \mathbb E<span class="co">[</span><span class="ot">\hat\theta_n - \theta(P)</span><span class="co">]</span>$.</span>
+<span id="cb26-307"><a href="#cb26-307" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Variance**: $\mathbb V<span class="co">[</span><span class="ot">\sqrt n \{\hat\theta_n - \theta(P)\}</span><span class="co">]</span>$.</span>
+<span id="cb26-308"><a href="#cb26-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-309"><a href="#cb26-309" aria-hidden="true" tabindex="-1"></a>The key conceptual point is this: **the bootstrap principle estimates bias by looking at the first</span>
+<span id="cb26-310"><a href="#cb26-310" aria-hidden="true" tabindex="-1"></a>moment of $J_n(t,\hat P_n)$, and variance by looking at its second moment**</span>
+<span id="cb26-311"><a href="#cb26-311" aria-hidden="true" tabindex="-1"></a>(**Slide 35**). We did not need new machinery — bias and variance are</span>
+<span id="cb26-312"><a href="#cb26-312" aria-hidden="true" tabindex="-1"></a>already there, hiding inside the bootstrap distribution we built in Part 1.</span>
+<span id="cb26-313"><a href="#cb26-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-314"><a href="#cb26-314" aria-hidden="true" tabindex="-1"></a>To make this concrete and to connect back to your own code, we use the</span>
+<span id="cb26-315"><a href="#cb26-315" aria-hidden="true" tabindex="-1"></a>**sample variance** as $\hat\theta_n$,</span>
+<span id="cb26-316"><a href="#cb26-316" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-317"><a href="#cb26-317" aria-hidden="true" tabindex="-1"></a>\hat\theta_n = \frac{1}{n}\sum_{i=1}^n (X_i - \bar X_n)^2,</span>
+<span id="cb26-318"><a href="#cb26-318" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-319"><a href="#cb26-319" aria-hidden="true" tabindex="-1"></a>which is well known to be **biased** in finite samples</span>
+<span id="cb26-320"><a href="#cb26-320" aria-hidden="true" tabindex="-1"></a>($\mathbb E<span class="co">[</span><span class="ot">\hat\theta_n</span><span class="co">]</span> = \frac{n-1}{n}\sigma^2 \ne \sigma^2$), making it a</span>
+<span id="cb26-321"><a href="#cb26-321" aria-hidden="true" tabindex="-1"></a>much more interesting object than the sample mean for this section.</span>
+<span id="cb26-322"><a href="#cb26-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-323"><a href="#cb26-323" aria-hidden="true" tabindex="-1"></a><span class="fu">## Bootstrapping the Bias (Slides 30–32)</span></span>
+<span id="cb26-324"><a href="#cb26-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-325"><a href="#cb26-325" aria-hidden="true" tabindex="-1"></a>Recall the plug-in logic from **Slide 31**: since</span>
+<span id="cb26-326"><a href="#cb26-326" aria-hidden="true" tabindex="-1"></a>$\text{Bias}_n(P) = \mathbb E_P<span class="co">[</span><span class="ot">\hat\theta_n - \theta(P)</span><span class="co">]</span>$, the bootstrap</span>
+<span id="cb26-327"><a href="#cb26-327" aria-hidden="true" tabindex="-1"></a>analogue simply replaces $P$ by $\hat P_n$,</span>
+<span id="cb26-328"><a href="#cb26-328" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-329"><a href="#cb26-329" aria-hidden="true" tabindex="-1"></a>\text{Bias}_n(\hat P_n) = \mathbb E_{\hat P_n}<span class="co">[</span><span class="ot">\theta_n^* - \hat\theta_n</span><span class="co">]</span>.</span>
+<span id="cb26-330"><a href="#cb26-330" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-331"><a href="#cb26-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-334"><a href="#cb26-334" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-335"><a href="#cb26-335" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: bootstrap-bias</span></span>
+<span id="cb26-336"><a href="#cb26-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-337"><a href="#cb26-337" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span>
+<span id="cb26-338"><a href="#cb26-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-339"><a href="#cb26-339" aria-hidden="true" tabindex="-1"></a>n   <span class="ot">&lt;-</span> <span class="dv">25</span></span>
+<span id="cb26-340"><a href="#cb26-340" aria-hidden="true" tabindex="-1"></a>sig2 <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb26-341"><a href="#cb26-341" aria-hidden="true" tabindex="-1"></a>B   <span class="ot">&lt;-</span> <span class="dv">3000</span></span>
+<span id="cb26-342"><a href="#cb26-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-343"><a href="#cb26-343" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fu">sqrt</span>(sig2))</span>
+<span id="cb26-344"><a href="#cb26-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-345"><a href="#cb26-345" aria-hidden="true" tabindex="-1"></a>theta_hat_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">mean</span>((x <span class="sc">-</span> <span class="fu">mean</span>(x))<span class="sc">^</span><span class="dv">2</span>)   <span class="co"># the (biased) sample variance</span></span>
+<span id="cb26-346"><a href="#cb26-346" aria-hidden="true" tabindex="-1"></a>theta_hat_n   <span class="ot">&lt;-</span> <span class="fu">theta_hat_fun</span>(X)</span>
+<span id="cb26-347"><a href="#cb26-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-348"><a href="#cb26-348" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 1-2 (Slide 32): draw B bootstrap samples, compute theta*_{n,j} - theta_hat_n</span></span>
+<span id="cb26-349"><a href="#cb26-349" aria-hidden="true" tabindex="-1"></a>diffs_star <span class="ot">&lt;-</span> <span class="fu">numeric</span>(B)</span>
+<span id="cb26-350"><a href="#cb26-350" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B) {</span>
+<span id="cb26-351"><a href="#cb26-351" aria-hidden="true" tabindex="-1"></a>  X_star <span class="ot">&lt;-</span> <span class="fu">sample</span>(X, <span class="at">size =</span> n, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb26-352"><a href="#cb26-352" aria-hidden="true" tabindex="-1"></a>  diffs_star[j] <span class="ot">&lt;-</span> <span class="fu">theta_hat_fun</span>(X_star) <span class="sc">-</span> theta_hat_n</span>
+<span id="cb26-353"><a href="#cb26-353" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-354"><a href="#cb26-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-355"><a href="#cb26-355" aria-hidden="true" tabindex="-1"></a><span class="co"># STEP 3 (Slide 32): Bias*_{n,B}(P_hat_n) = (1/B) * sum_j { theta*_{n,j} - theta_hat_n }</span></span>
+<span id="cb26-356"><a href="#cb26-356" aria-hidden="true" tabindex="-1"></a>bias_boot <span class="ot">&lt;-</span> <span class="fu">mean</span>(diffs_star)</span>
+<span id="cb26-357"><a href="#cb26-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-358"><a href="#cb26-358" aria-hidden="true" tabindex="-1"></a><span class="co"># Known finite-sample bias for this estimator: -sigma^2 / n</span></span>
+<span id="cb26-359"><a href="#cb26-359" aria-hidden="true" tabindex="-1"></a>bias_true <span class="ot">&lt;-</span> <span class="sc">-</span>sig2 <span class="sc">/</span> n</span>
+<span id="cb26-360"><a href="#cb26-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-361"><a href="#cb26-361" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Bootstrap bias estimate :"</span>, <span class="fu">round</span>(bias_boot, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb26-362"><a href="#cb26-362" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Exact finite-sample bias:"</span>, <span class="fu">round</span>(bias_true, <span class="dv">4</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb26-363"><a href="#cb26-363" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-364"><a href="#cb26-364" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-365"><a href="#cb26-365" aria-hidden="true" tabindex="-1"></a>Notice exactly what we computed: <span class="in">`diffs_star`</span> stores</span>
+<span id="cb26-366"><a href="#cb26-366" aria-hidden="true" tabindex="-1"></a>$\theta_{n,j}^* - \hat\theta_n$ for each bootstrap replication, and</span>
+<span id="cb26-367"><a href="#cb26-367" aria-hidden="true" tabindex="-1"></a><span class="in">`bias_boot`</span> is literally the **sample mean of the bootstrap distribution**,</span>
+<span id="cb26-368"><a href="#cb26-368" aria-hidden="true" tabindex="-1"></a>recentered at $\hat\theta_n$. This *is* the first moment of $J_n(t,\hat</span>
+<span id="cb26-369"><a href="#cb26-369" aria-hidden="true" tabindex="-1"></a>P_n)$ referenced on **Slide 35**, item 1 — nothing more exotic than that.</span>
+<span id="cb26-370"><a href="#cb26-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-371"><a href="#cb26-371" aria-hidden="true" tabindex="-1"></a><span class="fu">## Bootstrapping the Variance (Slides 33–34)</span></span>
+<span id="cb26-372"><a href="#cb26-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-373"><a href="#cb26-373" aria-hidden="true" tabindex="-1"></a>Likewise, **Slide 33** defines the bootstrap variance estimator as</span>
+<span id="cb26-374"><a href="#cb26-374" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-375"><a href="#cb26-375" aria-hidden="true" tabindex="-1"></a>\mathbb E_{\hat P_n}\Big<span class="co">[</span><span class="ot">\,n\,\big(\theta_n^* - \hat\theta_n\big)^2\,\Big</span><span class="co">]</span>,</span>
+<span id="cb26-376"><a href="#cb26-376" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb26-377"><a href="#cb26-377" aria-hidden="true" tabindex="-1"></a>i.e., the **second moment** of the (recentered, rescaled) bootstrap</span>
+<span id="cb26-378"><a href="#cb26-378" aria-hidden="true" tabindex="-1"></a>distribution.</span>
+<span id="cb26-379"><a href="#cb26-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-382"><a href="#cb26-382" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-383"><a href="#cb26-383" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: bootstrap-variance</span></span>
+<span id="cb26-384"><a href="#cb26-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-385"><a href="#cb26-385" aria-hidden="true" tabindex="-1"></a><span class="co"># Re-use diffs_star = theta*_{n,j} - theta_hat_n from above</span></span>
+<span id="cb26-386"><a href="#cb26-386" aria-hidden="true" tabindex="-1"></a><span class="co"># n * diffs_star^2 corresponds to {T*_{n,j}}^2 with T*_{n,j} = sqrt(n)(theta*_{n,j} - theta_hat_n)</span></span>
+<span id="cb26-387"><a href="#cb26-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-388"><a href="#cb26-388" aria-hidden="true" tabindex="-1"></a>var_boot <span class="ot">&lt;-</span> <span class="fu">mean</span>(n <span class="sc">*</span> diffs_star<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb26-389"><a href="#cb26-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-390"><a href="#cb26-390" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare to a "plug-in" / method-of-moments estimate of the asymptotic variance</span></span>
+<span id="cb26-391"><a href="#cb26-391" aria-hidden="true" tabindex="-1"></a><span class="co"># of the sample variance: Var = mu4 - sigma^4 (population fourth central moment minus sigma^4)</span></span>
+<span id="cb26-392"><a href="#cb26-392" aria-hidden="true" tabindex="-1"></a>var_mom <span class="ot">&lt;-</span> <span class="fu">mean</span>((X <span class="sc">-</span> <span class="fu">mean</span>(X))<span class="sc">^</span><span class="dv">4</span>) <span class="sc">-</span> <span class="fu">mean</span>((X <span class="sc">-</span> <span class="fu">mean</span>(X))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb26-393"><a href="#cb26-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-394"><a href="#cb26-394" aria-hidden="true" tabindex="-1"></a><span class="co"># True asymptotic variance under normality: 2*sigma^4</span></span>
+<span id="cb26-395"><a href="#cb26-395" aria-hidden="true" tabindex="-1"></a>var_true <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> sig2<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb26-396"><a href="#cb26-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-397"><a href="#cb26-397" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Bootstrap variance estimate     :"</span>, <span class="fu">round</span>(var_boot, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb26-398"><a href="#cb26-398" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Method-of-moments estimate      :"</span>, <span class="fu">round</span>(var_mom, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb26-399"><a href="#cb26-399" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"True asymptotic variance (2s^4) :"</span>, <span class="fu">round</span>(var_true, <span class="dv">3</span>), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb26-400"><a href="#cb26-400" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-401"><a href="#cb26-401" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-402"><a href="#cb26-402" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connecting Mean, Bias, and Variance to the Moments of $J_n^*(t,\hat P_n)$</span></span>
+<span id="cb26-403"><a href="#cb26-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-404"><a href="#cb26-404" aria-hidden="true" tabindex="-1"></a>The figure below makes the connection from **Slide 35** completely visual:</span>
+<span id="cb26-405"><a href="#cb26-405" aria-hidden="true" tabindex="-1"></a>the same bootstrap histogram you have already built carries *both* pieces of</span>
+<span id="cb26-406"><a href="#cb26-406" aria-hidden="true" tabindex="-1"></a>information simultaneously: its center (relative to zero) is the bias, and</span>
+<span id="cb26-407"><a href="#cb26-407" aria-hidden="true" tabindex="-1"></a>its spread is the variance.</span>
+<span id="cb26-408"><a href="#cb26-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-411"><a href="#cb26-411" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb26-412"><a href="#cb26-412" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-bias-variance</span></span>
+<span id="cb26-413"><a href="#cb26-413" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "The bootstrap distribution of theta*_n - theta_hat_n: its mean is the bootstrap bias estimate, its second moment (about zero) is the bootstrap variance estimate (after rescaling by n)."</span></span>
+<span id="cb26-414"><a href="#cb26-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-415"><a href="#cb26-415" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(diffs_star, <span class="at">breaks =</span> <span class="dv">40</span>, <span class="at">freq =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb26-416"><a href="#cb26-416" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">rgb</span>(<span class="fl">0.3</span>, <span class="fl">0.6</span>, <span class="fl">0.3</span>, <span class="fl">0.45</span>), <span class="at">border =</span> <span class="st">"white"</span>,</span>
+<span id="cb26-417"><a href="#cb26-417" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">expression</span>(<span class="fu">paste</span>(<span class="st">"Bootstrap Distribution of  "</span>,</span>
+<span id="cb26-418"><a href="#cb26-418" aria-hidden="true" tabindex="-1"></a>                              theta[n]<span class="sc">^</span><span class="st">"*"</span>, <span class="st">" - "</span>, <span class="fu">hat</span>(theta)[n])),</span>
+<span id="cb26-419"><a href="#cb26-419" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="fu">expression</span>(theta[n]<span class="sc">^</span><span class="st">"*"</span> <span class="sc">-</span> <span class="fu">hat</span>(theta)[n]))</span>
+<span id="cb26-420"><a href="#cb26-420" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"grey40"</span>)</span>
+<span id="cb26-421"><a href="#cb26-421" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> bias_boot, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"firebrick"</span>)</span>
+<span id="cb26-422"><a href="#cb26-422" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">bty =</span> <span class="st">"n"</span>, <span class="at">lty =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="at">lwd =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>),</span>
+<span id="cb26-423"><a href="#cb26-423" aria-hidden="true" tabindex="-1"></a>       <span class="at">col =</span> <span class="fu">c</span>(<span class="st">"grey40"</span>, <span class="st">"firebrick"</span>),</span>
+<span id="cb26-424"><a href="#cb26-424" aria-hidden="true" tabindex="-1"></a>       <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"zero"</span>, <span class="fu">expression</span>(<span class="fu">paste</span>(<span class="st">"Bias"</span>[<span class="st">"n,B"</span>]<span class="sc">^</span><span class="st">"*"</span>, <span class="st">"("</span>, <span class="fu">hat</span>(P)[n], <span class="st">") = mean of distribution"</span>))))</span>
+<span id="cb26-425"><a href="#cb26-425" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb26-426"><a href="#cb26-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-427"><a href="#cb26-427" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb26-428"><a href="#cb26-428" aria-hidden="true" tabindex="-1"></a><span class="fu">## Takeaway (mirrors Slide 35 exactly)</span></span>
+<span id="cb26-429"><a href="#cb26-429" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Mean / Bias**: look at the **first moment** of the bootstrap</span>
+<span id="cb26-430"><a href="#cb26-430" aria-hidden="true" tabindex="-1"></a>  distribution of $\theta_n^* - \hat\theta_n$.</span>
+<span id="cb26-431"><a href="#cb26-431" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Variance**: look at the **second moment** of the (rescaled) bootstrap</span>
+<span id="cb26-432"><a href="#cb26-432" aria-hidden="true" tabindex="-1"></a>  distribution, $n(\theta_n^*-\hat\theta_n)^2$.</span>
+<span id="cb26-433"><a href="#cb26-433" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Both quantities come from the *exact same* set of $B$ bootstrap</span>
+<span id="cb26-434"><a href="#cb26-434" aria-hidden="true" tabindex="-1"></a>  replications computed once in Part 1, so there is no need to run a separate</span>
+<span id="cb26-435"><a href="#cb26-435" aria-hidden="true" tabindex="-1"></a>  simulation for bias versus variance.</span>
+<span id="cb26-436"><a href="#cb26-436" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-437"><a href="#cb26-437" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-438"><a href="#cb26-438" aria-hidden="true" tabindex="-1"></a><span class="fu"># Exercises</span></span>
+<span id="cb26-439"><a href="#cb26-439" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-440"><a href="#cb26-440" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb26-441"><a href="#cb26-441" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 1 — Exact Enumeration for $n=3$</span></span>
+<span id="cb26-442"><a href="#cb26-442" aria-hidden="true" tabindex="-1"></a>Extend the exact-enumeration code from Part 1 (currently for $n=2$) to</span>
+<span id="cb26-443"><a href="#cb26-443" aria-hidden="true" tabindex="-1"></a>$n=3$, using three toy values $a&lt;b&lt;c$. How many bootstrap samples are there</span>
+<span id="cb26-444"><a href="#cb26-444" aria-hidden="true" tabindex="-1"></a>now? Tabulate $\theta_n^*$ and its probability for each one, and verify</span>
+<span id="cb26-445"><a href="#cb26-445" aria-hidden="true" tabindex="-1"></a>that the implied distribution of $T_n^*$ is symmetric around $0$ whenever</span>
+<span id="cb26-446"><a href="#cb26-446" aria-hidden="true" tabindex="-1"></a>$\theta(P)$ is the sample mean. (Hint: <span class="in">`expand.grid()`</span> again, with three</span>
+<span id="cb26-447"><a href="#cb26-447" aria-hidden="true" tabindex="-1"></a>arguments.)</span>
+<span id="cb26-448"><a href="#cb26-448" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-449"><a href="#cb26-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-450"><a href="#cb26-450" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb26-451"><a href="#cb26-451" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 2 — How Many Bootstrap Replications Are "Enough"?</span></span>
+<span id="cb26-452"><a href="#cb26-452" aria-hidden="true" tabindex="-1"></a>Reproduce the <span class="in">`B`</span>-sensitivity plot from Part 1, but track the **bootstrap</span>
+<span id="cb26-453"><a href="#cb26-453" aria-hidden="true" tabindex="-1"></a>variance estimate** of the sample mean (not $J_{n,B}^*(0,\hat P_n)$) as a</span>
+<span id="cb26-454"><a href="#cb26-454" aria-hidden="true" tabindex="-1"></a>function of $B \in <span class="sc">\{</span>10, 50, 100, 500, 1000, 5000, 10000<span class="sc">\}</span>$. At what point</span>
+<span id="cb26-455"><a href="#cb26-455" aria-hidden="true" tabindex="-1"></a>does the curve visually stabilize? Repeat with a smaller sample size</span>
+<span id="cb26-456"><a href="#cb26-456" aria-hidden="true" tabindex="-1"></a>$n=10$ — does the required $B$ change?</span>
+<span id="cb26-457"><a href="#cb26-457" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-458"><a href="#cb26-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-459"><a href="#cb26-459" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb26-460"><a href="#cb26-460" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 3 — Parametric Bootstrap Under Misspecification</span></span>
+<span id="cb26-461"><a href="#cb26-461" aria-hidden="true" tabindex="-1"></a>Modify the Part 2 code: keep simulating the *true* data from a</span>
+<span id="cb26-462"><a href="#cb26-462" aria-hidden="true" tabindex="-1"></a>$\text{Gamma}(\text{shape}=2,\text{rate}=\lambda_0)$ distribution (same mean</span>
+<span id="cb26-463"><a href="#cb26-463" aria-hidden="true" tabindex="-1"></a>as before, $\mathbb E<span class="co">[</span><span class="ot">X</span><span class="co">]</span> = 2/\lambda_0$), but leave the **parametric**</span>
+<span id="cb26-464"><a href="#cb26-464" aria-hidden="true" tabindex="-1"></a>bootstrap step resampling from $\text{Exponential}(\hat\lambda_n)$ as</span>
+<span id="cb26-465"><a href="#cb26-465" aria-hidden="true" tabindex="-1"></a>before (i.e., a deliberately *wrong* parametric model). Compare the</span>
+<span id="cb26-466"><a href="#cb26-466" aria-hidden="true" tabindex="-1"></a>parametric and nonparametric bootstrap variance estimates of $\hat\lambda_n</span>
+<span id="cb26-467"><a href="#cb26-467" aria-hidden="true" tabindex="-1"></a>= 1/\bar X_n$ to a large-sample Monte Carlo "truth" (simulate many fresh</span>
+<span id="cb26-468"><a href="#cb26-468" aria-hidden="true" tabindex="-1"></a>data sets directly and compute the variance of $\hat\lambda_n$ across</span>
+<span id="cb26-469"><a href="#cb26-469" aria-hidden="true" tabindex="-1"></a>them). Which bootstrap remains close to the truth?</span>
+<span id="cb26-470"><a href="#cb26-470" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-471"><a href="#cb26-471" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-472"><a href="#cb26-472" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb26-473"><a href="#cb26-473" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercise 4 — Bias-Correction</span></span>
+<span id="cb26-474"><a href="#cb26-474" aria-hidden="true" tabindex="-1"></a>Using the <span class="in">`bias_boot`</span> estimate from Part 3, construct the **bias-corrected**</span>
+<span id="cb26-475"><a href="#cb26-475" aria-hidden="true" tabindex="-1"></a>estimator $\tilde\theta_n = \hat\theta_n - \text{Bias}_{n,B}^*(\hat P_n)$</span>
+<span id="cb26-476"><a href="#cb26-476" aria-hidden="true" tabindex="-1"></a>for the sample variance. Run a small simulation (a few hundred replications</span>
+<span id="cb26-477"><a href="#cb26-477" aria-hidden="true" tabindex="-1"></a>of generating fresh data, computing $\hat\theta_n$, bootstrapping the bias,</span>
+<span id="cb26-478"><a href="#cb26-478" aria-hidden="true" tabindex="-1"></a>and bias-correcting) to check whether $\tilde\theta_n$ has, on average,</span>
+<span id="cb26-479"><a href="#cb26-479" aria-hidden="true" tabindex="-1"></a>smaller bias than $\hat\theta_n$ relative to the true $\sigma^2$. Is there a</span>
+<span id="cb26-480"><a href="#cb26-480" aria-hidden="true" tabindex="-1"></a>cost in terms of variance?</span>
+<span id="cb26-481"><a href="#cb26-481" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb26-482"><a href="#cb26-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-483"><a href="#cb26-483" aria-hidden="true" tabindex="-1"></a><span class="fu"># Recap</span></span>
+<span id="cb26-484"><a href="#cb26-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-485"><a href="#cb26-485" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The bootstrap distribution is built by literally enumerating (or, for</span>
+<span id="cb26-486"><a href="#cb26-486" aria-hidden="true" tabindex="-1"></a>  realistic $n$, Monte Carlo approximating) all hypothetical samples from</span>
+<span id="cb26-487"><a href="#cb26-487" aria-hidden="true" tabindex="-1"></a>  $\hat P_n$, exactly as in **Slides 10–19**.</span>
+<span id="cb26-488"><a href="#cb26-488" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The parametric bootstrap changes only *where we resample from*</span>
+<span id="cb26-489"><a href="#cb26-489" aria-hidden="true" tabindex="-1"></a>  ($P_{\hat\eta}$ instead of $\hat P_n$); the Monte Carlo machinery around</span>
+<span id="cb26-490"><a href="#cb26-490" aria-hidden="true" tabindex="-1"></a>  it is unchanged (**Slides 21–22**).</span>
+<span id="cb26-491"><a href="#cb26-491" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Bias and variance (the "measures of performance" of **Slide 29**) are</span>
+<span id="cb26-492"><a href="#cb26-492" aria-hidden="true" tabindex="-1"></a>  nothing but the first and second moments of the very same bootstrap</span>
+<span id="cb26-493"><a href="#cb26-493" aria-hidden="true" tabindex="-1"></a>  distribution we already use to approximate $J_n(t,\hat P_n)$</span>
+<span id="cb26-494"><a href="#cb26-494" aria-hidden="true" tabindex="-1"></a>  (**Slides 30–35**). No new simulation is required to obtain them once you</span>
+<span id="cb26-495"><a href="#cb26-495" aria-hidden="true" tabindex="-1"></a>  have the bootstrap replicates in hand.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
