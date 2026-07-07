@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bootstrap Confidence Intervals</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="bootstrap_ci_files/libs/clipboard/clipboard.min.js"></script>
+<script src="bootstrap_ci_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="bootstrap_ci_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="bootstrap_ci_files/libs/quarto-html/popper.min.js"></script>
+<script src="bootstrap_ci_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="bootstrap_ci_files/libs/quarto-html/anchor.min.js"></script>
+<link href="bootstrap_ci_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="bootstrap_ci_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="bootstrap_ci_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="bootstrap_ci_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="bootstrap_ci_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Bootstrap Confidence Intervals</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="sec-bootstrap-ci" class="level1">
+<h1>Bootstrap Confidence Intervals</h1>
+<div class="cell">
+<details class="code-fold">
+<summary>Load libraries</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>We established conditions under which the bootstrap “works,” in the sense that <span class="math inline">\(J_n(t,\hat P_n) - J_n(t,P) \xrightarrow{P} 0\)</span>. This chapter uses that result to build confidence intervals directly from the bootstrap distribution, and implements the whole pipeline for the average treatment effect (ATE) under complete randomization.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Where this fits
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Everything below is conditional on bootstrap consistency. If you have not yet covered why and when the bootstrap “works,” revisit that chapter first.</p>
+</div>
+</div>
+</section>
+<section id="from-test-statistics-to-confidence-intervals" class="level2">
+<h2 class="anchored" data-anchor-id="from-test-statistics-to-confidence-intervals">From Test Statistics to Confidence Intervals</h2>
+<p>Suppose we test <span class="math inline">\(H_0 : \theta(P) = 0\)</span> using a statistic <span class="math inline">\(T_n = T_n(W^{(n)})\)</span>, with large values of <span class="math inline">\(T_n\)</span> providing evidence against <span class="math inline">\(H_0\)</span> — for instance <span class="math inline">\(T_n = \sqrt n\{\hat\theta_n - \theta(P)\}\)</span>. Let <span class="math inline">\(J(t,P)\)</span> denote the asymptotic distribution of <span class="math inline">\(T_n\)</span>. At level <span class="math inline">\(\alpha \in (0,1)\)</span> we have considered three rejection rules:</p>
+<ol type="1">
+<li><strong>Critical values.</strong> Reject <span class="math inline">\(H_0\)</span> if <span class="math inline">\(T_n &gt; J^{-1}(1-\alpha, P)\)</span>.</li>
+<li><strong><span class="math inline">\(p\)</span>-values.</strong> Reject <span class="math inline">\(H_0\)</span> if <span class="math inline">\(\hat p &lt; \alpha\)</span>.</li>
+<li><strong>Confidence intervals.</strong> Reject <span class="math inline">\(H_0\)</span> if <span class="math inline">\(\theta(P)\big|_{H_0} \notin \hat C_n\)</span>.</li>
+</ol>
+<p>These rules are equivalent. In <span class="math display">\[
+\mathbb P\!\left(\frac{\hat\theta_n - \theta(P)}{\sqrt{\sigma^2/n}} &gt; c\right) = p,
+\]</span> there are three free objects — <span class="math inline">\(\theta(P)\)</span>, <span class="math inline">\(c\)</span>, <span class="math inline">\(p\)</span> — and fixing any two lets us solve for the third: fix <span class="math inline">\(\theta(P)\)</span> at the null and <span class="math inline">\(c\)</span> at a critical value to get a <span class="math inline">\(p\)</span>-value; fix <span class="math inline">\(\theta(P)\)</span> at the null and <span class="math inline">\(p = 1-\alpha\)</span> to get a critical value; fix <span class="math inline">\(c\)</span> and <span class="math inline">\(p = 1-\alpha\)</span> and solve for <span class="math inline">\(\theta(P)\)</span> to get the <span class="math inline">\((1-\alpha)\times 100\%\)</span> confidence interval.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>A confidence interval is not a probability statement about <span class="math inline">\(\theta(P)\)</span>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>An interval estimator <span class="math inline">\(\hat C_n = [L,U]\)</span> is random because it is built from data, and the requirement is <span class="math display">\[
+\mathbb P[\theta(P) \in \hat C_n] \ge 1-\alpha,
+\]</span> at least asymptotically. Once <span class="math inline">\(\hat\theta_n\)</span> is realized, there is no randomness left: if <span class="math inline">\(\hat C_n = [0,1]\)</span>, it is <em>not</em> correct to say “there is a 95% chance <span class="math inline">\(\theta(P) \in [0,1]\)</span>.” There was a 95% chance <span class="math inline">\(\hat C_n\)</span> would come out that way; this particular realization either contains <span class="math inline">\(\theta(P)\)</span> or it does not. Loosely, <span class="math inline">\(\hat C_n\)</span> gives the range of <em>likely</em> values of <span class="math inline">\(\theta(P)\)</span>, where “likely” means <strong>confidence</strong>, not probability.</p>
+</div>
+</div>
+<p>For <span class="math inline">\(T_n = \{\hat\theta_n - \theta(P)\}/\text{s.e.}(\hat\theta_n) \xrightarrow{d} \mathcal N(0,1)\)</span>, symmetry of the normal (<span class="math inline">\(z_{1-\alpha/2} = -z_{\alpha/2}\)</span>) gives the familiar asymptotic interval <span class="math display">\[
+\hat C_n(1-\alpha) = \big[\hat\theta_n - z_{1-\alpha/2}\,\text{s.e.}(\hat\theta_n),\; \hat\theta_n + z_{1-\alpha/2}\,\text{s.e.}(\hat\theta_n)\big].
+\]</span></p>
+</section>
+<section id="sec-percentile-boot-ci" class="level2">
+<h2 class="anchored" data-anchor-id="sec-percentile-boot-ci">The Percentile Bootstrap Confidence Interval</h2>
+<p>When <span class="math inline">\(J_n(\cdot,P)\)</span> is unknown but the bootstrap works, we replace <span class="math inline">\(P\)</span> by <span class="math inline">\(\hat P_n\)</span> and use bootstrap quantiles directly. With <span class="math inline">\(J_n^{-1}(\tau,P) = \inf\{t : J_n(t,P) \ge \tau\}\)</span>, the infeasible interval <span class="math display">\[
+\hat C_n(1-\alpha) = \big\{\theta(P) : J_n^{-1}(\alpha/2,P) \le T_n \le J_n^{-1}(1-\alpha/2,P)\big\}
+\]</span> has the computable bootstrap analogue <span class="math display">\[
+\hat C_n^B(1-\alpha) = \big\{\theta(P) : J_n^{-1}(\alpha/2,\hat P_n) \le T_n \le J_n^{-1}(1-\alpha/2,\hat P_n)\big\}.
+\]</span></p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Theorem (asymptotic validity)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Under the conditions that guarantee bootstrap consistency, <span class="math display">\[
+\mathbb P\big[\theta(P) \in \hat C_n^B(1-\alpha)\big] \to 1-\alpha.
+\]</span> This is the <strong>percentile bootstrap confidence interval</strong>.</p>
+</div>
+</div>
+<p>In practice <span class="math inline">\(J_n(t,\hat P_n)\)</span> is intractable, so we approximate it by Monte Carlo:</p>
+<ol type="1">
+<li>Draw <span class="math inline">\((X_{1j}^*,\dots,X_{nj}^*)\)</span> i.i.d. from <span class="math inline">\(\hat P_n\)</span> — resample <span class="math inline">\((x_1,\dots,x_n)\)</span> with replacement — for <span class="math inline">\(j = 1,\dots,B\)</span>.</li>
+<li>Compute <span class="math inline">\(T_{n,j}^*\)</span> for each resample.</li>
+<li>Use the empirical quantiles of <span class="math inline">\((T_{n,1}^*,\dots,T_{n,B}^*)\)</span> to approximate the quantiles of <span class="math inline">\(J_n(\cdot,\hat P_n)\)</span>.</li>
+<li>Form <span class="math inline">\(\hat C_n^B(1-\alpha)\)</span> from these estimated quantiles.</li>
+</ol>
+</section>
+<section id="popular-variants-in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="popular-variants-in-practice">Popular Variants in Practice</h2>
+<p>If <span class="math inline">\(T_n = \sqrt n(\hat\theta_n - \theta_0) \xrightarrow{d} \mathcal N(0,\sigma^2)\)</span> and <span class="math inline">\(\hat\sigma^2\)</span> is consistent for <span class="math inline">\(\sigma^2\)</span>, the <strong>studentized bootstrap</strong> (percentile-<span class="math inline">\(t\)</span>) interval is <span class="math display">\[
+\hat C_n^B(1-\alpha) = \left\{\theta(P) : \hat\theta_n - \frac{J_n^{-1}(1-\alpha/2,\hat P_n)\,\hat\sigma}{\sqrt n} \le \theta(P) \le \hat\theta_n - \frac{J_n^{-1}(\alpha/2,\hat P_n)\,\hat\sigma}{\sqrt n}\right\},
+\]</span> note the reversed quantiles relative to the plug-in normal interval <span class="math display">\[
+\hat C_n(1-\alpha) = \left\{\theta(P): \hat\theta_n - z_{1-\alpha/2}\frac{\hat\sigma}{\sqrt n} \le \theta(P) \le \hat\theta_n + z_{1-\alpha/2}\frac{\hat\sigma}{\sqrt n}\right\}.
+\]</span> Two further variants used routinely in practice replace <span class="math inline">\(\hat\sigma\)</span> by a bootstrap estimate of the standard error itself, computed from the bootstrap draws <span class="math inline">\(\theta_{n,1}^*,\dots,\theta_{n,B}^*\)</span> (implicitly treating <span class="math inline">\(\theta(\hat P_n) = \hat\theta_n\)</span>).</p>
+<section id="sec-case1" class="level3">
+<h3 class="anchored" data-anchor-id="sec-case1">What Some Practitioners Do: Case I</h3>
+<p>Use the second moment of the bootstrap sampling distribution, <span class="math display">\[
+\hat s_n^{*2} = \mathbb E_{\hat P_n}\big[n\{\theta_n^* - \theta(\hat P_n)\}^2\big] ,
+\]</span> approximated by Monte Carlo as <span class="math display">\[
+\hat s_{n,B}^{*} = \left\{\frac{1}{B}\sum_{j=1}^B n\big(\theta^*_{n,j} - \hat\theta_n\big)^2\right\}^{1/2},
+\]</span> and form the interval <span class="math inline">\(\{\hat\theta_n \pm z_{1-\alpha/2}\,\hat s_{n,B}^*/\sqrt n\}\)</span>.</p>
+</section>
+<section id="sec-case2" class="level3">
+<h3 class="anchored" data-anchor-id="sec-case2">What Some Practitioners Do: Case II</h3>
+<p>Alternatively, use the bootstrap <em>variance</em> to estimate <span class="math inline">\(\sigma^2\)</span>, <span class="math display">\[
+\hat\sigma_n^{*2} = \underbrace{\mathbb E_{\hat P_n}\big[n\{\theta_n^*-\theta(\hat P_n)\}^2\big]}_{\equiv\, \hat s_n^{*2}} - \Big(\mathbb E_{\hat P_n}\big[\sqrt n\{\theta_n^* - \hat\theta_n\}\big]\Big)^2 ,
+\]</span> approximated by Monte Carlo as <span class="math display">\[
+\hat\sigma_{n,B}^{*2} = \underbrace{\frac{1}{B}\sum_{j=1}^B n\big(\theta^*_{n,j} - \hat\theta_n\big)^2}_{\equiv\, \hat s_{n,B}^{*2}} - \left(\frac{1}{B}\sum_{j=1}^B \sqrt n\big\{\theta^*_{n,j} - \hat\theta_n\big\}\right)^{2} ,
+\]</span> and form the interval <span class="math inline">\(\{\hat\theta_n \pm z_{1-\alpha/2}\,\hat\sigma_{n,B}^*/\sqrt n\}\)</span>.</p>
+<p>Both cases follow the same three-step Monte Carlo recipe: (1) resample with replacement and compute <span class="math inline">\(\theta_{n,j}^*\)</span>; (2) repeat for <span class="math inline">\(j=1,\dots,B\)</span>; (3) plug <span class="math inline">\(\hat s_{n,B}^*\)</span> (Case I) or <span class="math inline">\(\hat\sigma_{n,B}^*\)</span> (Case II) into the normal-approximation interval above.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Why this is not a free lunch
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Neither <span class="math inline">\(\hat\sigma_n^{*2}\)</span> (Case II) nor <span class="math inline">\(\hat s_n^{*2}\)</span> (Case I) is consistent for <span class="math inline">\(\sigma^2\)</span> under bootstrap consistency alone: <span class="math display">\[
+\liminf_{n\to\infty} \hat\sigma_n^{*2} \ge \sigma^2, \qquad \liminf_{n\to\infty} \hat s_n^{*2} \ge \sigma^2, \qquad P\text{-a.s.}
+\]</span> Weak convergence of the bootstrap does not imply convergence of its moments; consistency of the bootstrap standard error requires uniform integrability, a strictly stronger condition. Intervals built from Case I or Case II therefore tend to be <strong>conservative</strong>, since <span class="math inline">\(\hat s_n^{*2} \ge \hat\sigma_n^{*2}\)</span> always. The percentile interval from <a href="#sec-percentile-boot-ci" class="quarto-xref">Section&nbsp;1.3</a> avoids this issue entirely, since it never estimates <span class="math inline">\(\sigma^2\)</span> as an intermediate step.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="hands-on-bootstrapping-the-ate-confidence-interval" class="level2">
+<h2 class="anchored" data-anchor-id="hands-on-bootstrapping-the-ate-confidence-interval">Hands-On: Bootstrapping the ATE Confidence Interval</h2>
+<p>We implement the percentile, Efron, Case I, and Case II constructions for the difference-in-means estimator of the ATE under complete randomization.</p>
+<section id="simulated-data" class="level3">
+<h3 class="anchored" data-anchor-id="simulated-data">Simulated Data</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Simulate outcomes under complete randomization</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>error <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>effect_size <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>outcome <span class="ot">&lt;-</span> <span class="dv">50</span> <span class="sc">+</span> treatment <span class="sc">*</span> effect_size <span class="sc">+</span> error</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">treatment =</span> treatment, <span class="at">outcome =</span> outcome)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  treatment  outcome
+1         0 50.75962
+2         1 53.98284
+3         0 48.04542
+4         1 53.31707
+5         1 42.82422</code></pre>
+</div>
+</div>
+<p>The true effect is <code>effect_size = 3</code>; we recover it, and a confidence interval around it, from a sample of <span class="math inline">\(n = 2000\)</span> units.</p>
+</section>
+<section id="estimator-and-its-variance" class="level3">
+<h3 class="anchored" data-anchor-id="estimator-and-its-variance">Estimator and Its Variance</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Define the ATE estimator and its variance estimator</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(data<span class="sc">$</span>outcome[data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mean</span>(data<span class="sc">$</span>outcome[data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>var_theta_hat <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  n1 <span class="ot">&lt;-</span> <span class="fu">sum</span>(data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  n0 <span class="ot">&lt;-</span> <span class="fu">sum</span>(data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">var</span>(data<span class="sc">$</span>outcome[data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">/</span> n1 <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">var</span>(data<span class="sc">$</span>outcome[data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">0</span>]) <span class="sc">/</span> n0</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>theta_hat_n <span class="ot">&lt;-</span> <span class="fu">theta_hat</span>(data)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>sigma_hat <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">var_theta_hat</span>(data))</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta_hat_n =</span> theta_hat_n, <span class="at">sigma_hat =</span> sigma_hat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>theta_hat_n   sigma_hat 
+  3.2336287   0.2236813 </code></pre>
+</div>
+</div>
+<p><span class="math inline">\(\hat\theta_n\)</span> is the Neyman difference-in-means estimator; <span class="math inline">\(\hat\sigma^2\)</span> is the Neyman variance estimator (sum of within-arm sample variances scaled by arm sizes).</p>
+</section>
+<section id="the-bootstrap-resampling-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="the-bootstrap-resampling-algorithm">The Bootstrap Resampling Algorithm</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Resample with replacement and recompute the statistic</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>bootstrap_estimator <span class="ot">&lt;-</span> <span class="cf">function</span>(data, <span class="at">B =</span> <span class="dv">2000</span>) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  theta_hat_n <span class="ot">&lt;-</span> <span class="fu">theta_hat</span>(data)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(data)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  bootstraps_theta <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> B, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B) {</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    data_star <span class="ot">&lt;-</span> data[<span class="fu">sample</span>(<span class="fu">nrow</span>(data), <span class="at">replace =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    bootstraps_theta[i, <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">theta_hat</span>(data_star)                   <span class="co"># theta_n^*</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    bootstraps_theta[i, <span class="dv">2</span>] <span class="ot">&lt;-</span> bootstraps_theta[i, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n   <span class="co"># recentered</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    bootstraps_theta[i, <span class="dv">3</span>] <span class="ot">&lt;-</span> bootstraps_theta[i, <span class="dv">2</span>] <span class="sc">/</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>(<span class="fu">var_theta_hat</span>(data_star))                                <span class="co"># studentized</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  bootstraps_theta</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Column 1 stores <span class="math inline">\(\theta_n^*\)</span>, column 2 the recentered <span class="math inline">\(\theta_n^* - \hat\theta_n\)</span> (used by the percentile-<span class="math inline">\(t\)</span>/Efron constructions), and column 3 the studentized statistic used for the diagnostic below.</p>
+</section>
+<section id="percentile-and-efron-constructions" class="level3">
+<h3 class="anchored" data-anchor-id="percentile-and-efron-constructions">Percentile and Efron Constructions</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>percentile / Efron studentized constructions</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>bootstrap_ci <span class="ot">&lt;-</span> <span class="cf">function</span>(bootstraps_theta, n, sigma_hat,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"percentile"</span>, <span class="st">"efron"</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">alpha =</span> <span class="fl">0.05</span>) {</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  quantile_lower <span class="ot">&lt;-</span> <span class="fu">quantile</span>(<span class="fu">sqrt</span>(n) <span class="sc">*</span> bootstraps_theta[, <span class="dv">2</span>], alpha <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  quantile_upper <span class="ot">&lt;-</span> <span class="fu">quantile</span>(<span class="fu">sqrt</span>(n) <span class="sc">*</span> bootstraps_theta[, <span class="dv">2</span>], <span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (type <span class="sc">==</span> <span class="st">"percentile"</span>) {</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    ci_lower <span class="ot">&lt;-</span> theta_hat_n <span class="sc">-</span> <span class="fu">unname</span>(quantile_upper) <span class="sc">*</span> sigma_hat <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    ci_upper <span class="ot">&lt;-</span> theta_hat_n <span class="sc">-</span> <span class="fu">unname</span>(quantile_lower) <span class="sc">*</span> sigma_hat <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (type <span class="sc">==</span> <span class="st">"efron"</span>) {</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    ci_lower <span class="ot">&lt;-</span> theta_hat_n <span class="sc">+</span> <span class="fu">unname</span>(quantile_lower) <span class="sc">*</span> sigma_hat <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    ci_upper <span class="ot">&lt;-</span> theta_hat_n <span class="sc">+</span> <span class="fu">unname</span>(quantile_upper) <span class="sc">*</span> sigma_hat <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">lower =</span> ci_lower, <span class="at">upper =</span> ci_upper)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><code>"percentile"</code> and <code>"efron"</code> are the two orderings of the studentized percentile interval from <a href="#sec-percentile-boot-ci" class="quarto-xref">Section&nbsp;1.3</a> (note the quantile reversal).</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Case I and Case II were missing from the original script
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The original <code>bootstrap_ci.r</code> had a <code>type1</code>/<code>type2</code> pair (a basic-bootstrap interval and its reflection around <span class="math inline">\(\hat\theta_n\)</span>) that do <strong>not</strong> correspond to the Case I / Case II constructions from <a href="#sec-case1" class="quarto-xref">Section&nbsp;1.4.1</a>–<a href="#sec-case2" class="quarto-xref">Section&nbsp;1.4.2</a> — those were never actually computed. The function above keeps only the studentized percentile/Efron pair; Case I and Case II are implemented separately below, exactly as in the lecture.</p>
+</div>
+</div>
+</section>
+<section id="implementing-case-i-and-case-ii" class="level3">
+<h3 class="anchored" data-anchor-id="implementing-case-i-and-case-ii">Implementing Case I and Case II</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Case I (second moment) and Case II (centered variance) SE constructions</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>bootstrap_se_ci <span class="ot">&lt;-</span> <span class="cf">function</span>(bootstraps_theta, theta_hat_n, n,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"case1"</span>, <span class="st">"case2"</span>), <span class="at">alpha =</span> <span class="fl">0.05</span>) {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  s_star_nB <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(n <span class="sc">*</span> (bootstraps_theta[, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (type <span class="sc">==</span> <span class="st">"case1"</span>) {</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    se <span class="ot">&lt;-</span> s_star_nB</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (type <span class="sc">==</span> <span class="st">"case2"</span>) {</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    cross_term      <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">sqrt</span>(n) <span class="sc">*</span> (bootstraps_theta[, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    sigma_star2_nB  <span class="ot">&lt;-</span> s_star_nB<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> cross_term<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    se <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(sigma_star2_nB)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  theta_hat_n <span class="sc">+</span> <span class="fu">c</span>(<span class="at">lower =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">*</span> se <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><code>s_star_nB</code> is exactly <span class="math inline">\(\hat s_{n,B}^*\)</span> from <a href="#sec-case1" class="quarto-xref">Section&nbsp;1.4.1</a>; Case II subtracts the squared bootstrap mean of <span class="math inline">\(\sqrt n(\theta_{n,j}^*-\hat\theta_n)\)</span> before taking the square root, exactly as <span class="math inline">\(\hat\sigma_{n,B}^{*2}\)</span> in <a href="#sec-case2" class="quarto-xref">Section&nbsp;1.4.2</a>. Neither case uses <code>sigma_hat</code>: both estimate the standard error from the bootstrap draws alone.</p>
+</section>
+<section id="computing-the-intervals" class="level3">
+<h3 class="anchored" data-anchor-id="computing-the-intervals">Computing the Intervals</h3>
+<div class="cell" data-tbl-cap="95% confidence intervals for the ATE, five constructions.">
+<details class="code-fold">
+<summary>Run B = 1000 bootstrap resamples and compare all constructions</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>theta_boot <span class="ot">&lt;-</span> <span class="fu">bootstrap_estimator</span>(data, <span class="at">B =</span> <span class="dv">1000</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>ci_percentile <span class="ot">&lt;-</span> <span class="fu">bootstrap_ci</span>(theta_boot, n, sigma_hat, <span class="at">type =</span> <span class="st">"percentile"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>ci_efron      <span class="ot">&lt;-</span> <span class="fu">bootstrap_ci</span>(theta_boot, n, sigma_hat, <span class="at">type =</span> <span class="st">"efron"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>ci_case1      <span class="ot">&lt;-</span> <span class="fu">bootstrap_se_ci</span>(theta_boot, theta_hat_n, n, <span class="at">type =</span> <span class="st">"case1"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>ci_case2      <span class="ot">&lt;-</span> <span class="fu">bootstrap_se_ci</span>(theta_boot, theta_hat_n, n, <span class="at">type =</span> <span class="st">"case2"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>ci_asym       <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">lower =</span> theta_hat_n <span class="sc">-</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">*</span> sigma_hat,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">upper =</span> theta_hat_n <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">*</span> sigma_hat)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>results_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">Method =</span> <span class="fu">c</span>(<span class="st">"Asymptotic normal"</span>, <span class="st">"Bootstrap percentile"</span>, <span class="st">"Efron's percentile"</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Case I (second moment)"</span>, <span class="st">"Case II (centered variance)"</span>),</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Lower  =</span> <span class="fu">c</span>(ci_asym[<span class="dv">1</span>], ci_percentile[<span class="dv">1</span>], ci_efron[<span class="dv">1</span>], ci_case1[<span class="dv">1</span>], ci_case2[<span class="dv">1</span>]),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">Upper  =</span> <span class="fu">c</span>(ci_asym[<span class="dv">2</span>], ci_percentile[<span class="dv">2</span>], ci_efron[<span class="dv">2</span>], ci_case1[<span class="dv">2</span>], ci_case2[<span class="dv">2</span>])</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(results_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>95% confidence intervals for the ATE, five constructions.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Method</th>
+<th style="text-align: right;">Lower</th>
+<th style="text-align: right;">Upper</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Asymptotic normal</td>
+<td style="text-align: right;">2.795</td>
+<td style="text-align: right;">3.672</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bootstrap percentile</td>
+<td style="text-align: right;">3.137</td>
+<td style="text-align: right;">3.326</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Efron’s percentile</td>
+<td style="text-align: right;">3.142</td>
+<td style="text-align: right;">3.330</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Case I (second moment)</td>
+<td style="text-align: right;">2.802</td>
+<td style="text-align: right;">3.665</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Case II (centered variance)</td>
+<td style="text-align: right;">2.803</td>
+<td style="text-align: right;">3.664</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>All five intervals bracket the true effect of <code>3</code>. Percentile and Efron nearly coincide, as do Case I and Case II — expected, since <span class="math inline">\(\hat s_{n,B}^*\)</span> and <span class="math inline">\(\hat\sigma_{n,B}^*\)</span> differ only by the squared bootstrap mean of <span class="math inline">\(\sqrt n(\theta_{n,j}^*-\hat\theta_n)\)</span>, which is close to zero once <span class="math inline">\(\theta_{n,j}^*\)</span> is centered at <span class="math inline">\(\hat\theta_n\)</span>. Case I and Case II are also noticeably wider than the percentile/Efron pair — the conservativeness from <a href="#sec-case2" class="quarto-xref">Section&nbsp;1.4.2</a>’s callout, visible here in a single draw.</p>
+</section>
+<section id="visualizing-the-bootstrap-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="visualizing-the-bootstrap-distribution">Visualizing the Bootstrap Distribution</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Plot the bootstrap distribution with the percentile CI</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df_boot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">theta_star =</span> theta_boot[, <span class="dv">1</span>])</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_boot, <span class="fu">aes</span>(<span class="at">x =</span> theta_star)) <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)), <span class="at">bins =</span> <span class="dv">45</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">colour =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">colour =</span> <span class="st">"steelblue4"</span>, <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(ci_percentile[<span class="st">"lower"</span>], ci_percentile[<span class="st">"upper"</span>]),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> <span class="st">"tomato"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> theta_hat_n, <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">linewidth =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(<span class="fu">hat</span>(theta)[n]<span class="sc">^</span>{<span class="st">"*"</span>}), <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Bootstrap Sampling Distribution of the ATE Estimator"</span>) <span class="sc">+</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-boot-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-boot-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="bootstrap_ci_files/figure-html/fig-boot-dist-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-boot-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Bootstrap sampling distribution of the ATE estimator, with the percentile 95% interval (dashed red) and the observed estimate (solid black).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="checking-the-conservative-bootstrap-se-claim" class="level3">
+<h3 class="anchored" data-anchor-id="checking-the-conservative-bootstrap-se-claim">Checking the “Conservative Bootstrap SE” Claim</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Compare Case I / Case II implied SEs to the analytic SE</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>s_star_nB       <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(n <span class="sc">*</span> (theta_boot[, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n)<span class="sc">^</span><span class="dv">2</span>))                 <span class="co"># Case I</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>cross_term      <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">sqrt</span>(n) <span class="sc">*</span> (theta_boot[, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>sigma_star_nB   <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(s_star_nB<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> cross_term<span class="sc">^</span><span class="dv">2</span>)                                   <span class="co"># Case II</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>sigma_hat_sqrtn <span class="ot">&lt;-</span> sigma_hat <span class="sc">*</span> <span class="fu">sqrt</span>(n)                                                <span class="co"># analytic</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">analytic_se_sqrtn =</span> sigma_hat_sqrtn, <span class="at">case1_se =</span> s_star_nB, <span class="at">case2_se =</span> sigma_star_nB)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>analytic_se_sqrtn          case1_se          case2_se 
+        10.003333          9.837981          9.818849 </code></pre>
+</div>
+</div>
+<p>All three are on the <span class="math inline">\(\sqrt n\)</span>-scale so they are directly comparable. In this example — a smooth, nearly-Gaussian difference-in-means statistic — Case I and Case II are close to the analytic <span class="math inline">\(\hat\sigma\sqrt n\)</span>, so the conservativeness predicted by the theorem is barely visible at <span class="math inline">\(n = 2000\)</span>. This is expected: <span class="math inline">\(\liminf \hat s_n^{*2} \ge \sigma^2\)</span> and <span class="math inline">\(\liminf \hat\sigma_n^{*2} \ge \sigma^2\)</span> are asymptotic worst cases, and the gap they describe is small for smooth statistics and can be substantial for non-smooth ones (e.g., quantiles). This is exactly why the percentile bootstrap interval — which never estimates <span class="math inline">\(\sigma^2\)</span> as an intermediate step — is the recommended default.</p>
+</section>
+</section>
+<section id="takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="takeaways">Takeaways</h2>
+<ul>
+<li>Confidence intervals, critical values, and <span class="math inline">\(p\)</span>-values are equivalent rejection rules; fixing two of <span class="math inline">\((\theta(P), c, p)\)</span> and solving for the third recovers whichever rule you need.</li>
+<li>The percentile bootstrap interval replaces the unknown quantiles <span class="math inline">\(J_n^{-1}(\cdot,P)\)</span> by their bootstrap estimates <span class="math inline">\(J_n^{-1}(\cdot,\hat P_n)\)</span>, and is consistent whenever the bootstrap itself is.</li>
+<li>The studentized percentile/Efron pair requires care with quantile reversal.</li>
+<li>Case I and Case II — the bootstrap standard-error plug-ins practitioners often reach for — tend to be conservative, since weak convergence of the bootstrap does not deliver convergence of its second moment. Prefer the percentile construction when in doubt.</li>
+</ul>
+<!-- -->
+
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Bootstrap Confidence Intervals"</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co">    code-summary: "Show code"</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="fu"># Bootstrap Confidence Intervals {#sec-bootstrap-ci}</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup-bootstrap-ci</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Load libraries"</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>, <span class="at">kind =</span> <span class="st">"L'Ecuyer-CMRG"</span>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>We established conditions under which the bootstrap "works," in the sense that $J_n(t,\hat P_n) - J_n(t,P) \xrightarrow{P} 0$. This chapter uses that result to build confidence intervals directly from the bootstrap distribution, and implements the whole pipeline for the average treatment effect (ATE) under complete randomization.</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where this fits</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>Everything below is conditional on bootstrap consistency. If you have not yet covered why and when the bootstrap "works," revisit that chapter first.</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="fu">## From Test Statistics to Confidence Intervals</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>Suppose we test $H_0 : \theta(P) = 0$ using a statistic $T_n = T_n(W^{(n)})$, with large values of $T_n$ providing evidence against $H_0$ — for instance $T_n = \sqrt n<span class="sc">\{</span>\hat\theta_n - \theta(P)<span class="sc">\}</span>$. Let $J(t,P)$ denote the asymptotic distribution of $T_n$. At level $\alpha \in (0,1)$ we have considered three rejection rules:</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Critical values.** Reject $H_0$ if $T_n &gt; J^{-1}(1-\alpha, P)$.</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**$p$-values.** Reject $H_0$ if $\hat p &lt; \alpha$.</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Confidence intervals.** Reject $H_0$ if $\theta(P)\big|_{H_0} \notin \hat C_n$.</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>These rules are equivalent. In</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>\mathbb P<span class="sc">\!</span>\left(\frac{\hat\theta_n - \theta(P)}{\sqrt{\sigma^2/n}} &gt; c\right) = p,</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>there are three free objects — $\theta(P)$, $c$, $p$ — and fixing any two lets us solve for the third: fix $\theta(P)$ at the null and $c$ at a critical value to get a $p$-value; fix $\theta(P)$ at the null and $p = 1-\alpha$ to get a critical value; fix $c$ and $p = 1-\alpha$ and solve for $\theta(P)$ to get the $(1-\alpha)\times 100\%$ confidence interval.</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="fu">## A confidence interval is not a probability statement about $\theta(P)$</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>An interval estimator $\hat C_n = <span class="co">[</span><span class="ot">L,U</span><span class="co">]</span>$ is random because it is built from data, and the requirement is</span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>\mathbb P<span class="co">[</span><span class="ot">\theta(P) \in \hat C_n</span><span class="co">]</span> \ge 1-\alpha,</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>at least asymptotically. Once $\hat\theta_n$ is realized, there is no randomness left: if $\hat C_n = <span class="co">[</span><span class="ot">0,1</span><span class="co">]</span>$, it is *not* correct to say "there is a 95% chance $\theta(P) \in [0,1]$." There was a 95% chance $\hat C_n$ would come out that way; this particular realization either contains $\theta(P)$ or it does not. Loosely, $\hat C_n$ gives the range of *likely* values of $\theta(P)$, where "likely" means **confidence**, not probability.</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>For $T_n = <span class="sc">\{</span>\hat\theta_n - \theta(P)<span class="sc">\}</span>/\text{s.e.}(\hat\theta_n) \xrightarrow{d} \mathcal N(0,1)$, symmetry of the normal ($z_{1-\alpha/2} = -z_{\alpha/2}$) gives the familiar asymptotic interval</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>\hat C_n(1-\alpha) = \big<span class="co">[</span><span class="ot">\hat\theta_n - z_{1-\alpha/2}\,\text{s.e.}(\hat\theta_n),\; \hat\theta_n + z_{1-\alpha/2}\,\text{s.e.}(\hat\theta_n)\big</span><span class="co">]</span>.</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Percentile Bootstrap Confidence Interval {#sec-percentile-boot-ci}</span></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>When $J_n(\cdot,P)$ is unknown but the bootstrap works, we replace $P$ by $\hat P_n$ and use bootstrap quantiles directly. With $J_n^{-1}(\tau,P) = \inf<span class="sc">\{</span>t : J_n(t,P) \ge \tau<span class="sc">\}</span>$, the infeasible interval</span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>\hat C_n(1-\alpha) = \big<span class="sc">\{</span>\theta(P) : J_n^{-1}(\alpha/2,P) \le T_n \le J_n^{-1}(1-\alpha/2,P)\big<span class="sc">\}</span></span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>has the computable bootstrap analogue</span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>\hat C_n^B(1-\alpha) = \big<span class="sc">\{</span>\theta(P) : J_n^{-1}(\alpha/2,\hat P_n) \le T_n \le J_n^{-1}(1-\alpha/2,\hat P_n)\big<span class="sc">\}</span>.</span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a><span class="fu">## Theorem (asymptotic validity)</span></span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>Under the conditions that guarantee bootstrap consistency,</span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>\mathbb P\big<span class="co">[</span><span class="ot">\theta(P) \in \hat C_n^B(1-\alpha)\big</span><span class="co">]</span> \to 1-\alpha.</span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>This is the **percentile bootstrap confidence interval**.</span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>In practice $J_n(t,\hat P_n)$ is intractable, so we approximate it by Monte Carlo:</span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Draw $(X_{1j}^*,\dots,X_{nj}^*)$ i.i.d. from $\hat P_n$ — resample $(x_1,\dots,x_n)$ with replacement — for $j = 1,\dots,B$.</span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Compute $T_{n,j}^*$ for each resample.</span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Use the empirical quantiles of $(T_{n,1}^*,\dots,T_{n,B}^*)$ to approximate the quantiles of $J_n(\cdot,\hat P_n)$.</span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Form $\hat C_n^B(1-\alpha)$ from these estimated quantiles.</span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a><span class="fu">## Popular Variants in Practice</span></span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a>If $T_n = \sqrt n(\hat\theta_n - \theta_0) \xrightarrow{d} \mathcal N(0,\sigma^2)$ and $\hat\sigma^2$ is consistent for $\sigma^2$, the **studentized bootstrap** (percentile-$t$) interval is</span>
+<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a>\hat C_n^B(1-\alpha) = \left<span class="sc">\{</span>\theta(P) : \hat\theta_n - \frac{J_n^{-1}(1-\alpha/2,\hat P_n)\,\hat\sigma}{\sqrt n} \le \theta(P) \le \hat\theta_n - \frac{J_n^{-1}(\alpha/2,\hat P_n)\,\hat\sigma}{\sqrt n}\right<span class="sc">\}</span>,</span>
+<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-95"><a href="#cb13-95" aria-hidden="true" tabindex="-1"></a>note the reversed quantiles relative to the plug-in normal interval</span>
+<span id="cb13-96"><a href="#cb13-96" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-97"><a href="#cb13-97" aria-hidden="true" tabindex="-1"></a>\hat C_n(1-\alpha) = \left<span class="sc">\{</span>\theta(P): \hat\theta_n - z_{1-\alpha/2}\frac{\hat\sigma}{\sqrt n} \le \theta(P) \le \hat\theta_n + z_{1-\alpha/2}\frac{\hat\sigma}{\sqrt n}\right<span class="sc">\}</span>.</span>
+<span id="cb13-98"><a href="#cb13-98" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-99"><a href="#cb13-99" aria-hidden="true" tabindex="-1"></a>Two further variants used routinely in practice replace $\hat\sigma$ by a bootstrap estimate of the standard error itself, computed from the bootstrap draws $\theta_{n,1}^*,\dots,\theta_{n,B}^*$ (implicitly treating $\theta(\hat P_n) = \hat\theta_n$).</span>
+<span id="cb13-100"><a href="#cb13-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-101"><a href="#cb13-101" aria-hidden="true" tabindex="-1"></a><span class="fu">### What Some Practitioners Do: Case I {#sec-case1}</span></span>
+<span id="cb13-102"><a href="#cb13-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-103"><a href="#cb13-103" aria-hidden="true" tabindex="-1"></a>Use the second moment of the bootstrap sampling distribution,</span>
+<span id="cb13-104"><a href="#cb13-104" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-105"><a href="#cb13-105" aria-hidden="true" tabindex="-1"></a>\hat s_n^{*2} = \mathbb E_{\hat P_n}\big[n\{\theta_n^* - \theta(\hat P_n)<span class="sc">\}</span>^2\big] ,</span>
+<span id="cb13-106"><a href="#cb13-106" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-107"><a href="#cb13-107" aria-hidden="true" tabindex="-1"></a>approximated by Monte Carlo as</span>
+<span id="cb13-108"><a href="#cb13-108" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-109"><a href="#cb13-109" aria-hidden="true" tabindex="-1"></a>\hat s_{n,B}^{*} = \left\{\frac{1}{B}\sum_{j=1}^B n\big(\theta^*_{n,j} - \hat\theta_n\big)^2\right<span class="sc">\}</span>^{1/2},</span>
+<span id="cb13-110"><a href="#cb13-110" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-111"><a href="#cb13-111" aria-hidden="true" tabindex="-1"></a>and form the interval $<span class="sc">\{</span>\hat\theta_n \pm z_{1-\alpha/2}\,\hat s_{n,B}^*/\sqrt n<span class="sc">\}</span>$.</span>
+<span id="cb13-112"><a href="#cb13-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-113"><a href="#cb13-113" aria-hidden="true" tabindex="-1"></a><span class="fu">### What Some Practitioners Do: Case II {#sec-case2}</span></span>
+<span id="cb13-114"><a href="#cb13-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-115"><a href="#cb13-115" aria-hidden="true" tabindex="-1"></a>Alternatively, use the bootstrap *variance* to estimate $\sigma^2$,</span>
+<span id="cb13-116"><a href="#cb13-116" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-117"><a href="#cb13-117" aria-hidden="true" tabindex="-1"></a>\hat\sigma_n^{*2} = \underbrace{\mathbb E_{\hat P_n}\big[n\{\theta_n^*-\theta(\hat P_n)\}^2\big]}_{\equiv\, \hat s_n^{*2}} - \Big(\mathbb E_{\hat P_n}\big[\sqrt n\{\theta_n^* - \hat\theta_n<span class="sc">\}</span>\big]\Big)^2 ,</span>
+<span id="cb13-118"><a href="#cb13-118" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-119"><a href="#cb13-119" aria-hidden="true" tabindex="-1"></a>approximated by Monte Carlo as</span>
+<span id="cb13-120"><a href="#cb13-120" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-121"><a href="#cb13-121" aria-hidden="true" tabindex="-1"></a>\hat\sigma_{n,B}^{*2} = \underbrace{\frac{1}{B}\sum_{j=1}^B n\big(\theta^*_{n,j} - \hat\theta_n\big)^2}_{\equiv\, \hat s_{n,B}^{*2}} - \left(\frac{1}{B}\sum_{j=1}^B \sqrt n\big\{\theta^*_{n,j} - \hat\theta_n\big<span class="sc">\}</span>\right)^{2} ,</span>
+<span id="cb13-122"><a href="#cb13-122" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-123"><a href="#cb13-123" aria-hidden="true" tabindex="-1"></a>and form the interval $<span class="sc">\{</span>\hat\theta_n \pm z_{1-\alpha/2}\,\hat\sigma_{n,B}^*/\sqrt n<span class="sc">\}</span>$.</span>
+<span id="cb13-124"><a href="#cb13-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-125"><a href="#cb13-125" aria-hidden="true" tabindex="-1"></a>Both cases follow the same three-step Monte Carlo recipe: (1) resample with replacement and compute $\theta_{n,j}^*$; (2) repeat for $j=1,\dots,B$; (3) plug $\hat s_{n,B}^*$ (Case I) or $\hat\sigma_{n,B}^*$ (Case II) into the normal-approximation interval above.</span>
+<span id="cb13-126"><a href="#cb13-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-127"><a href="#cb13-127" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb13-128"><a href="#cb13-128" aria-hidden="true" tabindex="-1"></a><span class="fu">## Why this is not a free lunch</span></span>
+<span id="cb13-129"><a href="#cb13-129" aria-hidden="true" tabindex="-1"></a>Neither $\hat\sigma_n^{*2}$ (Case II) nor $\hat s_n^{*2}$ (Case I) is consistent for $\sigma^2$ under bootstrap consistency alone:</span>
+<span id="cb13-130"><a href="#cb13-130" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-131"><a href="#cb13-131" aria-hidden="true" tabindex="-1"></a>\liminf_{n\to\infty} \hat\sigma_n^{*2} \ge \sigma^2, \qquad \liminf_{n\to\infty} \hat s_n^{*2} \ge \sigma^2, \qquad P\text{-a.s.}</span>
+<span id="cb13-132"><a href="#cb13-132" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb13-133"><a href="#cb13-133" aria-hidden="true" tabindex="-1"></a>Weak convergence of the bootstrap does not imply convergence of its moments; consistency of the bootstrap standard error requires uniform integrability, a strictly stronger condition. Intervals built from Case I or Case II therefore tend to be **conservative**, since $\hat s_n^{*2} \ge \hat\sigma_n^{*2}$ always. The percentile interval from @sec-percentile-boot-ci avoids this issue entirely, since it never estimates $\sigma^2$ as an intermediate step.</span>
+<span id="cb13-134"><a href="#cb13-134" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-135"><a href="#cb13-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-136"><a href="#cb13-136" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hands-On: Bootstrapping the ATE Confidence Interval</span></span>
+<span id="cb13-137"><a href="#cb13-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-138"><a href="#cb13-138" aria-hidden="true" tabindex="-1"></a>We implement the percentile, Efron, Case I, and Case II constructions for the difference-in-means estimator of the ATE under complete randomization.</span>
+<span id="cb13-139"><a href="#cb13-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-140"><a href="#cb13-140" aria-hidden="true" tabindex="-1"></a><span class="fu">### Simulated Data</span></span>
+<span id="cb13-141"><a href="#cb13-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-144"><a href="#cb13-144" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-145"><a href="#cb13-145" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: sim-data</span></span>
+<span id="cb13-146"><a href="#cb13-146" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Simulate outcomes under complete randomization"</span></span>
+<span id="cb13-147"><a href="#cb13-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-148"><a href="#cb13-148" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb13-149"><a href="#cb13-149" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb13-150"><a href="#cb13-150" aria-hidden="true" tabindex="-1"></a>error <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb13-151"><a href="#cb13-151" aria-hidden="true" tabindex="-1"></a>effect_size <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb13-152"><a href="#cb13-152" aria-hidden="true" tabindex="-1"></a>outcome <span class="ot">&lt;-</span> <span class="dv">50</span> <span class="sc">+</span> treatment <span class="sc">*</span> effect_size <span class="sc">+</span> error</span>
+<span id="cb13-153"><a href="#cb13-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-154"><a href="#cb13-154" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">treatment =</span> treatment, <span class="at">outcome =</span> outcome)</span>
+<span id="cb13-155"><a href="#cb13-155" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(data, <span class="dv">5</span>)</span>
+<span id="cb13-156"><a href="#cb13-156" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-157"><a href="#cb13-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-158"><a href="#cb13-158" aria-hidden="true" tabindex="-1"></a>The true effect is <span class="in">`effect_size = 3`</span>; we recover it, and a confidence interval around it, from a sample of $n = 2000$ units.</span>
+<span id="cb13-159"><a href="#cb13-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-160"><a href="#cb13-160" aria-hidden="true" tabindex="-1"></a><span class="fu">### Estimator and Its Variance</span></span>
+<span id="cb13-161"><a href="#cb13-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-164"><a href="#cb13-164" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-165"><a href="#cb13-165" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: estimators</span></span>
+<span id="cb13-166"><a href="#cb13-166" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Define the ATE estimator and its variance estimator"</span></span>
+<span id="cb13-167"><a href="#cb13-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-168"><a href="#cb13-168" aria-hidden="true" tabindex="-1"></a>theta_hat <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb13-169"><a href="#cb13-169" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>(data<span class="sc">$</span>outcome[data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">-</span></span>
+<span id="cb13-170"><a href="#cb13-170" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mean</span>(data<span class="sc">$</span>outcome[data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">0</span>])</span>
+<span id="cb13-171"><a href="#cb13-171" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-172"><a href="#cb13-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-173"><a href="#cb13-173" aria-hidden="true" tabindex="-1"></a>var_theta_hat <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb13-174"><a href="#cb13-174" aria-hidden="true" tabindex="-1"></a>  n1 <span class="ot">&lt;-</span> <span class="fu">sum</span>(data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb13-175"><a href="#cb13-175" aria-hidden="true" tabindex="-1"></a>  n0 <span class="ot">&lt;-</span> <span class="fu">sum</span>(data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb13-176"><a href="#cb13-176" aria-hidden="true" tabindex="-1"></a>  <span class="fu">var</span>(data<span class="sc">$</span>outcome[data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">1</span>]) <span class="sc">/</span> n1 <span class="sc">+</span></span>
+<span id="cb13-177"><a href="#cb13-177" aria-hidden="true" tabindex="-1"></a>    <span class="fu">var</span>(data<span class="sc">$</span>outcome[data<span class="sc">$</span>treatment <span class="sc">==</span> <span class="dv">0</span>]) <span class="sc">/</span> n0</span>
+<span id="cb13-178"><a href="#cb13-178" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-179"><a href="#cb13-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-180"><a href="#cb13-180" aria-hidden="true" tabindex="-1"></a>theta_hat_n <span class="ot">&lt;-</span> <span class="fu">theta_hat</span>(data)</span>
+<span id="cb13-181"><a href="#cb13-181" aria-hidden="true" tabindex="-1"></a>sigma_hat <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">var_theta_hat</span>(data))</span>
+<span id="cb13-182"><a href="#cb13-182" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta_hat_n =</span> theta_hat_n, <span class="at">sigma_hat =</span> sigma_hat)</span>
+<span id="cb13-183"><a href="#cb13-183" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-184"><a href="#cb13-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-185"><a href="#cb13-185" aria-hidden="true" tabindex="-1"></a>$\hat\theta_n$ is the Neyman difference-in-means estimator; $\hat\sigma^2$ is the Neyman variance estimator (sum of within-arm sample variances scaled by arm sizes).</span>
+<span id="cb13-186"><a href="#cb13-186" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-187"><a href="#cb13-187" aria-hidden="true" tabindex="-1"></a><span class="fu">### The Bootstrap Resampling Algorithm</span></span>
+<span id="cb13-188"><a href="#cb13-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-191"><a href="#cb13-191" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-192"><a href="#cb13-192" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: bootstrap-estimator</span></span>
+<span id="cb13-193"><a href="#cb13-193" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Resample with replacement and recompute the statistic"</span></span>
+<span id="cb13-194"><a href="#cb13-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-195"><a href="#cb13-195" aria-hidden="true" tabindex="-1"></a>bootstrap_estimator <span class="ot">&lt;-</span> <span class="cf">function</span>(data, <span class="at">B =</span> <span class="dv">2000</span>) {</span>
+<span id="cb13-196"><a href="#cb13-196" aria-hidden="true" tabindex="-1"></a>  theta_hat_n <span class="ot">&lt;-</span> <span class="fu">theta_hat</span>(data)</span>
+<span id="cb13-197"><a href="#cb13-197" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(data)</span>
+<span id="cb13-198"><a href="#cb13-198" aria-hidden="true" tabindex="-1"></a>  bootstraps_theta <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> B, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb13-199"><a href="#cb13-199" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>B) {</span>
+<span id="cb13-200"><a href="#cb13-200" aria-hidden="true" tabindex="-1"></a>    data_star <span class="ot">&lt;-</span> data[<span class="fu">sample</span>(<span class="fu">nrow</span>(data), <span class="at">replace =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb13-201"><a href="#cb13-201" aria-hidden="true" tabindex="-1"></a>    bootstraps_theta[i, <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">theta_hat</span>(data_star)                   <span class="co"># theta_n^*</span></span>
+<span id="cb13-202"><a href="#cb13-202" aria-hidden="true" tabindex="-1"></a>    bootstraps_theta[i, <span class="dv">2</span>] <span class="ot">&lt;-</span> bootstraps_theta[i, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n   <span class="co"># recentered</span></span>
+<span id="cb13-203"><a href="#cb13-203" aria-hidden="true" tabindex="-1"></a>    bootstraps_theta[i, <span class="dv">3</span>] <span class="ot">&lt;-</span> bootstraps_theta[i, <span class="dv">2</span>] <span class="sc">/</span></span>
+<span id="cb13-204"><a href="#cb13-204" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sqrt</span>(<span class="fu">var_theta_hat</span>(data_star))                                <span class="co"># studentized</span></span>
+<span id="cb13-205"><a href="#cb13-205" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-206"><a href="#cb13-206" aria-hidden="true" tabindex="-1"></a>  bootstraps_theta</span>
+<span id="cb13-207"><a href="#cb13-207" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-208"><a href="#cb13-208" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-209"><a href="#cb13-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-210"><a href="#cb13-210" aria-hidden="true" tabindex="-1"></a>Column 1 stores $\theta_n^*$, column 2 the recentered $\theta_n^* - \hat\theta_n$ (used by the percentile-$t$/Efron constructions), and column 3 the studentized statistic used for the diagnostic below.</span>
+<span id="cb13-211"><a href="#cb13-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-212"><a href="#cb13-212" aria-hidden="true" tabindex="-1"></a><span class="fu">### Percentile and Efron Constructions</span></span>
+<span id="cb13-213"><a href="#cb13-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-216"><a href="#cb13-216" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-217"><a href="#cb13-217" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: bootstrap-ci-fn</span></span>
+<span id="cb13-218"><a href="#cb13-218" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "percentile / Efron studentized constructions"</span></span>
+<span id="cb13-219"><a href="#cb13-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-220"><a href="#cb13-220" aria-hidden="true" tabindex="-1"></a>bootstrap_ci <span class="ot">&lt;-</span> <span class="cf">function</span>(bootstraps_theta, n, sigma_hat,</span>
+<span id="cb13-221"><a href="#cb13-221" aria-hidden="true" tabindex="-1"></a>                          <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"percentile"</span>, <span class="st">"efron"</span>),</span>
+<span id="cb13-222"><a href="#cb13-222" aria-hidden="true" tabindex="-1"></a>                          <span class="at">alpha =</span> <span class="fl">0.05</span>) {</span>
+<span id="cb13-223"><a href="#cb13-223" aria-hidden="true" tabindex="-1"></a>  quantile_lower <span class="ot">&lt;-</span> <span class="fu">quantile</span>(<span class="fu">sqrt</span>(n) <span class="sc">*</span> bootstraps_theta[, <span class="dv">2</span>], alpha <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb13-224"><a href="#cb13-224" aria-hidden="true" tabindex="-1"></a>  quantile_upper <span class="ot">&lt;-</span> <span class="fu">quantile</span>(<span class="fu">sqrt</span>(n) <span class="sc">*</span> bootstraps_theta[, <span class="dv">2</span>], <span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb13-225"><a href="#cb13-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-226"><a href="#cb13-226" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (type <span class="sc">==</span> <span class="st">"percentile"</span>) {</span>
+<span id="cb13-227"><a href="#cb13-227" aria-hidden="true" tabindex="-1"></a>    ci_lower <span class="ot">&lt;-</span> theta_hat_n <span class="sc">-</span> <span class="fu">unname</span>(quantile_upper) <span class="sc">*</span> sigma_hat <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb13-228"><a href="#cb13-228" aria-hidden="true" tabindex="-1"></a>    ci_upper <span class="ot">&lt;-</span> theta_hat_n <span class="sc">-</span> <span class="fu">unname</span>(quantile_lower) <span class="sc">*</span> sigma_hat <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb13-229"><a href="#cb13-229" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (type <span class="sc">==</span> <span class="st">"efron"</span>) {</span>
+<span id="cb13-230"><a href="#cb13-230" aria-hidden="true" tabindex="-1"></a>    ci_lower <span class="ot">&lt;-</span> theta_hat_n <span class="sc">+</span> <span class="fu">unname</span>(quantile_lower) <span class="sc">*</span> sigma_hat <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb13-231"><a href="#cb13-231" aria-hidden="true" tabindex="-1"></a>    ci_upper <span class="ot">&lt;-</span> theta_hat_n <span class="sc">+</span> <span class="fu">unname</span>(quantile_upper) <span class="sc">*</span> sigma_hat <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb13-232"><a href="#cb13-232" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-233"><a href="#cb13-233" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">lower =</span> ci_lower, <span class="at">upper =</span> ci_upper)</span>
+<span id="cb13-234"><a href="#cb13-234" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-235"><a href="#cb13-235" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-236"><a href="#cb13-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-237"><a href="#cb13-237" aria-hidden="true" tabindex="-1"></a><span class="in">`"percentile"`</span> and <span class="in">`"efron"`</span> are the two orderings of the studentized percentile interval from @sec-percentile-boot-ci (note the quantile reversal).</span>
+<span id="cb13-238"><a href="#cb13-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-239"><a href="#cb13-239" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb13-240"><a href="#cb13-240" aria-hidden="true" tabindex="-1"></a><span class="fu">## Case I and Case II were missing from the original script</span></span>
+<span id="cb13-241"><a href="#cb13-241" aria-hidden="true" tabindex="-1"></a>The original <span class="in">`bootstrap_ci.r`</span> had a <span class="in">`type1`</span>/<span class="in">`type2`</span> pair (a basic-bootstrap interval and its reflection around $\hat\theta_n$) that do **not** correspond to the Case I / Case II constructions from @sec-case1–@sec-case2 — those were never actually computed. The function above keeps only the studentized percentile/Efron pair; Case I and Case II are implemented separately below, exactly as in the lecture.</span>
+<span id="cb13-242"><a href="#cb13-242" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb13-243"><a href="#cb13-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-244"><a href="#cb13-244" aria-hidden="true" tabindex="-1"></a><span class="fu">### Implementing Case I and Case II</span></span>
+<span id="cb13-245"><a href="#cb13-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-248"><a href="#cb13-248" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-249"><a href="#cb13-249" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: bootstrap-se-cases</span></span>
+<span id="cb13-250"><a href="#cb13-250" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Case I (second moment) and Case II (centered variance) SE constructions"</span></span>
+<span id="cb13-251"><a href="#cb13-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-252"><a href="#cb13-252" aria-hidden="true" tabindex="-1"></a>bootstrap_se_ci <span class="ot">&lt;-</span> <span class="cf">function</span>(bootstraps_theta, theta_hat_n, n,</span>
+<span id="cb13-253"><a href="#cb13-253" aria-hidden="true" tabindex="-1"></a>                             <span class="at">type =</span> <span class="fu">c</span>(<span class="st">"case1"</span>, <span class="st">"case2"</span>), <span class="at">alpha =</span> <span class="fl">0.05</span>) {</span>
+<span id="cb13-254"><a href="#cb13-254" aria-hidden="true" tabindex="-1"></a>  s_star_nB <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(n <span class="sc">*</span> (bootstraps_theta[, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb13-255"><a href="#cb13-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-256"><a href="#cb13-256" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (type <span class="sc">==</span> <span class="st">"case1"</span>) {</span>
+<span id="cb13-257"><a href="#cb13-257" aria-hidden="true" tabindex="-1"></a>    se <span class="ot">&lt;-</span> s_star_nB</span>
+<span id="cb13-258"><a href="#cb13-258" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (type <span class="sc">==</span> <span class="st">"case2"</span>) {</span>
+<span id="cb13-259"><a href="#cb13-259" aria-hidden="true" tabindex="-1"></a>    cross_term      <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">sqrt</span>(n) <span class="sc">*</span> (bootstraps_theta[, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n))</span>
+<span id="cb13-260"><a href="#cb13-260" aria-hidden="true" tabindex="-1"></a>    sigma_star2_nB  <span class="ot">&lt;-</span> s_star_nB<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> cross_term<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb13-261"><a href="#cb13-261" aria-hidden="true" tabindex="-1"></a>    se <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(sigma_star2_nB)</span>
+<span id="cb13-262"><a href="#cb13-262" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-263"><a href="#cb13-263" aria-hidden="true" tabindex="-1"></a>  theta_hat_n <span class="sc">+</span> <span class="fu">c</span>(<span class="at">lower =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">upper =</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">*</span> se <span class="sc">/</span> <span class="fu">sqrt</span>(n)</span>
+<span id="cb13-264"><a href="#cb13-264" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-265"><a href="#cb13-265" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-266"><a href="#cb13-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-267"><a href="#cb13-267" aria-hidden="true" tabindex="-1"></a><span class="in">`s_star_nB`</span> is exactly $\hat s_{n,B}^*$ from @sec-case1; Case II subtracts the squared bootstrap mean of $\sqrt n(\theta_{n,j}^*-\hat\theta_n)$ before taking the square root, exactly as $\hat\sigma_{n,B}^{*2}$ in @sec-case2. Neither case uses <span class="in">`sigma_hat`</span>: both estimate the standard error from the bootstrap draws alone.</span>
+<span id="cb13-268"><a href="#cb13-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-269"><a href="#cb13-269" aria-hidden="true" tabindex="-1"></a><span class="fu">### Computing the Intervals</span></span>
+<span id="cb13-270"><a href="#cb13-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-273"><a href="#cb13-273" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-274"><a href="#cb13-274" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: compute-cis</span></span>
+<span id="cb13-275"><a href="#cb13-275" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "95% confidence intervals for the ATE, five constructions."</span></span>
+<span id="cb13-276"><a href="#cb13-276" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Run B = 1000 bootstrap resamples and compare all constructions"</span></span>
+<span id="cb13-277"><a href="#cb13-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-278"><a href="#cb13-278" aria-hidden="true" tabindex="-1"></a>theta_boot <span class="ot">&lt;-</span> <span class="fu">bootstrap_estimator</span>(data, <span class="at">B =</span> <span class="dv">1000</span>)</span>
+<span id="cb13-279"><a href="#cb13-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-280"><a href="#cb13-280" aria-hidden="true" tabindex="-1"></a>ci_percentile <span class="ot">&lt;-</span> <span class="fu">bootstrap_ci</span>(theta_boot, n, sigma_hat, <span class="at">type =</span> <span class="st">"percentile"</span>)</span>
+<span id="cb13-281"><a href="#cb13-281" aria-hidden="true" tabindex="-1"></a>ci_efron      <span class="ot">&lt;-</span> <span class="fu">bootstrap_ci</span>(theta_boot, n, sigma_hat, <span class="at">type =</span> <span class="st">"efron"</span>)</span>
+<span id="cb13-282"><a href="#cb13-282" aria-hidden="true" tabindex="-1"></a>ci_case1      <span class="ot">&lt;-</span> <span class="fu">bootstrap_se_ci</span>(theta_boot, theta_hat_n, n, <span class="at">type =</span> <span class="st">"case1"</span>)</span>
+<span id="cb13-283"><a href="#cb13-283" aria-hidden="true" tabindex="-1"></a>ci_case2      <span class="ot">&lt;-</span> <span class="fu">bootstrap_se_ci</span>(theta_boot, theta_hat_n, n, <span class="at">type =</span> <span class="st">"case2"</span>)</span>
+<span id="cb13-284"><a href="#cb13-284" aria-hidden="true" tabindex="-1"></a>ci_asym       <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">lower =</span> theta_hat_n <span class="sc">-</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">*</span> sigma_hat,</span>
+<span id="cb13-285"><a href="#cb13-285" aria-hidden="true" tabindex="-1"></a>                    <span class="at">upper =</span> theta_hat_n <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">*</span> sigma_hat)</span>
+<span id="cb13-286"><a href="#cb13-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-287"><a href="#cb13-287" aria-hidden="true" tabindex="-1"></a>results_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-288"><a href="#cb13-288" aria-hidden="true" tabindex="-1"></a>  <span class="at">Method =</span> <span class="fu">c</span>(<span class="st">"Asymptotic normal"</span>, <span class="st">"Bootstrap percentile"</span>, <span class="st">"Efron's percentile"</span>,</span>
+<span id="cb13-289"><a href="#cb13-289" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Case I (second moment)"</span>, <span class="st">"Case II (centered variance)"</span>),</span>
+<span id="cb13-290"><a href="#cb13-290" aria-hidden="true" tabindex="-1"></a>  <span class="at">Lower  =</span> <span class="fu">c</span>(ci_asym[<span class="dv">1</span>], ci_percentile[<span class="dv">1</span>], ci_efron[<span class="dv">1</span>], ci_case1[<span class="dv">1</span>], ci_case2[<span class="dv">1</span>]),</span>
+<span id="cb13-291"><a href="#cb13-291" aria-hidden="true" tabindex="-1"></a>  <span class="at">Upper  =</span> <span class="fu">c</span>(ci_asym[<span class="dv">2</span>], ci_percentile[<span class="dv">2</span>], ci_efron[<span class="dv">2</span>], ci_case1[<span class="dv">2</span>], ci_case2[<span class="dv">2</span>])</span>
+<span id="cb13-292"><a href="#cb13-292" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-293"><a href="#cb13-293" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(results_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb13-294"><a href="#cb13-294" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-295"><a href="#cb13-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-296"><a href="#cb13-296" aria-hidden="true" tabindex="-1"></a>All five intervals bracket the true effect of <span class="in">`3`</span>. Percentile and Efron nearly coincide, as do Case I and Case II — expected, since $\hat s_{n,B}^*$ and $\hat\sigma_{n,B}^*$ differ only by the squared bootstrap mean of $\sqrt n(\theta_{n,j}^*-\hat\theta_n)$, which is close to zero once $\theta_{n,j}^*$ is centered at $\hat\theta_n$. Case I and Case II are also noticeably wider than the percentile/Efron pair — the conservativeness from @sec-case2's callout, visible here in a single draw.</span>
+<span id="cb13-297"><a href="#cb13-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-298"><a href="#cb13-298" aria-hidden="true" tabindex="-1"></a><span class="fu">### Visualizing the Bootstrap Distribution</span></span>
+<span id="cb13-299"><a href="#cb13-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-302"><a href="#cb13-302" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-303"><a href="#cb13-303" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-boot-dist</span></span>
+<span id="cb13-304"><a href="#cb13-304" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Bootstrap sampling distribution of the ATE estimator, with the percentile 95% interval (dashed red) and the observed estimate (solid black)."</span></span>
+<span id="cb13-305"><a href="#cb13-305" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Plot the bootstrap distribution with the percentile CI"</span></span>
+<span id="cb13-306"><a href="#cb13-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-307"><a href="#cb13-307" aria-hidden="true" tabindex="-1"></a>df_boot <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">theta_star =</span> theta_boot[, <span class="dv">1</span>])</span>
+<span id="cb13-308"><a href="#cb13-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-309"><a href="#cb13-309" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_boot, <span class="fu">aes</span>(<span class="at">x =</span> theta_star)) <span class="sc">+</span></span>
+<span id="cb13-310"><a href="#cb13-310" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">after_stat</span>(density)), <span class="at">bins =</span> <span class="dv">45</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">colour =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb13-311"><a href="#cb13-311" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">colour =</span> <span class="st">"steelblue4"</span>, <span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span></span>
+<span id="cb13-312"><a href="#cb13-312" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(ci_percentile[<span class="st">"lower"</span>], ci_percentile[<span class="st">"upper"</span>]),</span>
+<span id="cb13-313"><a href="#cb13-313" aria-hidden="true" tabindex="-1"></a>             <span class="at">colour =</span> <span class="st">"tomato"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb13-314"><a href="#cb13-314" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> theta_hat_n, <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">linewidth =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb13-315"><a href="#cb13-315" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(<span class="fu">hat</span>(theta)[n]<span class="sc">^</span>{<span class="st">"*"</span>}), <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb13-316"><a href="#cb13-316" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Bootstrap Sampling Distribution of the ATE Estimator"</span>) <span class="sc">+</span></span>
+<span id="cb13-317"><a href="#cb13-317" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span>
+<span id="cb13-318"><a href="#cb13-318" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-319"><a href="#cb13-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-320"><a href="#cb13-320" aria-hidden="true" tabindex="-1"></a><span class="fu">### Checking the "Conservative Bootstrap SE" Claim</span></span>
+<span id="cb13-321"><a href="#cb13-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-324"><a href="#cb13-324" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb13-325"><a href="#cb13-325" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: boot-se-check</span></span>
+<span id="cb13-326"><a href="#cb13-326" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "Compare Case I / Case II implied SEs to the analytic SE"</span></span>
+<span id="cb13-327"><a href="#cb13-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-328"><a href="#cb13-328" aria-hidden="true" tabindex="-1"></a>s_star_nB       <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>(n <span class="sc">*</span> (theta_boot[, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n)<span class="sc">^</span><span class="dv">2</span>))                 <span class="co"># Case I</span></span>
+<span id="cb13-329"><a href="#cb13-329" aria-hidden="true" tabindex="-1"></a>cross_term      <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">sqrt</span>(n) <span class="sc">*</span> (theta_boot[, <span class="dv">1</span>] <span class="sc">-</span> theta_hat_n))</span>
+<span id="cb13-330"><a href="#cb13-330" aria-hidden="true" tabindex="-1"></a>sigma_star_nB   <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(s_star_nB<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> cross_term<span class="sc">^</span><span class="dv">2</span>)                                   <span class="co"># Case II</span></span>
+<span id="cb13-331"><a href="#cb13-331" aria-hidden="true" tabindex="-1"></a>sigma_hat_sqrtn <span class="ot">&lt;-</span> sigma_hat <span class="sc">*</span> <span class="fu">sqrt</span>(n)                                                <span class="co"># analytic</span></span>
+<span id="cb13-332"><a href="#cb13-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-333"><a href="#cb13-333" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">analytic_se_sqrtn =</span> sigma_hat_sqrtn, <span class="at">case1_se =</span> s_star_nB, <span class="at">case2_se =</span> sigma_star_nB)</span>
+<span id="cb13-334"><a href="#cb13-334" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb13-335"><a href="#cb13-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-336"><a href="#cb13-336" aria-hidden="true" tabindex="-1"></a>All three are on the $\sqrt n$-scale so they are directly comparable. In this example — a smooth, nearly-Gaussian difference-in-means statistic — Case I and Case II are close to the analytic $\hat\sigma\sqrt n$, so the conservativeness predicted by the theorem is barely visible at $n = 2000$. This is expected: $\liminf \hat s_n^{*2} \ge \sigma^2$ and $\liminf \hat\sigma_n^{*2} \ge \sigma^2$ are asymptotic worst cases, and the gap they describe is small for smooth statistics and can be substantial for non-smooth ones (e.g., quantiles). This is exactly why the percentile bootstrap interval — which never estimates $\sigma^2$ as an intermediate step — is the recommended default.</span>
+<span id="cb13-337"><a href="#cb13-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-338"><a href="#cb13-338" aria-hidden="true" tabindex="-1"></a><span class="fu">## Takeaways</span></span>
+<span id="cb13-339"><a href="#cb13-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-340"><a href="#cb13-340" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Confidence intervals, critical values, and $p$-values are equivalent rejection rules; fixing two of $(\theta(P), c, p)$ and solving for the third recovers whichever rule you need.</span>
+<span id="cb13-341"><a href="#cb13-341" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The percentile bootstrap interval replaces the unknown quantiles $J_n^{-1}(\cdot,P)$ by their bootstrap estimates $J_n^{-1}(\cdot,\hat P_n)$, and is consistent whenever the bootstrap itself is.</span>
+<span id="cb13-342"><a href="#cb13-342" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The studentized percentile/Efron pair requires care with quantile reversal.</span>
+<span id="cb13-343"><a href="#cb13-343" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Case I and Case II — the bootstrap standard-error plug-ins practitioners often reach for — tend to be conservative, since weak convergence of the bootstrap does not deliver convergence of its second moment. Prefer the percentile construction when in doubt.</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
